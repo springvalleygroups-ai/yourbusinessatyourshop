@@ -12,12 +12,18 @@
       theme: {
         extend: {
           colors: {
-            brand: '#ff6700',
-            brandlight: '#fff5ed',
-            dark: '#0f172a',
-            card: '#ffffff',
-            border: '#e2e8f0',
-            graytext: '#64748b'
+            brand: '#FF8A7A',
+            brandlight: '#FFF0ED',
+            dark: '#1F2229',
+            card: 'rgba(255, 255, 255, 0.75)',
+            border: 'rgba(226, 232, 240, 0.7)',
+            graytext: '#575F73',
+            koreanpeach: '#FF8A7A',
+            koreanlavender: '#D4B2D8',
+            koreanmint: '#A3E4D7',
+            koreanyellow: '#F9E79F',
+            koreansky: '#AED6F1',
+            koreanpink: '#FFB7C5'
           }
         }
       }
@@ -35,11 +41,18 @@
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo & Icon -->
       <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
-        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-orange-500/20">
-          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect width="24" height="24" rx="6" fill="#ff6700" />
+        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm">
+          <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad-admin-header" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFB7C5" />
+                <stop offset="50%" stop-color="#FF8A7A" />
+                <stop offset="100%" stop-color="#D4B2D8" />
+              </linearGradient>
+            </defs>
+            <rect width="24" height="24" rx="6" fill="url(#logo-grad-admin-header)" />
             <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
-            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="url(#logo-grad-admin-header)" />
             <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
