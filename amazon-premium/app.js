@@ -1014,10 +1014,11 @@ function showToast(message) {
 }
 
 // DYNAMIC CATEGORY FIELD INSERTER
-function updateCategoryFields(containerId, categorySelectId) {
+function updateCategoryFields(containerId, categorySelectId, idPrefix) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const category = document.getElementById(categorySelectId).value;
+  const p = idPrefix || 'attr-'; // 'attr-' for Add form, 'edit-attr-' for Edit modal
   
   container.innerHTML = '';
   
@@ -1026,15 +1027,15 @@ function updateCategoryFields(containerId, categorySelectId) {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="lengthMeters">${translations[currentLanguage].lengthMeters}</label>
-          <input type="number" id="attr-length" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 5" required>
+          <input type="number" id="${p}length" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 5" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="widthInches">${translations[currentLanguage].widthInches}</label>
-          <input type="number" id="attr-width" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 44" required>
+          <input type="number" id="${p}width" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 44" required>
         </div>
         <div class="col-span-2">
           <label class="block text-xs text-gray-500 mb-1" data-i18n="fabricType">${translations[currentLanguage].fabricType}</label>
-          <input type="text" id="attr-fabric" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Cotton, Silk" required>
+          <input type="text" id="${p}fabric" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Cotton, Silk" required>
         </div>
       </div>
     `;
@@ -1043,19 +1044,19 @@ function updateCategoryFields(containerId, categorySelectId) {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="brand">${translations[currentLanguage].brand}</label>
-          <input type="text" id="attr-brand" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Xiaomi" required>
+          <input type="text" id="${p}brand" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Xiaomi" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="model">${translations[currentLanguage].model}</label>
-          <input type="text" id="attr-model" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 14 Pro" required>
+          <input type="text" id="${p}model" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 14 Pro" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="storage">${translations[currentLanguage].storage}</label>
-          <input type="text" id="attr-storage" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 8GB/256GB" required>
+          <input type="text" id="${p}storage" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 8GB/256GB" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="warranty">${translations[currentLanguage].warranty}</label>
-          <input type="number" id="attr-warranty" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 12" required>
+          <input type="number" id="${p}warranty" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 12" required>
         </div>
       </div>
     `;
@@ -1064,11 +1065,11 @@ function updateCategoryFields(containerId, categorySelectId) {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="size">${translations[currentLanguage].size}</label>
-          <input type="text" id="attr-size" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. UK-8" required>
+          <input type="text" id="${p}size" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. UK-8" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="material">${translations[currentLanguage].material}</label>
-          <input type="text" id="attr-material" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Leather" required>
+          <input type="text" id="${p}material" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. Leather" required>
         </div>
       </div>
     `;
@@ -1077,11 +1078,11 @@ function updateCategoryFields(containerId, categorySelectId) {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="weight">${translations[currentLanguage].weight}</label>
-          <input type="text" id="attr-weight" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 1 Kg" required>
+          <input type="text" id="${p}weight" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 1 Kg" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="expiryDate">${translations[currentLanguage].expiryDate}</label>
-          <input type="date" id="attr-expiry" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" required>
+          <input type="date" id="${p}expiry" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" required>
         </div>
       </div>
     `;
@@ -1090,11 +1091,11 @@ function updateCategoryFields(containerId, categorySelectId) {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="brand">${translations[currentLanguage].brand}</label>
-          <input type="text" id="attr-brand" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" required>
+          <input type="text" id="${p}brand" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" required>
         </div>
         <div>
           <label class="block text-xs text-gray-500 mb-1" data-i18n="dimensions">${translations[currentLanguage].dimensions}</label>
-          <input type="text" id="attr-dimensions" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 10x10x5 cm" required>
+          <input type="text" id="${p}dimensions" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm" placeholder="e.g. 10x10x5 cm" required>
         </div>
       </div>
     `;
