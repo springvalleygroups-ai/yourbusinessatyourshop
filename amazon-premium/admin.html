@@ -1806,29 +1806,29 @@
       window.uploadedEditProductImages = p.imageUrls && p.imageUrls.length > 0 ? [...p.imageUrls] : (p.imageUrl ? [p.imageUrl] : []);
       renderEditProductImagePreviews();
 
-      // Update specs
-      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
+      // Update specs — pass 'edit-attr-' prefix so IDs don't clash with Add form
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category', 'edit-attr-');
       
       // Populate dynamic attribute fields if present
       if (p.attributes) {
         if (p.category === 'clothing') {
-          if (document.getElementById('attr-length')) document.getElementById('attr-length').value = p.attributes.lengthMeters || '';
-          if (document.getElementById('attr-width')) document.getElementById('attr-width').value = p.attributes.widthInches || '';
-          if (document.getElementById('attr-fabric')) document.getElementById('attr-fabric').value = p.attributes.fabricType || '';
+          if (document.getElementById('edit-attr-length')) document.getElementById('edit-attr-length').value = p.attributes.lengthMeters || '';
+          if (document.getElementById('edit-attr-width')) document.getElementById('edit-attr-width').value = p.attributes.widthInches || '';
+          if (document.getElementById('edit-attr-fabric')) document.getElementById('edit-attr-fabric').value = p.attributes.fabricType || '';
         } else if (p.category === 'electronics') {
-          if (document.getElementById('attr-brand')) document.getElementById('attr-brand').value = p.attributes.brand || '';
-          if (document.getElementById('attr-model')) document.getElementById('attr-model').value = p.attributes.model || '';
-          if (document.getElementById('attr-storage')) document.getElementById('attr-storage').value = p.attributes.storage || '';
-          if (document.getElementById('attr-warranty')) document.getElementById('attr-warranty').value = p.attributes.warranty || '';
+          if (document.getElementById('edit-attr-brand')) document.getElementById('edit-attr-brand').value = p.attributes.brand || '';
+          if (document.getElementById('edit-attr-model')) document.getElementById('edit-attr-model').value = p.attributes.model || '';
+          if (document.getElementById('edit-attr-storage')) document.getElementById('edit-attr-storage').value = p.attributes.storage || '';
+          if (document.getElementById('edit-attr-warranty')) document.getElementById('edit-attr-warranty').value = p.attributes.warranty || '';
         } else if (p.category === 'footwear') {
-          if (document.getElementById('attr-size')) document.getElementById('attr-size').value = p.attributes.size || '';
-          if (document.getElementById('attr-material')) document.getElementById('attr-material').value = p.attributes.material || '';
+          if (document.getElementById('edit-attr-size')) document.getElementById('edit-attr-size').value = p.attributes.size || '';
+          if (document.getElementById('edit-attr-material')) document.getElementById('edit-attr-material').value = p.attributes.material || '';
         } else if (p.category === 'grocery') {
-          if (document.getElementById('attr-weight')) document.getElementById('attr-weight').value = p.attributes.weight || '';
-          if (document.getElementById('attr-expiry')) document.getElementById('attr-expiry').value = p.attributes.expiryDate || '';
+          if (document.getElementById('edit-attr-weight')) document.getElementById('edit-attr-weight').value = p.attributes.weight || '';
+          if (document.getElementById('edit-attr-expiry')) document.getElementById('edit-attr-expiry').value = p.attributes.expiryDate || '';
         } else {
-          if (document.getElementById('attr-brand')) document.getElementById('attr-brand').value = p.attributes.brand || '';
-          if (document.getElementById('attr-dimensions')) document.getElementById('attr-dimensions').value = p.attributes.dimensions || '';
+          if (document.getElementById('edit-attr-brand')) document.getElementById('edit-attr-brand').value = p.attributes.brand || '';
+          if (document.getElementById('edit-attr-dimensions')) document.getElementById('edit-attr-dimensions').value = p.attributes.dimensions || '';
         }
       }
       
@@ -1845,7 +1845,7 @@
     }
 
     window.handleEditCategoryChange = function() {
-      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category', 'edit-attr-');
     }
 
     window.submitOwnerProductEdit = async function(e) {
@@ -1873,25 +1873,26 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving...';
       
+      // Read from 'edit-attr-' prefixed fields to avoid conflict with Add form
       const attributes = {};
       if (category === 'clothing') {
-        attributes.lengthMeters = document.getElementById('attr-length')?.value || '';
-        attributes.widthInches = document.getElementById('attr-width')?.value || '';
-        attributes.fabricType = document.getElementById('attr-fabric')?.value || '';
+        attributes.lengthMeters = document.getElementById('edit-attr-length')?.value || '';
+        attributes.widthInches = document.getElementById('edit-attr-width')?.value || '';
+        attributes.fabricType = document.getElementById('edit-attr-fabric')?.value || '';
       } else if (category === 'electronics') {
-        attributes.brand = document.getElementById('attr-brand')?.value || '';
-        attributes.model = document.getElementById('attr-model')?.value || '';
-        attributes.storage = document.getElementById('attr-storage')?.value || '';
-        attributes.warranty = document.getElementById('attr-warranty')?.value || '';
+        attributes.brand = document.getElementById('edit-attr-brand')?.value || '';
+        attributes.model = document.getElementById('edit-attr-model')?.value || '';
+        attributes.storage = document.getElementById('edit-attr-storage')?.value || '';
+        attributes.warranty = document.getElementById('edit-attr-warranty')?.value || '';
       } else if (category === 'footwear') {
-        attributes.size = document.getElementById('attr-size')?.value || '';
-        attributes.material = document.getElementById('attr-material')?.value || '';
+        attributes.size = document.getElementById('edit-attr-size')?.value || '';
+        attributes.material = document.getElementById('edit-attr-material')?.value || '';
       } else if (category === 'grocery') {
-        attributes.weight = document.getElementById('attr-weight')?.value || '';
-        attributes.expiryDate = document.getElementById('attr-expiry')?.value || '';
+        attributes.weight = document.getElementById('edit-attr-weight')?.value || '';
+        attributes.expiryDate = document.getElementById('edit-attr-expiry')?.value || '';
       } else {
-        attributes.brand = document.getElementById('attr-brand')?.value || '';
-        attributes.dimensions = document.getElementById('attr-dimensions')?.value || '';
+        attributes.brand = document.getElementById('edit-attr-brand')?.value || '';
+        attributes.dimensions = document.getElementById('edit-attr-dimensions')?.value || '';
       }
 
       // Snapshot current images (base64 or existing Firebase URLs)
