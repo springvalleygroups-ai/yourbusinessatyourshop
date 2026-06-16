@@ -10,6 +10,14 @@
   <script>
     tailwind.config = {
       theme: {
+        screens: {
+          'xs': '420px',
+          'sm': '640px',
+          'md': '768px',
+          'lg': '1024px',
+          'xl': '1280px',
+          '2xl': '1536px',
+        },
         extend: {
           colors: {
             brand: '#FF8A7A',
@@ -56,15 +64,16 @@
             <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
-        <span class="font-extrabold" data-i18n="brandName">Your Business, Your Shop</span>
+        <span class="font-extrabold hidden xs:inline" data-i18n="brandName">Your Business, Your Shop</span>
+        <span class="font-extrabold inline xs:hidden" data-i18n="brandNameShort">Your Shop</span>
       </a>
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4">
         <!-- Language Selector -->
         <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
-          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
-          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-3 py-1 rounded-full transition">EN</button>
+          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-2 sm:px-3 py-1 rounded-full transition"><span class="sm:hidden">GUJ</span><span class="hidden sm:inline">ગુજરાતી</span></button>
+          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-2 sm:px-3 py-1 rounded-full transition">EN</button>
         </div>
-        <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-slate-900 transition" data-i18n="home">Home</a>
+        <a href="index.html" class="text-sm font-semibold text-slate-650 hover:text-slate-900 transition" data-i18n="home">Home</a>
       </div>
     </div>
   </header>
@@ -183,7 +192,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1">Name / પૂરું નામ</label>
               <input type="text" id="reg-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
                 <input type="email" id="reg-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
@@ -193,7 +202,7 @@
                 <input type="password" id="reg-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-500 mb-1">Phone Number</label>
                 <input type="tel" id="reg-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
@@ -206,7 +215,7 @@
 
             <!-- VENDOR ONLY FIELDS -->
             <div id="vendor-only-fields" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="pan">Aadhaar Card Number</label>
                   <input type="text" id="reg-aadhaar" maxlength="12" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
@@ -279,7 +288,7 @@
                   <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodName">Product Name</label>
                   <input type="text" id="prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodPrice">Price (₹)</label>
                     <input type="number" id="prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
@@ -655,7 +664,7 @@
             <label class="block text-xs font-semibold text-slate-500 mb-1">Product Name / નામ</label>
             <input type="text" id="edit-prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1">Price (₹) / કિંમત</label>
               <input type="number" id="edit-prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
@@ -665,7 +674,7 @@
               <input type="number" id="edit-prod-stock" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div id="edit-prod-category-container" class="col-span-1">
               <label class="block text-xs font-semibold text-slate-500 mb-1">Category / કેટેગરી</label>
               <select id="edit-prod-category" onchange="handleEditCategoryChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
