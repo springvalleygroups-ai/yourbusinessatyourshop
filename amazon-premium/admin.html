@@ -974,6 +974,12 @@
         products.forEach(p => {
           const statusText = p.approvedByAdmin ? 'Approved' : 'Pending Approval';
           const statusColor = p.approvedByAdmin ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const uploadingBadge = p.imagesUploading
+            ? `<span class="ml-1 inline-flex items-center gap-1 text-[10px] text-blue-500 font-semibold animate-pulse">
+                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                Uploading…
+              </span>`
+            : '';
           prodList.innerHTML += `
             <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
               <td class="py-3 flex items-center gap-2">
@@ -982,7 +988,7 @@
               </td>
               <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
               <td class="py-3">${p.stock}</td>
-              <td class="py-3 text-xs ${statusColor}">${statusText}</td>
+              <td class="py-3 text-xs ${statusColor}">${statusText}${uploadingBadge}</td>
               <td class="py-3 flex gap-2">
                 <button onclick="openOwnerEditProductModal('${p.id}')" class="text-brand hover:text-orange-600 font-bold mr-2">Edit</button>
                 <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 font-bold">Delete</button>
@@ -1206,7 +1212,7 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = currentLanguage === 'gu' ? 'અપલોડ થઈ રહ્યું છે... / Uploading...' : 'Uploading...';
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving...';
 
       let category = document.getElementById('prod-category').value;
       if (category === 'custom_new') {
@@ -1241,53 +1247,72 @@
       }
 
       const prodId = 'prod_' + Date.now();
-      const imageUrls = [];
+      // Snapshot images as base64 now (already compressed)
+      const base64Images = [...window.uploadedProductImages];
 
       try {
-        for (let i = 0; i < window.uploadedProductImages.length; i++) {
-          const dataUrl = window.uploadedProductImages[i];
-          const url = await uploadProductImageToFirebase(prodId, i, dataUrl);
-          imageUrls.push(url);
-        }
-
+        // ── STEP 1: Save IMMEDIATELY with base64 images ──
+        // Product is visible to vendor & owner within ~1 second
         const newProduct = {
           id: prodId,
           name: document.getElementById('prod-name').value,
           price: parseFloat(document.getElementById('prod-price').value),
           description: document.getElementById('prod-desc').value,
-          imageUrl: imageUrls[0] || '', // backward compatibility
-          imageUrls: imageUrls,
+          imageUrl: base64Images[0] || '',
+          imageUrls: base64Images,
           category: category,
           stock: parseInt(document.getElementById('prod-stock').value),
           vendorId: currentUser.uid,
           vendorName: currentUser.displayName,
-          approvedByAdmin: false, // Strictly frozen-by-default, manual owner approval required!
+          approvedByAdmin: false,
           attributes: attributes,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          imagesUploading: true // flag: background upload in progress
         };
 
         db.saveProduct(newProduct);
-        showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ઉમેરાઈ ગઈ, અપ્રૂવલની રાહ જુઓ!' : 'Product added! Awaiting admin approval.');
-        
-        // Reset form
+
+        // Reset form immediately so vendor can add next product
         document.getElementById('prod-name').value = '';
         document.getElementById('prod-price').value = '';
         document.getElementById('prod-stock').value = '';
         document.getElementById('prod-desc').value = '';
-        
-        // Reset images
         window.uploadedProductImages = [];
         renderAddProductImagePreviews();
-
-        // Reset category selector
         document.getElementById('prod-category').value = 'others';
         handleCategorySelectChange();
-        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+
+        showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ ઉમેરાઈ ગઈ! ઓનર અપ્રૂવ કરે પછી લાઈવ થશે.' : '✅ Product listed! Awaiting owner approval.');
         renderVendorDashboard();
+
+        // ── STEP 2: Upload images to Firebase in BACKGROUND ──
+        // UI is already updated; this runs silently
+        if (typeof firebase !== 'undefined' && firebase.apps.length) {
+          (async () => {
+            try {
+              const firebaseUrls = await Promise.all(
+                base64Images.map((dataUrl, i) => uploadProductImageToFirebase(prodId, i, dataUrl))
+              );
+              // Update product with real Firebase URLs
+              db.updateProduct(prodId, {
+                imageUrl: firebaseUrls[0] || base64Images[0],
+                imageUrls: firebaseUrls,
+                imagesUploading: false
+              });
+              // Refresh dashboard silently to show updated image URLs
+              if (currentUser && currentUser.role === 'vendor') renderVendorDashboard();
+            } catch (uploadErr) {
+              console.warn('Background Firebase image upload failed, keeping base64:', uploadErr);
+              db.updateProduct(prodId, { imagesUploading: false });
+            }
+          })();
+        }
+
       } catch (err) {
         console.error("Error adding product:", err);
         alert("Failed to add product. Please try again.");
-      } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
       }
@@ -1372,6 +1397,15 @@
           if (p.attributes) {
             specSummary = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
           }
+          const syncingNote = p.imagesUploading
+            ? `<div class="inline-flex items-center gap-1 text-[10px] text-blue-500 font-semibold animate-pulse mt-0.5">
+                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                Image syncing…
+              </div>`
+            : '';
+          const approveBtn = p.imagesUploading
+            ? `<button disabled title="Wait for image upload to finish" class="bg-slate-200 text-slate-400 text-xs px-3 py-1.5 rounded-full mr-2 cursor-not-allowed">Wait…</button>`
+            : `<button onclick="approveProduct('${p.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>`;
           productRequestsList.innerHTML += `
             <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
               <td class="py-3 flex items-center gap-2">
@@ -1379,13 +1413,14 @@
                 <div>
                   <div class="font-bold text-slate-700">${p.name}</div>
                   <div class="text-[11px] text-slate-400 max-w-xs truncate">${p.description}</div>
+                  ${syncingNote}
                 </div>
               </td>
               <td class="py-3 text-xs text-slate-500">${p.vendorName}</td>
               <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
               <td class="py-3 text-xs text-slate-400 max-w-xs truncate">${specSummary || 'None'}</td>
               <td class="py-3">
-                <button onclick="approveProduct('${p.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                ${approveBtn}
                 <button onclick="rejectProduct('${p.id}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 shadow-sm shadow-red-500/10">Reject</button>
               </td>
             </tr>
@@ -1836,7 +1871,7 @@
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = currentLanguage === 'gu' ? 'અપલોડ થઈ રહ્યું છે... / Uploading...' : 'Uploading...';
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving...';
       
       const attributes = {};
       if (category === 'clothing') {
@@ -1859,47 +1894,72 @@
         attributes.dimensions = document.getElementById('attr-dimensions')?.value || '';
       }
 
-      const imageUrls = [];
+      // Snapshot current images (base64 or existing Firebase URLs)
+      const base64EditImages = [...window.uploadedEditProductImages];
 
       try {
-        for (let i = 0; i < window.uploadedEditProductImages.length; i++) {
-          const dataUrl = window.uploadedEditProductImages[i];
-          const url = await uploadProductImageToFirebase(id, i, dataUrl);
-          imageUrls.push(url);
-        }
-
+        // ── STEP 1: Save IMMEDIATELY with current images ──
         const updatedFields = {
           name: document.getElementById('edit-prod-name').value,
           price: parseFloat(document.getElementById('edit-prod-price').value),
           stock: parseInt(document.getElementById('edit-prod-stock').value),
           category: category,
-          imageUrl: imageUrls[0] || '', // backward compatibility
-          imageUrls: imageUrls,
+          imageUrl: base64EditImages[0] || '',
+          imageUrls: base64EditImages,
           description: document.getElementById('edit-prod-desc').value,
-          attributes: attributes
+          attributes: attributes,
+          imagesUploading: false
         };
 
         if (currentUser.role === 'admin') {
           updatedFields.badge = document.getElementById('edit-prod-badge').value;
           db.updateProduct(id, updatedFields);
-          showToast('Product updated successfully by Owner!');
+          showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ અપડેટ થઈ ગઈ!' : '✅ Product updated successfully!');
           toggleOwnerEditProductModal(false);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
           renderAdminDashboard();
         } else {
-          // Vendors cannot change badge; keep original badge
+          // Vendors: keep original badge, reset approval
           updatedFields.badge = p.badge || 'none';
-          // Reset approval
           updatedFields.approvedByAdmin = false;
-          
+          updatedFields.imagesUploading = true;
           db.updateProduct(id, updatedFields);
-          showToast(currentLanguage === 'gu' ? "પ્રોડક્ટ અપડેટ થઈ ગઈ, ઓનર અપ્રૂવલ આપશે પછી લાઈવ થશે" : "Product updated! It will go live after Owner approval.");
+          showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ અપડેટ! ઓનર અપ્રૂવ કરે પછી લાઈવ થશે.' : '✅ Updated! Goes live after Owner approval.');
           toggleOwnerEditProductModal(false);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
           renderVendorDashboard();
+
+          // ── STEP 2: Background Firebase upload for vendor edits ──
+          if (typeof firebase !== 'undefined' && firebase.apps.length) {
+            (async () => {
+              try {
+                // Only upload images that are base64 (not already Firebase URLs)
+                const firebaseUrls = await Promise.all(
+                  base64EditImages.map((img, i) => {
+                    if (img.startsWith('data:')) {
+                      return uploadProductImageToFirebase(id, i, img);
+                    }
+                    return Promise.resolve(img); // already a remote URL, keep it
+                  })
+                );
+                db.updateProduct(id, {
+                  imageUrl: firebaseUrls[0] || base64EditImages[0],
+                  imageUrls: firebaseUrls,
+                  imagesUploading: false
+                });
+                if (currentUser && currentUser.role === 'vendor') renderVendorDashboard();
+              } catch (uploadErr) {
+                console.warn('Background edit image upload failed:', uploadErr);
+                db.updateProduct(id, { imagesUploading: false });
+              }
+            })();
+          }
         }
       } catch (err) {
         console.error("Error editing product:", err);
         alert("Failed to save product changes.");
-      } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
       }
