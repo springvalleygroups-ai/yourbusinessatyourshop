@@ -640,6 +640,7 @@ function setCurrentUser(user) {
 const translations = {
   en: {
     brandName: "Your Business, Your Shop",
+    brandNameShort: "Your Shop",
     tagline: "Your Business, Your Shop",
     subtagline: "Anyone wishing to do business from home can list their products and kickstart their journey.",
     home: "Home",
@@ -751,6 +752,7 @@ const translations = {
   },
   gu: {
     brandName: "તમારો ધંધો, તમારી દુકાન",
+    brandNameShort: "તમારી દુકાન",
     tagline: "તમારો ધંધો, તમારી દુકાન",
     subtagline: "કોઈપણ વ્યક્તિ જે ઘરેથી વેપાર કરવા માંગે છે તે પોતાની પ્રોડક્ટ્સ અહીં મૂકીને સરળતાથી બિઝનેસ શરૂ કરી શકે છે.",
     home: "હોમ",
@@ -942,13 +944,18 @@ function addToCart(productId) {
 
 function updateCartUI() {
   const countBadge = document.getElementById('cart-count');
+  const bottomCountBadge = document.getElementById('bottom-cart-count');
   const itemsContainer = document.getElementById('cart-items-container');
   const totalAmountEl = document.getElementById('cart-total-amount');
 
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
   if (countBadge) {
-    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
     countBadge.innerText = totalQty;
     countBadge.classList.toggle('hidden', totalQty === 0);
+  }
+  if (bottomCountBadge) {
+    bottomCountBadge.innerText = totalQty;
+    bottomCountBadge.classList.toggle('hidden', totalQty === 0);
   }
 
   if (itemsContainer) {
