@@ -12,12 +12,18 @@
       theme: {
         extend: {
           colors: {
-            brand: '#ff6700',
-            brandlight: '#fff5ed',
-            dark: '#0f172a',
-            card: '#ffffff',
-            border: '#e2e8f0',
-            graytext: '#64748b'
+            brand: '#FF8A7A',
+            brandlight: '#FFF0ED',
+            dark: '#1F2229',
+            card: 'rgba(255, 255, 255, 0.75)',
+            border: 'rgba(226, 232, 240, 0.7)',
+            graytext: '#575F73',
+            koreanpeach: '#FF8A7A',
+            koreanlavender: '#D4B2D8',
+            koreanmint: '#A3E4D7',
+            koreanyellow: '#F9E79F',
+            koreansky: '#AED6F1',
+            koreanpink: '#FFB7C5'
           }
         }
       }
@@ -41,11 +47,18 @@
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo & Icon -->
       <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
-        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-orange-500/20">
-          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect width="24" height="24" rx="6" fill="#ff6700" />
+        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm">
+          <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFB7C5" />
+                <stop offset="50%" stop-color="#FF8A7A" />
+                <stop offset="100%" stop-color="#D4B2D8" />
+              </linearGradient>
+            </defs>
+            <rect width="24" height="24" rx="6" fill="url(#logo-grad-header)" />
             <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
-            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="url(#logo-grad-header)" />
             <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
@@ -107,11 +120,18 @@
     <div class="relative z-20 text-center px-6 max-w-4xl mx-auto mt-12">
       <!-- Big Premium Custom Branding logo in Hero -->
       <div class="flex justify-center mb-6 hero-logo opacity-0 scale-90">
-        <div class="relative w-20 h-20 flex items-center justify-center rounded-2xl overflow-hidden shadow-lg shadow-orange-500/10">
-          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect width="24" height="24" rx="6" fill="#ff6700" />
+        <div class="relative w-20 h-20 flex items-center justify-center rounded-2xl overflow-hidden shadow-lg">
+          <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad-hero" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFB7C5" />
+                <stop offset="50%" stop-color="#FF8A7A" />
+                <stop offset="100%" stop-color="#D4B2D8" />
+              </linearGradient>
+            </defs>
+            <rect width="24" height="24" rx="6" fill="url(#logo-grad-hero)" />
             <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
-            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="url(#logo-grad-hero)" />
             <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
@@ -699,12 +719,21 @@
         allProds = allProds.filter(p => p.vendorId === window.currentShopFilter);
       }
 
-      // Only show approved products and filter by selected badge
+      // Only show approved products and filter by selected badge and search term
       const badgeFilter = document.getElementById('badge-filter')?.value || 'all';
+      const term = (document.getElementById('search-input')?.value || document.getElementById('search-input-mobile')?.value || '').toLowerCase().trim();
+      
       const filtered = allProds.filter(p => {
         if (!p.approvedByAdmin) return false;
         if (currentCategoryFilter !== 'all' && p.category !== currentCategoryFilter) return false;
         if (badgeFilter !== 'all' && p.badge !== badgeFilter) return false;
+        
+        if (term) {
+          const matchName = p.name.toLowerCase().includes(term);
+          const matchDesc = p.description ? p.description.toLowerCase().includes(term) : false;
+          const matchCat = p.category ? p.category.toLowerCase().includes(term) : false;
+          if (!matchName && !matchDesc && !matchCat) return false;
+        }
         return true;
       });
 
@@ -714,13 +743,15 @@
       }
 
       filtered.forEach(p => {
-        // UPGRADE 2: Glowing Product Badges
+        // UPGRADE 2: Glowing Product Badges using Korean trendy pastel colors
         let badgeHtml = '';
         if (p.badge && p.badge !== 'none') {
-          let badgeColor = 'bg-brand text-white shadow-sm shadow-orange-500/20';
-          if (p.badge === 'Bestseller') badgeColor = 'bg-amber-500 text-white';
-          if (p.badge === 'Trending') badgeColor = 'bg-red-500 text-white animate-pulse';
-          badgeHtml = `<span class="absolute top-2 left-2 ${badgeColor} text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full z-10">${p.badge}</span>`;
+          let badgeClass = 'badge-korean-peach';
+          if (p.badge === 'Bestseller') badgeClass = 'badge-korean-yellow';
+          if (p.badge === 'Trending') badgeClass = 'badge-korean-peach animate-pulse';
+          if (p.badge === 'Featured') badgeClass = 'badge-korean-lilac';
+          if (p.badge === 'New Arrival') badgeClass = 'badge-korean-mint';
+          badgeHtml = `<span class="absolute top-2 left-2 ${badgeClass} text-[9px] sm:text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full z-10 shadow-sm">${p.badge}</span>`;
         }
 
         // UPGRADE 8: Smart Stock Alerts & Locks
@@ -732,20 +763,20 @@
         let addToCartBtnHtml = '';
         
         if (isOutOfStock) {
-          stockBadgeHtml = `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">SOLD OUT</span>`;
+          stockBadgeHtml = `<span class="absolute top-2 right-2 bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">SOLD OUT</span>`;
           cardOverlayHtml = `<div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px] z-10 flex items-center justify-center pointer-events-none"><span class="text-white text-xs font-black bg-slate-950/80 px-4 py-1.5 rounded-full border border-slate-700">OUT OF STOCK</span></div>`;
           addToCartBtnHtml = `
-            <button disabled class="bg-slate-100 text-slate-450 p-2.5 rounded-full cursor-not-allowed" title="Out of Stock">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+            <button disabled class="bg-slate-100 text-slate-450 p-2 sm:p-2.5 rounded-full cursor-not-allowed" title="Out of Stock">
+              <svg class="w-4 h-4 sm:w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
             </button>
           `;
         } else {
           if (isLowStock) {
-            stockBadgeHtml = `<span class="absolute top-2 right-2 bg-amber-550 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full z-10 animate-bounce">ONLY ${p.stock} LEFT</span>`;
+            stockBadgeHtml = `<span class="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full z-10 animate-bounce">ONLY ${p.stock} LEFT</span>`;
           }
           addToCartBtnHtml = `
-            <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-655 p-2 sm:p-2.5 rounded-full transition duration-300">
+              <svg class="w-4 h-4 sm:w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             </button>
           `;
         }
@@ -756,26 +787,26 @@
         const shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
         grid.innerHTML += `
-          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm relative">
+          <div class="premium-card rounded-2xl overflow-hidden hover:border-koreanlavender hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm relative">
             ${badgeHtml}
             ${stockBadgeHtml}
-            <div class="relative overflow-hidden cursor-pointer" onclick="showProductDetails('${p.id}')">
+            <div class="product-card-image-wrapper w-full h-32 xs:h-36 sm:h-48 overflow-hidden relative cursor-pointer" onclick="showProductDetails('${p.id}')">
               ${cardOverlayHtml}
-              <img src="${p.imageUrl}" class="w-full h-48 object-cover zoom-img" alt="${p.name}">
+              <img src="${p.imageUrl}" class="w-full h-full object-cover zoom-img" alt="${p.name}">
               <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <span class="text-xs bg-white text-slate-800 px-4 py-2 rounded-full font-bold shadow-sm uppercase tracking-wider">View Details</span>
+                <span class="text-[10px] sm:text-xs bg-white text-slate-800 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-bold shadow-sm uppercase tracking-wider">View Details</span>
               </div>
             </div>
-            <div class="p-4 flex flex-col justify-between flex-grow">
+            <div class="product-card-padding p-3 sm:p-4 flex flex-col justify-between flex-grow">
               <div class="text-left">
-                <h3 class="font-bold text-slate-800 text-base leading-tight hover:text-brand cursor-pointer transition" onclick="showProductDetails('${p.id}')">${p.name}</h3>
-                <p class="text-xs text-slate-400 mt-1">${p.vendorName}</p>
+                <h3 class="product-card-title font-bold text-slate-800 text-xs sm:text-sm md:text-base leading-tight hover:text-brand cursor-pointer transition line-clamp-2" onclick="showProductDetails('${p.id}')">${p.name}</h3>
+                <p class="text-[10px] sm:text-xs text-slate-400 mt-1">${p.vendorName}</p>
               </div>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="text-lg font-extrabold text-slate-950">₹${p.price}</span>
+              <div class="mt-3 sm:mt-4 flex items-center justify-between">
+                <span class="product-card-price text-sm sm:text-base md:text-lg font-extrabold text-slate-950">₹${p.price}</span>
                 <div class="flex gap-1.5">
-                  <a href="${shareLink}" target="_blank" class="bg-slate-100 hover:bg-emerald-500 hover:text-white hover:scale-105 text-slate-500 p-2.5 rounded-full transition duration-300" title="WhatsApp Share">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" width="16" height="16"><path d="M12.031 2C6.49 2 2 6.48 2 12.02c0 1.91.53 3.69 1.45 5.23L2 22l4.89-1.28c1.47.8 3.14 1.25 4.93 1.25 5.54 0 10.03-4.48 10.03-10.02S17.57 2 12.031 2zm.05 18.25c-1.68 0-3.32-.44-4.75-1.28l-.34-.2-2.92.77.78-2.85-.22-.35a8.216 8.216 0 0 1-1.26-4.32c0-4.52 3.68-8.19 8.21-8.19 4.53 0 8.21 3.67 8.21 8.19 0 4.52-3.68 8.19-8.21 8.19z"/></svg>
+                  <a href="${shareLink}" target="_blank" class="bg-slate-100 hover:bg-emerald-500 hover:text-white hover:scale-105 text-slate-500 p-2 sm:p-2.5 rounded-full transition duration-300" title="WhatsApp Share">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 2C6.49 2 2 6.48 2 12.02c0 1.91.53 3.69 1.45 5.23L2 22l4.89-1.28c1.47.8 3.14 1.25 4.93 1.25 5.54 0 10.03-4.48 10.03-10.02S17.57 2 12.031 2zm.05 18.25c-1.68 0-3.32-.44-4.75-1.28l-.34-.2-2.92.77.78-2.85-.22-.35a8.216 8.216 0 0 1-1.26-4.32c0-4.52 3.68-8.19 8.21-8.19 4.53 0 8.21 3.67 8.21 8.19 0 4.52-3.68 8.19-8.21 8.19z"/></svg>
                   </a>
                   ${addToCartBtnHtml}
                 </div>
@@ -791,49 +822,15 @@
     document.getElementById('search-input-mobile').addEventListener('input', filterSearch);
 
     function filterSearch(e) {
-      const term = e.target.value.toLowerCase();
-      const grid = document.getElementById('product-grid');
-      grid.innerHTML = '';
-      
-      let allProds = db.getProducts();
-      if (window.currentShopFilter) {
-        allProds = allProds.filter(p => p.vendorId === window.currentShopFilter);
+      const term = e.target.value;
+      if (e.target.id === 'search-input') {
+        const mob = document.getElementById('search-input-mobile');
+        if (mob) mob.value = term;
+      } else {
+        const desk = document.getElementById('search-input');
+        if (desk) desk.value = term;
       }
-
-      const filtered = allProds.filter(p => {
-        if (!p.approvedByAdmin) return false;
-        return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term) || p.category.toLowerCase().includes(term);
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16" data-i18n="noProducts">${translations[currentLanguage].noProducts}</div>`;
-        return;
-      }
-
-      filtered.forEach(p => {
-        grid.innerHTML += `
-          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
-            <div class="relative overflow-hidden cursor-pointer" onclick="showProductDetails('${p.id}')">
-              <img src="${p.imageUrl}" class="w-full h-48 object-cover zoom-img" alt="${p.name}">
-              <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <span class="text-xs bg-white text-slate-800 px-4 py-2 rounded-full font-bold shadow-sm">View Details</span>
-              </div>
-            </div>
-            <div class="p-4 flex flex-col justify-between flex-grow">
-              <div class="text-left">
-                <h3 class="font-bold text-slate-800 text-base leading-tight cursor-pointer" onclick="showProductDetails('${p.id}')">${p.name}</h3>
-                <p class="text-xs text-slate-400 mt-1">${p.vendorName}</p>
-              </div>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="text-lg font-extrabold text-slate-950">₹${p.price}</span>
-                <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+      renderProducts();
     }
 
     // DRAWERS & MODALS
@@ -957,8 +954,10 @@
         `;
       } else {
         actionButtonsHtml = `
-          <button onclick="addToCart('${p.id}'); toggleDetailDrawer(false);" class="flex-1 btn-secondary text-slate-800 py-3 rounded-full font-semibold transition">Add To Cart</button>
-          <button onclick="buyNow('${p.id}')" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Buy Now</button>
+          <div class="flex flex-col sm:flex-row gap-2.5 sm:gap-4 w-full">
+            <button onclick="addToCart('${p.id}'); toggleDetailDrawer(false);" class="w-full sm:flex-1 btn-secondary text-slate-800 py-3 rounded-full font-semibold transition">Add To Cart</button>
+            <button onclick="buyNow('${p.id}')" class="w-full sm:flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Buy Now</button>
+          </div>
         `;
       }
 
@@ -1041,7 +1040,7 @@
             </div>
           </div>
 
-          <div class="flex gap-4">
+          <div class="w-full">
             ${actionButtonsHtml}
           </div>
           
