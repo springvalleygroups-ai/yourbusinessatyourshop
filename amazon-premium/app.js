@@ -277,7 +277,14 @@ class Database {
     fsDb.collection('users').onSnapshot(snapshot => {
       let users = this.getUsers();
       snapshot.docChanges().forEach(change => {
-        const docData = change.doc.data();
+        let docData = change.doc.data();
+        
+        // Force migration in Firestore sync to prevent remote database overwrites
+        if (docData.uid === "admin123" && docData.email === "admin@store.com") {
+          docData.email = "springvalleygroups@gmail.com";
+          this.pushToFirestore('users', docData.uid, docData);
+        }
+        
         const index = users.findIndex(u => u.uid === docData.uid);
         if (change.type === 'added' || change.type === 'modified') {
           if (index !== -1) {
@@ -1492,3 +1499,18 @@ function generateInvoiceHTML(order) {
     </div>
   `;
 }
+
+// Database auto-repair/migration for Owner email
+(function migrateAdminEmail() {
+  try {
+    let users = db.getUsers();
+    let admin = users.find(u => u.uid === "admin123");
+    if (admin && admin.email !== "springvalleygroups@gmail.com") {
+      admin.email = "springvalleygroups@gmail.com";
+      db.saveUser(admin);
+      console.log("Database Repair: Forced Admin email to springvalleygroups@gmail.com");
+    }
+  } catch (e) {
+    console.error("Auto repair error:", e);
+  }
+})();
