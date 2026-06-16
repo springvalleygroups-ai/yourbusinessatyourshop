@@ -10,6 +10,14 @@
   <script>
     tailwind.config = {
       theme: {
+        screens: {
+          'xs': '420px',
+          'sm': '640px',
+          'md': '768px',
+          'lg': '1024px',
+          'xl': '1280px',
+          '2xl': '1536px',
+        },
         extend: {
           colors: {
             brand: '#FF8A7A',
@@ -62,7 +70,8 @@
             <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
           </svg>
         </div>
-        <span class="font-extrabold" data-i18n="brandName">Your Business, Your Shop</span>
+        <span class="font-extrabold hidden xs:inline" data-i18n="brandName">Your Business, Your Shop</span>
+        <span class="font-extrabold inline xs:hidden" data-i18n="brandNameShort">Your Shop</span>
       </a>
 
       <!-- Search Bar -->
@@ -75,11 +84,11 @@
       </div>
 
       <!-- Navigation & Controls -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4">
         <!-- Language Selector -->
         <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
-          <button id="lang-gu-btn" onclick="setLanguage('gu'); playVoiceGreeting('gu');" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
-          <button id="lang-en-btn" onclick="setLanguage('en'); playVoiceGreeting('en');" class="px-3 py-1 rounded-full transition">EN</button>
+          <button id="lang-gu-btn" onclick="setLanguage('gu'); playVoiceGreeting('gu');" class="px-2 sm:px-3 py-1 rounded-full transition"><span class="sm:hidden">GUJ</span><span class="hidden sm:inline">ગુજરાતી</span></button>
+          <button id="lang-en-btn" onclick="setLanguage('en'); playVoiceGreeting('en');" class="px-2 sm:px-3 py-1 rounded-full transition">EN</button>
         </div>
 
         <!-- Cart Button -->
@@ -89,7 +98,7 @@
         </button>
 
         <!-- User Accounts Link -->
-        <div id="nav-user-actions" class="flex items-center gap-2 text-sm text-slate-700">
+        <div id="nav-user-actions" class="hidden md:flex items-center gap-2 text-sm text-slate-700">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -106,7 +115,7 @@
   </div>
 
   <!-- HERO SECTION WITH VIDEO BACKGROUND -->
-  <section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-100">
+  <section class="relative min-h-[85vh] sm:h-screen flex items-center justify-center overflow-hidden bg-slate-100 py-16 sm:py-0">
     <!-- Background Video -->
     <video autoplay loop muted playsinline class="absolute z-0 w-auto min-w-full min-h-full max-w-none opacity-20 object-cover">
       <source src="https://assets.mixkit.co/videos/preview/mixkit-minimalist-living-room-with-a-lamp-42353-large.mp4" type="video/mp4" />
@@ -641,6 +650,7 @@
     // Navigation bar states
     function updateNavUI() {
       const navUser = document.getElementById('nav-user-actions');
+      const bottomProfileText = document.getElementById('bottom-profile-text');
       if (!navUser) return;
       if (currentUser) {
         navUser.innerHTML = `
@@ -648,12 +658,18 @@
           <a href="admin.html" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="dashboard">${translations[currentLanguage].dashboard}</a>
           <button onclick="handleLogout()" class="border border-slate-200 bg-white text-slate-700 px-4 py-1.5 rounded-full hover:bg-slate-50 hover:border-slate-300 transition" data-i18n="logout">${translations[currentLanguage].logout}</button>
         `;
+        if (bottomProfileText) {
+          bottomProfileText.textContent = currentUser.role === 'owner' ? 'Owner' : 'Seller';
+        }
       } else {
         navUser.innerHTML = `
           <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
           <a href="admin.html?action=login" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="login">${translations[currentLanguage].login}</a>
           <a href="admin.html?action=register" class="btn-primary text-white px-4 py-1.5 rounded-full font-semibold transition" data-i18n="register">${translations[currentLanguage].register}</a>
         `;
+        if (bottomProfileText) {
+          bottomProfileText.textContent = translations[currentLanguage].login;
+        }
       }
     }
 
@@ -1246,6 +1262,39 @@
       container.innerHTML = generateInvoiceHTML(order);
       document.getElementById('invoice-modal').classList.remove('hidden');
     }
+
+    window.focusMobileSearch = function() {
+      const input = document.getElementById('search-input-mobile');
+      if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   </script>
+
+  <!-- MOBILE BOTTOM NAVIGATION -->
+  <div class="fixed bottom-4 left-4 right-4 z-50 md:hidden bg-white/85 backdrop-blur-lg border border-white/40 shadow-xl rounded-2xl px-6 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+      <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+      <span class="text-[9px] font-bold">Home</span>
+    </a>
+    <button onclick="focusMobileSearch()" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+      <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <span class="text-[9px] font-bold">Search</span>
+    </button>
+    <button onclick="toggleCartDrawer(true)" class="relative flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+      <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+      <span id="bottom-cart-count" class="absolute -top-1 -right-2 bg-brand text-white text-[8px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold hidden shadow-sm">0</span>
+      <span class="text-[9px] font-bold">Cart</span>
+    </button>
+    <button onclick="toggleOrdersDrawer(true)" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+      <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+      <span class="text-[9px] font-bold">Orders</span>
+    </button>
+    <a href="admin.html" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+      <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+      <span id="bottom-profile-text" class="text-[9px] font-bold">Account</span>
+    </a>
+  </div>
 </body>
 </html>
