@@ -1001,9 +1001,28 @@
         }).join('');
       }
 
+      const images = p.imageUrls && p.imageUrls.length > 0 ? p.imageUrls : (p.imageUrl ? [p.imageUrl] : []);
+      let galleryHtml = '';
+      if (images.length > 0) {
+        galleryHtml = `
+          <div class="relative w-full mb-6">
+            <img id="main-product-detail-image" src="${images[0]}" class="w-full h-64 object-cover rounded-2xl shadow-md transition-all duration-300" />
+          </div>
+        `;
+        if (images.length > 1) {
+          galleryHtml += `
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-thin">
+              ${images.map(img => `
+                <img src="${img}" onclick="document.getElementById('main-product-detail-image').src = this.src" class="w-16 h-16 object-cover rounded-xl border-2 border-transparent hover:border-brand cursor-pointer shadow-sm transition-all flex-shrink-0" />
+              `).join('')}
+            </div>
+          `;
+        }
+      }
+
       const container = document.getElementById('detail-content');
       container.innerHTML = `
-        <img src="${p.imageUrl}" class="w-full h-64 object-cover rounded-2xl mb-6 shadow-md" />
+        ${galleryHtml}
         <div class="text-left">
           <h2 class="text-2xl font-extrabold text-slate-900 mb-1">${p.name}</h2>
           <p class="text-sm text-slate-400 mb-4">Sold by: <span class="text-brand font-bold">${p.vendorName}</span></p>

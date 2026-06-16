@@ -298,8 +298,10 @@
                 <div id="dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
 
                 <div>
-                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodImage">Image URL</label>
-                  <input type="url" id="prod-image" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1">Upload Product Images / પ્રોડક્ટ ઇમેજ અપલોડ (Max 5)</label>
+                  <div class="grid grid-cols-5 gap-2 mt-1" id="image-upload-preview-grid">
+                    <!-- Dynamic preview grid -->
+                  </div>
                 </div>
                 <div>
                   <div class="flex justify-between items-center mb-1">
@@ -678,8 +680,10 @@
           <div id="edit-dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">Image URL / ઇમેજ લિંક</label>
-            <input type="url" id="edit-prod-image" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Upload Product Images / પ્રોડક્ટ ઇમેજ અપલોડ (Max 5)</label>
+            <div class="grid grid-cols-5 gap-2 mt-1" id="edit-image-upload-preview-grid">
+              <!-- Dynamic preview grid -->
+            </div>
           </div>
           <div>
             <div class="flex justify-between items-center mb-1">
@@ -705,9 +709,157 @@
     let resetTargetUser = null;
     let generatedResetOTP = "";
 
+    // Image Upload State & Processing
+    window.uploadedProductImages = [];
+    window.uploadedEditProductImages = [];
+
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          callback(dataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadProductImageToFirebase(productId, imgIndex, dataUrl) {
+      if (typeof firebase === 'undefined' || !firebase.apps.length) return dataUrl;
+      try {
+        const storageRef = firebase.storage().ref();
+        const ref = storageRef.child(`products/${productId}/image_${imgIndex}.jpg`);
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const snapshot = await ref.put(blob);
+        const downloadUrl = await snapshot.ref.getDownloadURL();
+        return downloadUrl;
+      } catch (e) {
+        console.error("Firebase Storage product upload failed, using base64:", e);
+        return dataUrl;
+      }
+    }
+
+    function renderAddProductImagePreviews() {
+      const grid = document.getElementById('image-upload-preview-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      window.uploadedProductImages.forEach((img, idx) => {
+        grid.innerHTML += `
+          <div class="col-span-1 aspect-square rounded-xl overflow-hidden relative border border-slate-100 shadow-sm">
+            <img src="${img}" class="w-full h-full object-cover">
+            <button type="button" onclick="removeAddProductImage(${idx})" class="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white rounded-full p-0.5 shadow transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        `;
+      });
+      if (window.uploadedProductImages.length < 5) {
+        grid.innerHTML += `
+          <div id="image-upload-btn-container" class="col-span-1 aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-brand transition group relative">
+            <input type="file" id="prod-image-file" onchange="handleAddProductImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="text-[8px] text-slate-400 mt-1 font-bold group-hover:text-brand transition">Add / ઉમેરો</span>
+          </div>
+        `;
+      }
+    }
+
+    window.handleAddProductImageUpload = function(e) {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - window.uploadedProductImages.length;
+      const filesToProcess = files.slice(0, remainingSlots);
+      let processedCount = 0;
+      if (filesToProcess.length === 0) return;
+      filesToProcess.forEach(file => {
+        compressImage(file, 600, 600, 0.7, (compressedDataUrl) => {
+          window.uploadedProductImages.push(compressedDataUrl);
+          processedCount++;
+          if (processedCount === filesToProcess.length) {
+            renderAddProductImagePreviews();
+          }
+        });
+      });
+    };
+
+    window.removeAddProductImage = function(idx) {
+      window.uploadedProductImages.splice(idx, 1);
+      renderAddProductImagePreviews();
+    };
+
+    function renderEditProductImagePreviews() {
+      const grid = document.getElementById('edit-image-upload-preview-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      window.uploadedEditProductImages.forEach((img, idx) => {
+        grid.innerHTML += `
+          <div class="col-span-1 aspect-square rounded-xl overflow-hidden relative border border-slate-100 shadow-sm">
+            <img src="${img}" class="w-full h-full object-cover">
+            <button type="button" onclick="removeEditProductImage(${idx})" class="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white rounded-full p-0.5 shadow transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        `;
+      });
+      if (window.uploadedEditProductImages.length < 5) {
+        grid.innerHTML += `
+          <div id="edit-image-upload-btn-container" class="col-span-1 aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-brand transition group relative">
+            <input type="file" id="edit-prod-image-file" onchange="handleEditProductImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="text-[8px] text-slate-400 mt-1 font-bold group-hover:text-brand transition">Add / ઉમેરો</span>
+          </div>
+        `;
+      }
+    }
+
+    window.handleEditProductImageUpload = function(e) {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - window.uploadedEditProductImages.length;
+      const filesToProcess = files.slice(0, remainingSlots);
+      let processedCount = 0;
+      if (filesToProcess.length === 0) return;
+      filesToProcess.forEach(file => {
+        compressImage(file, 600, 600, 0.7, (compressedDataUrl) => {
+          window.uploadedEditProductImages.push(compressedDataUrl);
+          processedCount++;
+          if (processedCount === filesToProcess.length) {
+            renderEditProductImagePreviews();
+          }
+        });
+      });
+    };
+
+    window.removeEditProductImage = function(idx) {
+      window.uploadedEditProductImages.splice(idx, 1);
+      renderEditProductImagePreviews();
+    };
+
     document.addEventListener("DOMContentLoaded", () => {
       setLanguage(currentLanguage);
       initDashboard();
+      renderAddProductImagePreviews();
       
       // Determine auth views by URL params
       const urlParams = new URLSearchParams(window.location.search);
@@ -1042,14 +1194,27 @@
       }
     }
 
-    function vendorAddProduct(e) {
+    async function vendorAddProduct(e) {
       e.preventDefault();
       
+      if (window.uploadedProductImages.length === 0) {
+        alert(currentLanguage === 'gu' ? 'કૃપા કરીને ઓછામાં ઓછી ૧ ઇમેજ અપલોડ કરો.' : 'Please upload at least 1 product image.');
+        return;
+      }
+      
+      // Set submit button to loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'અપલોડ થઈ રહ્યું છે... / Uploading...' : 'Uploading...';
+
       let category = document.getElementById('prod-category').value;
       if (category === 'custom_new') {
         category = document.getElementById('custom-category-name').value.trim().toLowerCase().replace(/\s+/g, '_');
         if (!category) {
           alert('Please enter a valid category name.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
           return;
         }
       }
@@ -1075,35 +1240,57 @@
         attributes.dimensions = document.getElementById('attr-dimensions') ? document.getElementById('attr-dimensions').value : '';
       }
 
-      const newProduct = {
-        id: 'prod_' + Date.now(),
-        name: document.getElementById('prod-name').value,
-        price: parseFloat(document.getElementById('prod-price').value),
-        description: document.getElementById('prod-desc').value,
-        imageUrl: document.getElementById('prod-image').value,
-        category: category,
-        stock: parseInt(document.getElementById('prod-stock').value),
-        vendorId: currentUser.uid,
-        vendorName: currentUser.displayName,
-        approvedByAdmin: false, // Strictly frozen-by-default, manual owner approval required!
-        attributes: attributes,
-        createdAt: new Date().toISOString()
-      };
+      const prodId = 'prod_' + Date.now();
+      const imageUrls = [];
 
-      db.saveProduct(newProduct);
-      showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ઉમેરાઈ ગઈ, અપ્રૂવલની રાહ જુઓ!' : 'Product added! Awaiting admin approval.');
-      
-      // Reset form
-      document.getElementById('prod-name').value = '';
-      document.getElementById('prod-price').value = '';
-      document.getElementById('prod-stock').value = '';
-      document.getElementById('prod-image').value = '';
-      document.getElementById('prod-desc').value = '';
-      // Reset category selector
-      document.getElementById('prod-category').value = 'others';
-      handleCategorySelectChange();
-      
-      renderVendorDashboard();
+      try {
+        for (let i = 0; i < window.uploadedProductImages.length; i++) {
+          const dataUrl = window.uploadedProductImages[i];
+          const url = await uploadProductImageToFirebase(prodId, i, dataUrl);
+          imageUrls.push(url);
+        }
+
+        const newProduct = {
+          id: prodId,
+          name: document.getElementById('prod-name').value,
+          price: parseFloat(document.getElementById('prod-price').value),
+          description: document.getElementById('prod-desc').value,
+          imageUrl: imageUrls[0] || '', // backward compatibility
+          imageUrls: imageUrls,
+          category: category,
+          stock: parseInt(document.getElementById('prod-stock').value),
+          vendorId: currentUser.uid,
+          vendorName: currentUser.displayName,
+          approvedByAdmin: false, // Strictly frozen-by-default, manual owner approval required!
+          attributes: attributes,
+          createdAt: new Date().toISOString()
+        };
+
+        db.saveProduct(newProduct);
+        showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ઉમેરાઈ ગઈ, અપ્રૂવલની રાહ જુઓ!' : 'Product added! Awaiting admin approval.');
+        
+        // Reset form
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-stock').value = '';
+        document.getElementById('prod-desc').value = '';
+        
+        // Reset images
+        window.uploadedProductImages = [];
+        renderAddProductImagePreviews();
+
+        // Reset category selector
+        document.getElementById('prod-category').value = 'others';
+        handleCategorySelectChange();
+        
+        renderVendorDashboard();
+      } catch (err) {
+        console.error("Error adding product:", err);
+        alert("Failed to add product. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
     }
 
     // ADMIN ACTIONS
@@ -1578,9 +1765,12 @@
       document.getElementById('edit-prod-stock').value = p.stock;
       document.getElementById('edit-prod-category').value = p.category || 'others';
       document.getElementById('edit-prod-badge').value = p.badge || 'none';
-      document.getElementById('edit-prod-image').value = p.imageUrl;
       document.getElementById('edit-prod-desc').value = p.description;
       
+      // Load current images
+      window.uploadedEditProductImages = p.imageUrls && p.imageUrls.length > 0 ? [...p.imageUrls] : (p.imageUrl ? [p.imageUrl] : []);
+      renderEditProductImagePreviews();
+
       // Update specs
       updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
       
@@ -1623,7 +1813,7 @@
       updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
     }
 
-    window.submitOwnerProductEdit = function(e) {
+    window.submitOwnerProductEdit = async function(e) {
       e.preventDefault();
       const id = document.getElementById('edit-prod-id').value;
       const category = document.getElementById('edit-prod-category').value;
@@ -1636,6 +1826,17 @@
         showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
         return;
       }
+
+      if (window.uploadedEditProductImages.length === 0) {
+        alert(currentLanguage === 'gu' ? 'કૃપા કરીને ઓછામાં ઓછી ૧ ઇમેજ અપલોડ કરો.' : 'Please upload at least 1 product image.');
+        return;
+      }
+
+      // Set submit button to loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'અપલોડ થઈ રહ્યું છે... / Uploading...' : 'Uploading...';
       
       const attributes = {};
       if (category === 'clothing') {
@@ -1658,32 +1859,49 @@
         attributes.dimensions = document.getElementById('attr-dimensions')?.value || '';
       }
 
-      const updatedFields = {
-        name: document.getElementById('edit-prod-name').value,
-        price: parseFloat(document.getElementById('edit-prod-price').value),
-        stock: parseInt(document.getElementById('edit-prod-stock').value),
-        category: category,
-        imageUrl: document.getElementById('edit-prod-image').value,
-        description: document.getElementById('edit-prod-desc').value,
-        attributes: attributes
-      };
+      const imageUrls = [];
 
-      if (currentUser.role === 'admin') {
-        updatedFields.badge = document.getElementById('edit-prod-badge').value;
-        db.updateProduct(id, updatedFields);
-        showToast('Product updated successfully by Owner!');
-        toggleOwnerEditProductModal(false);
-        renderAdminDashboard();
-      } else {
-        // Vendors cannot change badge; keep original badge
-        updatedFields.badge = p.badge || 'none';
-        // Reset approval
-        updatedFields.approvedByAdmin = false;
-        
-        db.updateProduct(id, updatedFields);
-        showToast(currentLanguage === 'gu' ? "પ્રોડક્ટ અપડેટ થઈ ગઈ, ઓનર અપ્રૂવલ આપશે પછી લાઈવ થશે" : "Product updated! It will go live after Owner approval.");
-        toggleOwnerEditProductModal(false);
-        renderVendorDashboard();
+      try {
+        for (let i = 0; i < window.uploadedEditProductImages.length; i++) {
+          const dataUrl = window.uploadedEditProductImages[i];
+          const url = await uploadProductImageToFirebase(id, i, dataUrl);
+          imageUrls.push(url);
+        }
+
+        const updatedFields = {
+          name: document.getElementById('edit-prod-name').value,
+          price: parseFloat(document.getElementById('edit-prod-price').value),
+          stock: parseInt(document.getElementById('edit-prod-stock').value),
+          category: category,
+          imageUrl: imageUrls[0] || '', // backward compatibility
+          imageUrls: imageUrls,
+          description: document.getElementById('edit-prod-desc').value,
+          attributes: attributes
+        };
+
+        if (currentUser.role === 'admin') {
+          updatedFields.badge = document.getElementById('edit-prod-badge').value;
+          db.updateProduct(id, updatedFields);
+          showToast('Product updated successfully by Owner!');
+          toggleOwnerEditProductModal(false);
+          renderAdminDashboard();
+        } else {
+          // Vendors cannot change badge; keep original badge
+          updatedFields.badge = p.badge || 'none';
+          // Reset approval
+          updatedFields.approvedByAdmin = false;
+          
+          db.updateProduct(id, updatedFields);
+          showToast(currentLanguage === 'gu' ? "પ્રોડક્ટ અપડેટ થઈ ગઈ, ઓનર અપ્રૂવલ આપશે પછી લાઈવ થશે" : "Product updated! It will go live after Owner approval.");
+          toggleOwnerEditProductModal(false);
+          renderVendorDashboard();
+        }
+      } catch (err) {
+        console.error("Error editing product:", err);
+        alert("Failed to save product changes.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
       }
     }
 
