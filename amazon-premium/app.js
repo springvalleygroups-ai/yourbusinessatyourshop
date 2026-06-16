@@ -356,6 +356,9 @@ class Database {
           if (index !== -1) reviews.splice(index, 1);
         }
       });
+      this.setData('db_reviews', reviews);
+      this.triggerUIRedraw();
+    });
     // Settings Sync
     fsDb.collection('settings').onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
