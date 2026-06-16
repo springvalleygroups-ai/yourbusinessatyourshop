@@ -356,8 +356,15 @@ class Database {
           if (index !== -1) reviews.splice(index, 1);
         }
       });
-      this.setData('db_reviews', reviews);
-      this.triggerUIRedraw();
+    // Settings Sync
+    fsDb.collection('settings').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        const docData = change.doc.data();
+        if (change.doc.id === 'announcement_banner') {
+          localStorage.setItem('db_banner_settings', JSON.stringify(docData));
+          if (typeof renderAnnouncementBanner === 'function') renderAnnouncementBanner();
+        }
+      });
     });
   }
 
@@ -541,6 +548,9 @@ class Database {
   saveReview(review) {
     review.comment = sanitizeHTML(review.comment);
     review.userName = sanitizeHTML(review.userName);
+    if (review.approvedByAdmin === undefined) {
+      review.approvedByAdmin = false; // Admin approval required by default
+    }
     const reviews = this.getReviews();
     reviews.push(review);
     this.setData('db_reviews', reviews);
@@ -548,14 +558,64 @@ class Database {
     // Push to Firestore
     this.pushToFirestore('reviews', review.id, review);
 
-    // Update product average rating
-    const prodReviews = reviews.filter(r => r.productId === review.productId);
-    const totalRating = prodReviews.reduce((sum, r) => sum + r.rating, 0);
-    const newAvg = parseFloat((totalRating / prodReviews.length).toFixed(1));
-    this.updateProduct(review.productId, {
+    // Update product rating only if review is approved
+    if (review.approvedByAdmin) {
+      this.recalculateProductRating(review.productId);
+    }
+  }
+
+  updateReview(id, updatedFields) {
+    const reviews = this.getReviews();
+    const index = reviews.findIndex(r => r.id === id);
+    if (index !== -1) {
+      const updatedRev = { ...reviews[index], ...updatedFields };
+      reviews[index] = updatedRev;
+      this.setData('db_reviews', reviews);
+      this.pushToFirestore('reviews', id, updatedRev);
+      
+      this.recalculateProductRating(updatedRev.productId);
+    }
+  }
+
+  deleteReview(id) {
+    const reviews = this.getReviews();
+    const rev = reviews.find(r => r.id === id);
+    const updatedReviews = reviews.filter(r => r.id !== id);
+    this.setData('db_reviews', updatedReviews);
+    this.deleteFromFirestore('reviews', id);
+    
+    if (rev) {
+      this.recalculateProductRating(rev.productId);
+    }
+  }
+
+  recalculateProductRating(productId) {
+    const reviews = this.getReviews().filter(r => r.productId === productId && r.approvedByAdmin);
+    if (reviews.length === 0) {
+      this.updateProduct(productId, { rating: 5, reviewsCount: 0 });
+      return;
+    }
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const newAvg = parseFloat((totalRating / reviews.length).toFixed(1));
+    this.updateProduct(productId, {
       rating: newAvg,
-      reviewsCount: prodReviews.length
+      reviewsCount: reviews.length
     });
+  }
+
+  // Banner Settings Collection
+  getBannerSettings() {
+    let settings = JSON.parse(localStorage.getItem('db_banner_settings'));
+    if (!settings) {
+      settings = { text: "તહેવાર સેલ: ઓર્ડર કરવા માટે ડાયરેક્ટ કનેક્ટ કરો! / Festive Sale - Buy Direct!", active: true };
+      localStorage.setItem('db_banner_settings', JSON.stringify(settings));
+    }
+    return settings;
+  }
+  
+  saveBannerSettings(settings) {
+    localStorage.setItem('db_banner_settings', JSON.stringify(settings));
+    this.pushToFirestore('settings', 'announcement_banner', settings);
   }
 }
 
@@ -852,6 +912,13 @@ function addToCart(productId) {
   if (!product) return;
 
   const cartItem = cart.find(item => item.productId === productId);
+  const currentQty = cartItem ? cartItem.quantity : 0;
+
+  if (currentQty + 1 > product.stock) {
+    showToast(currentLanguage === 'gu' ? `માત્ર ${product.stock} નંગ સ્ટોકમાં છે!` : `Only ${product.stock} items available in stock!`);
+    return;
+  }
+
   if (cartItem) {
     cartItem.quantity += 1;
   } else {
@@ -915,8 +982,14 @@ function updateCartUI() {
 }
 
 function changeQty(productId, diff) {
+  const products = db.getProducts();
+  const product = products.find(p => p.id === productId);
   const index = cart.findIndex(item => item.productId === productId);
-  if (index !== -1) {
+  if (index !== -1 && product) {
+    if (diff > 0 && cart[index].quantity + diff > product.stock) {
+      showToast(currentLanguage === 'gu' ? `માત્ર ${product.stock} નંગ સ્ટોકમાં છે!` : `Only ${product.stock} items available in stock!`);
+      return;
+    }
     cart[index].quantity += diff;
     if (cart[index].quantity <= 0) {
       cart.splice(index, 1);
@@ -1306,6 +1379,7 @@ async function initiateOwnerOTPVerification(user, actionType) {
   // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   window.generatedOwnerOTP = otp;
+  console.log("🔒 [SECURITY] Generated OTP for " + (user.email || user.displayName) + " is:", otp);
   
   // Open the OTP Modal
   const modal = document.getElementById('owner-otp-modal');
@@ -1513,4 +1587,115 @@ function generateInvoiceHTML(order) {
   } catch (e) {
     console.error("Auto repair error:", e);
   }
+})();
+
+// UPGRADE 4: CLIENT-SIDE AI COPYWRITER DESCRIPTION GENERATOR
+function generateAIDescription(name, category) {
+  const cleanName = name.trim();
+  if (!cleanName) return "";
+  
+  const templates = {
+    clothing: [
+      `અધતન ફેશન અને પ્રીમિયમ ક્વોલિટી ધરાવતું ${cleanName}! આ ફેબ્રિક ખૂબ જ સોફ્ટ, કમ્ફર્ટેબલ અને પહેરવામાં આકર્ષક લાગે છે. તહેવારો અને પ્રસંગો માટે એકદમ પરફેક્ટ ચોઈસ છે. \n\nIntroducing the premium quality ${cleanName}! Made with skin-friendly, breathable fabric that ensures all-day comfort. Elegant design, perfect for casual wear, festive occasions, and parties. Upgrade your wardrobe today!`,
+      `ગ્રેસફુલ લુક આપતું ${cleanName}! ટકાઉ મટીરીયલ અને આધુનિક ડિઝાઈન સાથે બનેલ છે. ધોવા પછી પણ તેનો રંગ અને ચમક યથાવત રહે છે.\n\nExperience style and premium comfort with ${cleanName}. Crafted from high-grade fabric, featuring color-fastness and modern tailoring. Perfect outfit for all seasons.`
+    ],
+    electronics: [
+      `નવી ટેકનોલોજી અને હાઈ-પરફોર્મન્સ ધરાવતું ${cleanName}! તે વાપરવામાં ખૂબ જ સ્મૂથ, સ્પીડી અને ડ્યુરેબલ છે. આજના સ્માર્ટ લાઈફસ્ટાઈલ માટે બેસ્ટ આઈટમ છે. \n\nExperience the next-gen technology with ${cleanName}! Designed for speed, durability, and top-tier performance. Features sleek aesthetics, battery efficiency, and smart connectivity. Built for your everyday smart living.`,
+      `પાવરફુલ ફિચર્સ અને પોકેટ-ફ્રેન્ડલી રેન્જમાં ${cleanName}! એકદમ આધુનિક ડિઝાઈન અને ગેરંટીડ ટકાઉપણું.\n\nHigh efficiency meets smart design. ${cleanName} is engineered with advanced components to deliver exceptional productivity and long-lasting durability.`
+    ],
+    footwear: [
+      `પ્રીમિયમ લુક અને સુપર કમ્ફર્ટ સોલ સાથેનું ${cleanName}! આખો દિવસ પહેરવા છતાં પગમાં દુખાવો થતો નથી. ટકાઉ દોડવા અને ચાલવા માટે આદર્શ શૂઝ.\n\nPremium build quality and ergonomic sole design with ${cleanName}. Offers superior grip, soft cushioning, and long-lasting comfort. Suitable for both style and heavy daily usage.`,
+      `ટ્રેન્ડી લુક અને મજબૂત ગ્રિપ આપતા ${cleanName}! ઓફિસ અને કેઝ્યુઅલ પ્રસંગો માટે એકદમ આકર્ષક ડિઝાઈન.\n\nWalk in absolute style and confidence with ${cleanName}. High durability, water-resistant exterior, and fashionable fit.`
+    ],
+    grocery: [
+      `૧૦૦% શુદ્ધ અને કુદરતી સ્ત્રોતોમાંથી બનેલું તાજું ${cleanName}! સ્વાસ્થ્ય માટે ઉત્તમ અને આહારનો સ્વાદ વધારતી ઓર્ગેનિક પ્રોડક્ટ.\n\n100% pure and organic ${cleanName}, sourced directly from premium farms. Hygienically packed, fresh, and free from any chemical additives. Boost your daily health and kitchen flavor naturally.`,
+      `ન્યુટ્રિશિયન્સ અને વિટામિન્સથી ભરપૂર ${cleanName}! લાંબા સમય સુધી તાજું રહે તેવું હાઈ-ગ્રેડ પેકિંગ.\n\nDirect from nature to your home. ${cleanName} offers superior freshness, nutrient-rich value, and delicious taste for your family.`
+    ],
+    home_kitchen: [
+      `તમારા ઘર અને રસોડાની સુંદરતા વધારતું ${cleanName}! કોમ્પેક્ટ ડિઝાઈન, હળવું વજન અને વાપરવામાં એકદમ સરળ અને સલામત છે.\n\nUpgrade your living space with ${cleanName}! Highly functional, space-saving design, and built using eco-friendly materials. Adds a touch of elegance and convenience to your daily home operations.`,
+      `ટકાઉ મટીરીયલ અને મોર્ડન આઉટલુક સાથેનું ${cleanName}! રોજિંદા ઘર વપરાશ માટે લાંબા સમય સુધી સાથ આપે તેવી આઈટમ.\n\nStylish and functional helper for your home. ${cleanName} is carefully designed to offer high efficiency, modern aesthetics, and easy maintenance.`
+    ],
+    others: [
+      `ખાસ જરૂરિયાત અને ડેઈલી લાઈફસ્ટાઈલ માટે પ્રીમિયમ કલેક્શનમાંથી ${cleanName}! બેસ્ટ ઇન ક્લાસ ક્વોલિટી અને ઉત્તમ મજબૂતાઈ ધરાવે છે.\n\nHandcrafted to perfection, ${cleanName} is made from premium grade materials to ensure top-notch quality, style, and long lifetime. A perfect gift or utility item for your needs.`,
+      `ગેરંટીડ ટકાઉપણું અને બજેટ ફ્રેન્ડલી રેટમાં ${cleanName}! ગ્રાહકોની પહેલી પસંદ.\n\nHighly recommended premium utility item. ${cleanName} offers outstanding value, durable packaging, and beautiful design.`
+    ]
+  };
+  
+  const catList = templates[category] || templates['others'];
+  const index = Math.floor(Math.random() * catList.length);
+  return catList[index];
+}
+
+// UPGRADE 11: PAYTM-STYLE UPI PAYMENT SOUNDBOX AUDIO ALERTS
+function playPaymentSoundbox(amount) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // Cancel any active speech
+    
+    const text = `તમારો ધંધો તમારી દુકાન પર ${amount} રૂપિયા નું ચુકવણું સફળતાપૂર્વક મળ્યું!`;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'gu-IN';
+    utterance.rate = 0.95;
+    
+    // Fallback if Gujarati voice is not found on user machine
+    const voices = window.speechSynthesis.getVoices();
+    const hasGuj = voices.some(v => v.lang.startsWith('gu'));
+    
+    if (!hasGuj) {
+      const hasHi = voices.some(v => v.lang.startsWith('hi'));
+      if (hasHi) {
+        utterance.text = `तमारो धंधो तुम्हारी दूकान पर ${amount} रुपये का भुगतान सफलतापूर्वक प्राप्त हुआ!`;
+        utterance.lang = 'hi-IN';
+      } else {
+        utterance.text = `Your Business, Your Shop received a payment of ${amount} rupees successfully!`;
+        utterance.lang = 'en-IN';
+      }
+    }
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+// UPGRADE 14: COLLABORATIVE CART LINK SHARING & LOADING
+(function parseSharedCart() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedCart = urlParams.get('cart_share');
+    if (sharedCart) {
+      try {
+        const items = sharedCart.split(',');
+        const products = db.getProducts();
+        let loadedAny = false;
+        
+        // Clear existing cart first
+        cart = [];
+        
+        items.forEach(itemStr => {
+          const [prodId, qtyStr] = itemStr.split(':');
+          const qty = parseInt(qtyStr) || 1;
+          const product = products.find(p => p.id === prodId && p.approvedByAdmin);
+          if (product) {
+            cart.push({
+              productId: product.id,
+              name: product.name,
+              price: product.price,
+              imageUrl: product.imageUrl,
+              vendorId: product.vendorId,
+              vendorName: product.vendorName,
+              attributes: product.attributes,
+              quantity: qty
+            });
+            loadedAny = true;
+          }
+        });
+        
+        if (loadedAny) {
+          saveCart();
+          showToast(currentLanguage === 'gu' ? "શેર્ડ કાર્ટ સફળતાપૂર્વક લોડ થઈ ગયું છે!" : "Shared cart loaded successfully!");
+          // Clean URL params to prevent reloading on refresh
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (e) {
+        console.error("Error parsing shared cart link:", e);
+      }
+    }
+  });
 })();

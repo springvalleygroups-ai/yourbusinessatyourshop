@@ -302,7 +302,10 @@
                   <input type="url" id="prod-image" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodDesc">Description</label>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-semibold text-slate-500" data-i18n="prodDesc">Description</label>
+                    <button type="button" onclick="triggerVendorAICopywriter()" class="text-xs font-bold text-brand hover:underline flex items-center gap-1">✨ Auto-Write (ઓટો-લખણ)</button>
+                  </div>
                   <textarea id="prod-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required></textarea>
                 </div>
                 
@@ -375,6 +378,32 @@
           </div>
         </div>
 
+        <!-- UPGRADE 6: SALES ANALYTICS GRAPH -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-1 text-slate-800">Sales Analytics Trend / વેચાણ વિશ્લેષણ આલેખ</h3>
+          <p class="text-xs text-slate-400 mb-4">Total platform transactions plotted over time.</p>
+          <div class="w-full relative h-48 bg-slate-50 rounded-xl p-2 border border-slate-100 flex items-center justify-center">
+            <svg id="admin-sales-chart" viewBox="0 0 500 150" class="w-full h-full text-brand overflow-visible"></svg>
+          </div>
+        </div>
+
+        <!-- UPGRADE 7: ANNOUNCEMENT BANNER MANAGER -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-1 text-slate-800">Announcement Banner Manager / જાહેરાત પટ્ટી મેનેજર</h3>
+          <p class="text-xs text-slate-400 mb-4">Set a promotional alert marquee text at the top of the homepage.</p>
+          <form onsubmit="saveAdminBannerSettings(event)" class="space-y-4">
+            <div class="flex items-center gap-2 mb-2">
+              <input type="checkbox" id="banner-active" class="w-4 h-4 text-brand focus:ring-brand border-gray-300 rounded">
+              <label for="banner-active" class="text-xs font-bold text-slate-700">Show Announcement / જાહેરાત પટ્ટી ચાલુ કરો</label>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Banner Text / લખાણ (Gujarati & English)</label>
+              <input type="text" id="banner-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <button type="submit" class="btn-primary text-white text-xs px-5 py-2.5 rounded-full font-semibold transition">Save Banner Settings</button>
+          </form>
+        </div>
+
         <!-- Vendor Sign-up approvals -->
         <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
           <h3 class="text-lg font-bold mb-4 text-slate-800" data-i18n="vendorRequests">Vendor Registration Requests</h3>
@@ -417,6 +446,26 @@
           </div>
         </div>
 
+        <!-- UPGRADE 9: REVIEWS MODERATION PANEL -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Customer Reviews Moderation / અભિપ્રાય મંજૂરી</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">User / Product</th>
+                  <th class="py-3">Rating</th>
+                  <th class="py-3">Comment / કમેન્ટ</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-pending-reviews-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- ALL REGISTERED VENDORS LIST -->
         <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
           <h3 class="text-lg font-bold mb-4 text-slate-800">All Registered Vendors</h3>
@@ -437,16 +486,44 @@
           </div>
         </div>
 
+        <!-- UPGRADE 1: ACTIVE APPROVED PRODUCTS LIST -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Active Approved Products / ચાલુ પ્રોડક્ટ્સ</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                  <th class="py-3">Product / વસ્તુ</th>
+                  <th class="py-3">Vendor / વિક્રેતા</th>
+                  <th class="py-3">Price / કિંમત</th>
+                  <th class="py-3">Stock / સ્ટોક</th>
+                  <th class="py-3">Badge / ટેગ</th>
+                  <th class="py-3">Actions / ક્રિયાઓ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-approved-products-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- SECRET AUDIT & LEDGER PANEL (Only for Owner/Admin) -->
         <div class="bg-white border border-slate-150 p-6 rounded-2xl shadow-sm border-l-4 border-l-orange-500 text-left">
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
             <div>
               <h3 class="text-lg font-extrabold text-slate-800" data-i18n="secretAuditTitle">Owner's Master Audit (Secret Ledger)</h3>
               <p class="text-xs text-slate-400">Confidential: detailed tracking of all sales and invoices by vendor.</p>
             </div>
-            <button onclick="toggleAdminAuditDetails(true)" class="btn-secondary text-xs px-4 py-2.5 rounded-full font-semibold transition" data-i18n="viewAllBills">
-              View All Bills
-            </button>
+            <div class="flex gap-2">
+              <!-- UPGRADE 15: Excel/CSV Master Ledger Bookkeeping Exporter -->
+              <button onclick="exportLedgerToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2.5 rounded-full font-semibold transition shadow-sm shadow-emerald-500/10">
+                Export CSV / એક્સેલ ડાઉનલોડ
+              </button>
+              <button onclick="toggleAdminAuditDetails(true)" class="btn-secondary text-xs px-4 py-2.5 rounded-full font-semibold transition" data-i18n="viewAllBills">
+                View All Bills
+              </button>
+            </div>
           </div>
           
           <div class="overflow-x-auto">
@@ -548,6 +625,73 @@
           Note: If this is the first time, check springvalleygroups@gmail.com for a confirmation email from FormSubmit and click 'Activate Form' to start receiving OTPs.
         </p>
       </div>
+    </div>
+  <!-- OWNER EDIT PRODUCT MODAL -->
+  <div id="owner-edit-product-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
+      <button onclick="toggleOwnerEditProductModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900">Edit Product (માલિક દ્વારા સુધારો)</h3>
+      <form id="owner-edit-product-form" onsubmit="submitOwnerProductEdit(event)">
+        <input type="hidden" id="edit-prod-id">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Product Name / નામ</label>
+            <input type="text" id="edit-prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Price (₹) / કિંમત</label>
+              <input type="number" id="edit-prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Stock / જથ્થો</label>
+              <input type="number" id="edit-prod-stock" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div id="edit-prod-category-container" class="col-span-1">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Category / કેટેગરી</label>
+              <select id="edit-prod-category" onchange="handleEditCategoryChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                <option value="clothing">Clothing & Fabrics</option>
+                <option value="electronics">Electronics & Mobiles</option>
+                <option value="footwear">Footwear</option>
+                <option value="grocery">Groceries</option>
+                <option value="home_kitchen">Home & Kitchen</option>
+                <option value="others">Others</option>
+              </select>
+            </div>
+            <div id="edit-prod-badge-container" class="col-span-1">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Highlight Badge / ટેગ</label>
+              <select id="edit-prod-badge" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+                <option value="none">None / કોઈ નહીં</option>
+                <option value="Trending">Trending / ટ્રેન્ડિંગ</option>
+                <option value="Bestseller">Bestseller / બેસ્ટસેલર</option>
+                <option value="Featured">Featured / ખાસ પ્રોડક્ટ્સ</option>
+                <option value="New Arrival">New Arrival / નવી વસ્તુઓ</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Dynamic specs inside edit modal -->
+          <div id="edit-dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Image URL / ઇમેજ લિંક</label>
+            <input type="url" id="edit-prod-image" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs font-semibold text-slate-500">Description / વર્ણન</label>
+              <button type="button" onclick="triggerEditAICopywriter()" class="text-xs font-bold text-brand hover:underline flex items-center gap-1">✨ Auto-Write (ઓટો-લખણ)</button>
+            </div>
+            <textarea id="edit-prod-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required></textarea>
+          </div>
+          
+          <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition">Save Changes / સેવ કરો</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -687,7 +831,8 @@
               <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
               <td class="py-3">${p.stock}</td>
               <td class="py-3 text-xs ${statusColor}">${statusText}</td>
-              <td class="py-3">
+              <td class="py-3 flex gap-2">
+                <button onclick="openOwnerEditProductModal('${p.id}')" class="text-brand hover:text-orange-600 font-bold mr-2">Edit</button>
                 <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 font-bold">Delete</button>
               </td>
             </tr>
@@ -744,9 +889,26 @@
     }
 
     function verifyOrderPayment(id) {
-      db.updateOrder(id, { paymentStatus: 'verified', orderStatus: 'processing' });
-      showToast('Payment verified successfully!');
-      renderVendorDashboard();
+      const order = db.getOrders().find(o => o.id === id);
+      if (order) {
+        // Decrement stock for each item
+        order.items.forEach(item => {
+          const prod = db.getProducts().find(p => p.id === item.productId);
+          if (prod) {
+            const newStock = Math.max(0, prod.stock - item.quantity);
+            db.updateProduct(prod.id, { stock: newStock });
+          }
+        });
+        db.updateOrder(id, { paymentStatus: 'verified', orderStatus: 'processing' });
+        
+        // UPGRADE 11: Play soundbox announcement
+        if (typeof playPaymentSoundbox === 'function') {
+          playPaymentSoundbox(order.totalAmount);
+        }
+        
+        showToast('Payment verified successfully!');
+        renderVendorDashboard();
+      }
     }
 
     function shipOrder(id) {
@@ -959,6 +1121,20 @@
       document.getElementById('admin-total-orders').innerText = totalOrdersCount;
       document.getElementById('admin-total-vendors').innerText = totalVendors;
 
+      // UPGRADE 6: Render Sales Graph
+      if (typeof renderSalesChart === 'function') {
+        renderSalesChart(allOrders);
+      }
+
+      // UPGRADE 7: Fetch Announcement Settings
+      const banner = db.getBannerSettings();
+      if (document.getElementById('banner-text')) {
+        document.getElementById('banner-text').value = banner.text || '';
+      }
+      if (document.getElementById('banner-active')) {
+        document.getElementById('banner-active').checked = banner.active || false;
+      }
+
       // Render Vendor registration requests
       const vendorRequestsList = document.getElementById('admin-vendor-requests-list');
       vendorRequestsList.innerHTML = '';
@@ -1030,6 +1206,37 @@
         });
       }
 
+      // UPGRADE 9: Render Pending Reviews
+      const pendingReviewsList = document.getElementById('admin-pending-reviews-list');
+      if (pendingReviewsList) {
+        pendingReviewsList.innerHTML = '';
+        const pendingReviews = db.getReviews().filter(r => !r.approvedByAdmin);
+        if (pendingReviews.length === 0) {
+          pendingReviewsList.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No pending reviews.</td></tr>`;
+        } else {
+          pendingReviews.forEach(r => {
+            const p = allProducts.find(prod => prod.id === r.productId);
+            const prodName = p ? p.name : 'Unknown Product';
+            const stars = '⭐'.repeat(r.rating);
+            
+            pendingReviewsList.innerHTML += `
+              <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+                <td class="py-3">
+                  <div class="font-bold text-slate-700">${r.userName}</div>
+                  <div class="text-[10px] text-slate-400">${prodName}</div>
+                </td>
+                <td class="py-3 text-amber-500 text-xs">${stars}</td>
+                <td class="py-3 text-xs italic">${r.comment}</td>
+                <td class="py-3">
+                  <button onclick="approveReview('${r.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                  <button onclick="deleteReview('${r.id}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 shadow-sm shadow-red-500/10">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      }
+
       // Render Registered Vendors table
       const allVendorsList = document.getElementById('admin-all-vendors-list');
       allVendorsList.innerHTML = '';
@@ -1060,6 +1267,36 @@
             </tr>
           `;
         });
+      }
+
+      // UPGRADE 1: Render Approved Products Table
+      const approvedProductsList = document.getElementById('admin-approved-products-list');
+      if (approvedProductsList) {
+        approvedProductsList.innerHTML = '';
+        const approvedProducts = allProducts.filter(p => p.approvedByAdmin);
+        if (approvedProducts.length === 0) {
+          approvedProductsList.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No active approved products yet.</td></tr>`;
+        } else {
+          approvedProducts.forEach(p => {
+            const badgeLabel = p.badge && p.badge !== 'none' ? p.badge : 'None';
+            approvedProductsList.innerHTML += `
+              <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+                <td class="py-3 flex items-center gap-2">
+                  <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                  <span class="font-bold text-slate-700">${p.name}</span>
+                </td>
+                <td class="py-3 text-xs">${p.vendorName}</td>
+                <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+                <td class="py-3">${p.stock}</td>
+                <td class="py-3 text-xs text-slate-500">${badgeLabel}</td>
+                <td class="py-3 flex gap-2">
+                  <button onclick="openOwnerEditProductModal('${p.id}')" class="bg-brand text-white text-xs px-3 py-1 rounded-full font-semibold transition hover:bg-orange-600 shadow-sm shadow-orange-500/10">Edit</button>
+                  <button onclick="deleteProductFromAdmin('${p.id}')" class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-semibold transition hover:bg-red-600 shadow-sm shadow-red-500/10">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
       }
 
       // Render Secret Ledger Auditing Table
@@ -1244,6 +1481,9 @@
               <td class="py-2 text-slate-500">${categoryName}</td>
               <td class="py-2 text-right font-semibold">₹${p.price}</td>
               <td class="py-2 text-center text-[10px] ${statusColor}">${statusText}</td>
+              <td class="py-2 text-right">
+                <button onclick="toggleVendorProfileModal(false); openOwnerEditProductModal('${p.id}')" class="text-xs font-semibold text-brand hover:underline">Edit</button>
+              </td>
             </tr>
           `;
         }).join('');
@@ -1259,6 +1499,7 @@
                     <th class="py-1 pb-2">${textCategory}</th>
                     <th class="py-1 pb-2 text-right">${textPrice}</th>
                     <th class="py-1 pb-2 text-center">${textStatus}</th>
+                    <th class="py-1 pb-2 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1301,6 +1542,348 @@
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // NEW MASTER SUITE HELPER FUNCTIONS
+    // ==========================================
+
+    // UPGRADE 1: Open Owner Edit Modal
+    // UPGRADE 1: Open Owner Edit Modal
+    window.openOwnerEditProductModal = function(id) {
+      const p = db.getProducts().find(prod => prod.id === id);
+      if (!p) return;
+      
+      // Security Check: If vendor, verify ownership
+      if (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid) {
+        showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
+        return;
+      }
+
+      // Hide or show badge selection depending on user role
+      if (currentUser.role === 'admin') {
+        document.getElementById('edit-prod-badge-container').classList.remove('hidden');
+        document.getElementById('edit-prod-category-container').className = "col-span-1";
+        document.querySelector('#owner-edit-product-modal h3').innerText = "Edit Product (માલિક દ્વારા સુધારો)";
+      } else {
+        document.getElementById('edit-prod-badge-container').classList.add('hidden');
+        document.getElementById('edit-prod-category-container').className = "col-span-2";
+        document.querySelector('#owner-edit-product-modal h3').innerText = "Edit Product (સુધારો)";
+      }
+
+      document.getElementById('edit-prod-id').value = p.id;
+      document.getElementById('edit-prod-name').value = p.name;
+      document.getElementById('edit-prod-price').value = p.price;
+      document.getElementById('edit-prod-stock').value = p.stock;
+      document.getElementById('edit-prod-category').value = p.category || 'others';
+      document.getElementById('edit-prod-badge').value = p.badge || 'none';
+      document.getElementById('edit-prod-image').value = p.imageUrl;
+      document.getElementById('edit-prod-desc').value = p.description;
+      
+      // Update specs
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
+      
+      // Populate dynamic attribute fields if present
+      if (p.attributes) {
+        if (p.category === 'clothing') {
+          if (document.getElementById('attr-length')) document.getElementById('attr-length').value = p.attributes.lengthMeters || '';
+          if (document.getElementById('attr-width')) document.getElementById('attr-width').value = p.attributes.widthInches || '';
+          if (document.getElementById('attr-fabric')) document.getElementById('attr-fabric').value = p.attributes.fabricType || '';
+        } else if (p.category === 'electronics') {
+          if (document.getElementById('attr-brand')) document.getElementById('attr-brand').value = p.attributes.brand || '';
+          if (document.getElementById('attr-model')) document.getElementById('attr-model').value = p.attributes.model || '';
+          if (document.getElementById('attr-storage')) document.getElementById('attr-storage').value = p.attributes.storage || '';
+          if (document.getElementById('attr-warranty')) document.getElementById('attr-warranty').value = p.attributes.warranty || '';
+        } else if (p.category === 'footwear') {
+          if (document.getElementById('attr-size')) document.getElementById('attr-size').value = p.attributes.size || '';
+          if (document.getElementById('attr-material')) document.getElementById('attr-material').value = p.attributes.material || '';
+        } else if (p.category === 'grocery') {
+          if (document.getElementById('attr-weight')) document.getElementById('attr-weight').value = p.attributes.weight || '';
+          if (document.getElementById('attr-expiry')) document.getElementById('attr-expiry').value = p.attributes.expiryDate || '';
+        } else {
+          if (document.getElementById('attr-brand')) document.getElementById('attr-brand').value = p.attributes.brand || '';
+          if (document.getElementById('attr-dimensions')) document.getElementById('attr-dimensions').value = p.attributes.dimensions || '';
+        }
+      }
+      
+      document.getElementById('owner-edit-product-modal').classList.remove('hidden');
+    }
+
+    window.toggleOwnerEditProductModal = function(open) {
+      const modal = document.getElementById('owner-edit-product-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    window.handleEditCategoryChange = function() {
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category');
+    }
+
+    window.submitOwnerProductEdit = function(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-prod-id').value;
+      const category = document.getElementById('edit-prod-category').value;
+      
+      const p = db.getProducts().find(prod => prod.id === id);
+      if (!p) return;
+
+      // Security Check: If vendor, verify ownership
+      if (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid) {
+        showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
+        return;
+      }
+      
+      const attributes = {};
+      if (category === 'clothing') {
+        attributes.lengthMeters = document.getElementById('attr-length')?.value || '';
+        attributes.widthInches = document.getElementById('attr-width')?.value || '';
+        attributes.fabricType = document.getElementById('attr-fabric')?.value || '';
+      } else if (category === 'electronics') {
+        attributes.brand = document.getElementById('attr-brand')?.value || '';
+        attributes.model = document.getElementById('attr-model')?.value || '';
+        attributes.storage = document.getElementById('attr-storage')?.value || '';
+        attributes.warranty = document.getElementById('attr-warranty')?.value || '';
+      } else if (category === 'footwear') {
+        attributes.size = document.getElementById('attr-size')?.value || '';
+        attributes.material = document.getElementById('attr-material')?.value || '';
+      } else if (category === 'grocery') {
+        attributes.weight = document.getElementById('attr-weight')?.value || '';
+        attributes.expiryDate = document.getElementById('attr-expiry')?.value || '';
+      } else {
+        attributes.brand = document.getElementById('attr-brand')?.value || '';
+        attributes.dimensions = document.getElementById('attr-dimensions')?.value || '';
+      }
+
+      const updatedFields = {
+        name: document.getElementById('edit-prod-name').value,
+        price: parseFloat(document.getElementById('edit-prod-price').value),
+        stock: parseInt(document.getElementById('edit-prod-stock').value),
+        category: category,
+        imageUrl: document.getElementById('edit-prod-image').value,
+        description: document.getElementById('edit-prod-desc').value,
+        attributes: attributes
+      };
+
+      if (currentUser.role === 'admin') {
+        updatedFields.badge = document.getElementById('edit-prod-badge').value;
+        db.updateProduct(id, updatedFields);
+        showToast('Product updated successfully by Owner!');
+        toggleOwnerEditProductModal(false);
+        renderAdminDashboard();
+      } else {
+        // Vendors cannot change badge; keep original badge
+        updatedFields.badge = p.badge || 'none';
+        // Reset approval
+        updatedFields.approvedByAdmin = false;
+        
+        db.updateProduct(id, updatedFields);
+        showToast(currentLanguage === 'gu' ? "પ્રોડક્ટ અપડેટ થઈ ગઈ, ઓનર અપ્રૂવલ આપશે પછી લાઈવ થશે" : "Product updated! It will go live after Owner approval.");
+        toggleOwnerEditProductModal(false);
+        renderVendorDashboard();
+      }
+    }
+
+    window.deleteProductFromAdmin = function(id) {
+      if (confirm('Are you sure you want to delete this product?')) {
+        db.deleteProduct(id);
+        showToast('Product deleted successfully!');
+        renderAdminDashboard();
+      }
+    }
+
+    // UPGRADE 4: AI Copywriter triggers
+    window.triggerVendorAICopywriter = function() {
+      const name = document.getElementById('prod-name').value;
+      const category = document.getElementById('prod-category').value;
+      if (!name.trim()) {
+        alert(currentLanguage === 'gu' ? "કૃપા કરીને પહેલા પ્રોડક્ટનું નામ લખો." : "Please enter the product name first.");
+        return;
+      }
+      const desc = generateAIDescription(name, category);
+      animateTyping(document.getElementById('prod-desc'), desc);
+    }
+    
+    window.triggerEditAICopywriter = function() {
+      const name = document.getElementById('edit-prod-name').value;
+      const category = document.getElementById('edit-prod-category').value;
+      if (!name.trim()) {
+        alert(currentLanguage === 'gu' ? "કૃપા કરીને પહેલા પ્રોડક્ટનું નામ લખો." : "Please enter the product name first.");
+        return;
+      }
+      const desc = generateAIDescription(name, category);
+      animateTyping(document.getElementById('edit-prod-desc'), desc);
+    }
+
+    function animateTyping(textarea, text) {
+      textarea.value = '';
+      let i = 0;
+      textarea.focus();
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          textarea.value += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 5);
+    }
+
+    // UPGRADE 7: Save announcement banner settings
+    window.saveAdminBannerSettings = function(e) {
+      e.preventDefault();
+      const text = document.getElementById('banner-text').value;
+      const active = document.getElementById('banner-active').checked;
+      
+      db.saveBannerSettings({ text, active });
+      showToast('Announcement settings saved successfully!');
+    }
+
+    // UPGRADE 9: Star rating review approval and deletions
+    window.approveReview = function(id) {
+      db.updateReview(id, { approvedByAdmin: true });
+      showToast('Review approved and rating recalculated!');
+      renderAdminDashboard();
+    }
+    
+    window.deleteReview = function(id) {
+      if (confirm('Are you sure you want to delete/reject this review?')) {
+        db.deleteReview(id);
+        showToast('Review deleted!');
+        renderAdminDashboard();
+      }
+    }
+
+    // UPGRADE 15: Excel/CSV Master Ledger Bookkeeping Exporter
+    window.exportLedgerToCSV = function() {
+      const orders = db.getOrders();
+      if (orders.length === 0) {
+        showToast('No transaction logs found to export!');
+        return;
+      }
+
+      // Header row
+      const headers = [
+        "Invoice Number", "Order ID", "Date", "Vendor Name", "Customer Name", 
+        "Customer Mobile", "Shipping Address", "Total Amount (INR)", 
+        "Payment Status", "Order Status"
+      ];
+      
+      const rows = orders.map(o => [
+        o.invoiceNumber || '',
+        o.id || '',
+        new Date(o.createdAt).toLocaleDateString(),
+        o.vendorName || '',
+        o.customerName || '',
+        o.customerMobile || '',
+        `"${(o.shippingAddress || '').replace(/"/g, '""')}"`,
+        o.totalAmount || 0,
+        o.paymentStatus || '',
+        o.orderStatus || ''
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Master_Ledger_Export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      
+      link.click();
+      document.body.removeChild(link);
+      showToast('Master Ledger CSV exported successfully!');
+    }
+
+    // UPGRADE 6: Animated SVG Sales Chart builder
+    window.renderSalesChart = function(orders) {
+      const svg = document.getElementById('admin-sales-chart');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      // Get last 7 days sales values
+      const dates = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+      }
+
+      // Aggregate sales amounts
+      const amounts = new Array(7).fill(0);
+      orders.forEach(o => {
+        const orderDate = new Date(o.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const idx = dates.indexOf(orderDate);
+        if (idx !== -1) {
+          amounts[idx] += o.totalAmount;
+        }
+      });
+
+      const maxVal = Math.max(...amounts, 100);
+      
+      const width = 500;
+      const height = 150;
+      const paddingLeft = 40;
+      const paddingRight = 20;
+      const paddingTop = 20;
+      const paddingBottom = 20;
+      const chartWidth = width - paddingLeft - paddingRight;
+      const chartHeight = height - paddingTop - paddingBottom;
+
+      const points = amounts.map((val, idx) => {
+        const x = paddingLeft + (idx / 6) * chartWidth;
+        const y = height - paddingBottom - (val / maxVal) * chartHeight;
+        return { x, y, val };
+      });
+
+      // Draw Gridlines & Labels
+      dates.forEach((date, idx) => {
+        const x = paddingLeft + (idx / 6) * chartWidth;
+        svg.innerHTML += `<text x="${x}" y="${height - 5}" text-anchor="middle" font-size="8" fill="#94a3b8">${date}</text>`;
+        svg.innerHTML += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="2,2" />`;
+      });
+
+      for (let i = 0; i <= 4; i++) {
+        const levelVal = Math.round((i / 4) * maxVal);
+        const y = height - paddingBottom - (i / 4) * chartHeight;
+        svg.innerHTML += `<text x="${paddingLeft - 8}" y="${y + 3}" text-anchor="end" font-size="8" fill="#94a3b8">₹${levelVal}</text>`;
+        svg.innerHTML += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="#e2e8f0" stroke-width="0.5" />`;
+      }
+
+      const pathData = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const fillPathData = `${pathData} L ${points[6].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+
+      svg.innerHTML += `
+        <defs>
+          <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6700" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#ff6700" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+      `;
+
+      svg.innerHTML += `<path d="${fillPathData}" fill="url(#chart-grad)" />`;
+      svg.innerHTML += `<path id="chart-stroke" d="${pathData}" fill="none" stroke="#ff6700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+
+      points.forEach(p => {
+        svg.innerHTML += `
+          <circle cx="${p.x}" cy="${p.y}" r="4" fill="#ffffff" stroke="#ff6700" stroke-width="2" class="cursor-pointer transition hover:scale-125">
+            <title>₹${p.val}</title>
+          </circle>
+        `;
+      });
+      
+      const strokeEl = svg.querySelector('#chart-stroke');
+      if (strokeEl) {
+        const len = strokeEl.getTotalLength();
+        gsap.fromTo(strokeEl, 
+          { strokeDasharray: len, strokeDashoffset: len }, 
+          { strokeDashoffset: 0, duration: 1.5, ease: "power2.out" }
+        );
       }
     }
   </script>

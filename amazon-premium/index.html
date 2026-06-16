@@ -33,6 +33,11 @@
 
   <!-- TOP HEADER -->
   <header class="fixed top-0 left-0 w-full z-50 glass border-b border-slate-200 transition-all duration-300">
+    <!-- Announcement Ticker Bar -->
+    <div id="announcement-banner-container" class="bg-brand text-white text-[11px] font-bold py-1 px-4 text-center tracking-wide overflow-hidden whitespace-nowrap text-ellipsis hidden">
+      <span id="announcement-banner-text"></span>
+    </div>
+    
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo & Icon -->
       <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
@@ -48,17 +53,20 @@
       </a>
 
       <!-- Search Bar -->
-      <div class="hidden md:flex items-center bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 w-96 focus-within:border-brand focus-within:bg-white focus-within:shadow-sm transition">
-        <svg class="w-4 h-4 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <input type="text" id="search-input" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full">
+      <div class="relative hidden md:flex flex-col">
+        <div class="flex items-center bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 w-96 focus-within:border-brand focus-within:bg-white focus-within:shadow-sm transition">
+          <svg class="w-4 h-4 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input type="text" id="search-input" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full" autocomplete="off">
+        </div>
+        <div id="search-autocomplete-desktop" class="absolute top-11 left-0 w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 hidden max-h-80 overflow-y-auto p-2"></div>
       </div>
 
       <!-- Navigation & Controls -->
       <div class="flex items-center gap-4">
         <!-- Language Selector -->
         <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
-          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
-          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-3 py-1 rounded-full transition">EN</button>
+          <button id="lang-gu-btn" onclick="setLanguage('gu'); playVoiceGreeting('gu');" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
+          <button id="lang-en-btn" onclick="setLanguage('en'); playVoiceGreeting('en');" class="px-3 py-1 rounded-full transition">EN</button>
         </div>
 
         <!-- Cart Button -->
@@ -76,11 +84,12 @@
   </header>
 
   <!-- MOBILE SEARCH BAR -->
-  <div class="md:hidden mt-20 px-4">
+  <div class="relative md:hidden mt-20 px-4">
     <div class="flex items-center bg-white border border-slate-200 rounded-full px-4 py-2 w-full focus-within:border-brand focus-within:shadow-sm transition">
       <svg class="w-4 h-4 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-      <input type="text" id="search-input-mobile" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full">
+      <input type="text" id="search-input-mobile" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full" autocomplete="off">
     </div>
+    <div id="search-autocomplete-mobile" class="absolute top-12 left-4 right-4 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 hidden max-h-60 overflow-y-auto p-2"></div>
   </div>
 
   <!-- HERO SECTION WITH VIDEO BACKGROUND -->
@@ -148,10 +157,44 @@
     </div>
   </section>
 
+  <!-- INDIVIDUAL VENDOR SHOP HEADER (Hidden by default, shown for ?shop=vendor_id) -->
+  <section id="vendor-shop-header" class="max-w-7xl mx-auto px-4 pt-8 pb-2 hidden text-left">
+    <div class="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden border-l-4 border-l-brand">
+      <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-brand/5 rounded-full blur-2xl"></div>
+      
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <img id="vendor-shop-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" class="w-20 h-20 rounded-full border-4 border-orange-100 object-cover shadow-sm" />
+        <div class="text-center md:text-left">
+          <h2 id="vendor-shop-title" class="text-2xl font-extrabold text-slate-900 leading-tight">Vendor Shop</h2>
+          <p id="vendor-shop-address" class="text-xs text-slate-400 mt-1 max-w-md">Address</p>
+          <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
+            <span class="text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-0.5 rounded-full uppercase tracking-wider">Verified Seller / મંજૂર વિક્રેતા</span>
+            <span id="vendor-shop-products-count" class="text-xs font-semibold bg-slate-50 text-slate-550 border border-slate-100 px-3 py-0.5 rounded-full">0 Products</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 w-full md:w-auto">
+        <a id="vendor-shop-call-btn" href="" class="flex-1 md:flex-none bg-slate-50 border border-slate-200 text-slate-700 text-center px-6 py-2.5 rounded-full font-semibold text-xs transition hover:bg-slate-100">Call Shop / ફોન કરો</a>
+        <a id="vendor-shop-wa-btn" href="" target="_blank" class="flex-1 md:flex-none btn-primary text-center px-6 py-2.5 rounded-full font-semibold text-xs text-white transition shadow-md shadow-orange-500/10">Chat on WhatsApp / વોટ્સએપ ચેટ</a>
+      </div>
+    </div>
+  </section>
+
   <!-- CATEGORIES FILTER -->
   <section class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <h3 class="text-xl font-extrabold text-slate-800 tracking-tight" data-i18n="categories">Categories</h3>
+      <div class="flex items-center gap-2">
+        <label class="text-xs text-slate-500 font-bold uppercase tracking-wider" for="badge-filter">Filter Badge / ટેગ:</label>
+        <select id="badge-filter" onchange="filterBadge()" class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-brand transition">
+          <option value="all">All / બધા ટેગ</option>
+          <option value="Trending">Trending / ટ્રેન્ડિંગ</option>
+          <option value="Bestseller">Bestseller / બેસ્ટસેલર</option>
+          <option value="Featured">Featured / ખાસ પ્રોડક્ટ્સ</option>
+          <option value="New Arrival">New Arrival / નવી વસ્તુઓ</option>
+        </select>
+      </div>
     </div>
     <div id="dynamic-categories-bar" class="mobile-scroll gap-3 flex pb-2">
       <!-- Populated dynamically by JS -->
@@ -201,6 +244,10 @@
           </div>
           <button id="checkout-btn" onclick="openCheckoutModal()" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition flex items-center justify-center gap-2">
             <span data-i18n="checkout">Checkout</span>
+          </button>
+          <button onclick="shareCart()" class="w-full mt-2 bg-slate-50 border border-slate-200 text-slate-650 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2 hover:bg-slate-100/50">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.894-2.719m0 0a3 3 0 100-4.046m0 4.046a3 3 0 110 4.046m0 0l-4.894 2.719m0 0a3 3 0 110-4.046m0 0a3 3 0 100 4.046"></path></svg>
+            Share Cart / કાર્ટ શેર કરો
           </button>
         </div>
       </div>
@@ -325,10 +372,14 @@
     // Initialize Page Controls
     document.addEventListener("DOMContentLoaded", () => {
       setLanguage(currentLanguage);
+      checkShopQuery();
+      renderAnnouncementBanner();
       renderCategoriesBar();
       renderProducts();
       updateCartUI();
       updateNavUI();
+      checkProductQuery();
+      setupAutocompleteSearch();
 
       // GSAP Animations
       gsap.from("header", { y: -100, opacity: 0, duration: 1, ease: "power4.out" });
@@ -352,6 +403,221 @@
       });
     });
 
+    // UPGRADE 7: Dynamic Announcement Banner
+    window.renderAnnouncementBanner = function() {
+      const bannerContainer = document.getElementById('announcement-banner-container');
+      const bannerText = document.getElementById('announcement-banner-text');
+      if (!bannerContainer || !bannerText) return;
+      const settings = db.getBannerSettings();
+      if (settings && settings.active && settings.text) {
+        bannerText.innerText = settings.text;
+        bannerContainer.classList.remove('hidden');
+      } else {
+        bannerContainer.classList.add('hidden');
+      }
+    };
+
+    // UPGRADE 3: Individual Vendor Storefront URL Query Parser
+    function checkShopQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const shopId = urlParams.get('shop');
+      if (shopId) {
+        window.currentShopFilter = shopId;
+        const users = db.getUsers();
+        const vendor = users.find(u => u.uid === shopId && u.role === 'vendor' && u.vendorStatus === 'approved');
+        
+        if (vendor) {
+          // Hide hero
+          const hero = document.querySelector('section.relative.h-screen');
+          if (hero) hero.classList.add('hidden');
+          
+          // Show vendor header
+          const shopHeader = document.getElementById('vendor-shop-header');
+          if (shopHeader) {
+            shopHeader.classList.remove('hidden');
+            
+            document.getElementById('vendor-shop-title').innerText = vendor.displayName;
+            document.getElementById('vendor-shop-avatar').src = vendor.selfieUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200";
+            document.getElementById('vendor-shop-address').innerText = vendor.physicalAddress || (currentLanguage === 'gu' ? "ઓનલાઈન સ્ટોર" : "Online Store");
+            
+            // Count products
+            const prodsCount = db.getProducts().filter(p => p.vendorId === shopId && p.approvedByAdmin).length;
+            document.getElementById('vendor-shop-products-count').innerText = `${prodsCount} Products / પ્રોડક્ટ્સ`;
+            
+            document.getElementById('vendor-shop-call-btn').href = `tel:${vendor.phone}`;
+            
+            let cleanWa = vendor.whatsapp.replace(/\D/g, '');
+            if (cleanWa.length === 10) cleanWa = '91' + cleanWa;
+            document.getElementById('vendor-shop-wa-btn').href = `https://wa.me/${cleanWa}?text=${encodeURIComponent(currentLanguage === 'gu' ? "નમસ્તે, હું આપની દુકાનમાંથી ખરીદી કરવા માંગું છું." : "Hello, I want to buy from your shop.")}`;
+          }
+        } else {
+          window.currentShopFilter = null;
+        }
+      }
+    }
+
+    // Direct Product Query on Load
+    function checkProductQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prodId = urlParams.get('prod');
+      if (prodId) {
+        setTimeout(() => showProductDetails(prodId), 500);
+      }
+    }
+
+    // UPGRADE 12: Multilingual Autocomplete Search Dropdown
+    const synonymMap = {
+      "cot": ["clothing", "કપડા", "કપડાં"],
+      "કપડા": ["clothing"],
+      "કપડાં": ["clothing"],
+      "cloth": ["clothing", "કપડા", "કપડાં"],
+      "clothing": ["clothing", "કપડા", "કપડાં"],
+      "mobile": ["electronics", "મોબાઈલ", "ઇલેક્ટ્રોનિક્સ"],
+      "phone": ["electronics", "મોબાઈલ", "ઇલેક્ટ્રોનિક્સ"],
+      "મોબાઈલ": ["electronics"],
+      "ઇલેક્ટ્રોનિક્સ": ["electronics"],
+      "electronic": ["electronics", "મોબાઈલ", "ઇલેક્ટ્રોનિક્સ"],
+      "footwear": ["footwear", "પગરખા", "બૂટ", "ચંપલ"],
+      "shoe": ["footwear", "પગરખા", "બૂટ", "ચંપલ"],
+      "બૂટ": ["footwear"],
+      "ચંપલ": ["footwear"],
+      "grocery": ["grocery", "કરિયાણું", "અનાજ"],
+      "food": ["grocery", "કરિયાણું", "અનાજ"],
+      "કરિયાણું": ["grocery"],
+      "light": ["lighting", "લાઇટિંગ", "દીવો", "બલ્બ"],
+      "lamp": ["lighting", "લાઇટિંગ", "દીવો", "બલ્બ"],
+      "લાઇટિંગ": ["lighting"],
+      "home": ["home_kitchen", "રસોડું", "ઘર વપરાશ"],
+      "kitchen": ["home_kitchen", "રસોડું", "ઘર વપરાશ"],
+      "રસોડું": ["home_kitchen"]
+    };
+
+    function setupAutocompleteSearch() {
+      const desktopInput = document.getElementById('search-input');
+      const mobileInput = document.getElementById('search-input-mobile');
+      const desktopSuggest = document.getElementById('search-autocomplete-desktop');
+      const mobileSuggest = document.getElementById('search-autocomplete-mobile');
+
+      if (desktopInput && desktopSuggest) {
+        desktopInput.addEventListener('input', (e) => showAutocomplete(e.target, desktopSuggest));
+      }
+      if (mobileInput && mobileSuggest) {
+        mobileInput.addEventListener('input', (e) => showAutocomplete(e.target, mobileSuggest));
+      }
+
+      document.addEventListener('click', (e) => {
+        if (desktopInput && !desktopInput.contains(e.target) && desktopSuggest && !desktopSuggest.contains(e.target)) {
+          desktopSuggest.classList.add('hidden');
+        }
+        if (mobileInput && !mobileInput.contains(e.target) && mobileSuggest && !mobileSuggest.contains(e.target)) {
+          mobileSuggest.classList.add('hidden');
+        }
+      });
+    }
+
+    function showAutocomplete(inputEl, suggestionEl) {
+      const val = inputEl.value.trim().toLowerCase();
+      if (!val) {
+        suggestionEl.innerHTML = '';
+        suggestionEl.classList.add('hidden');
+        return;
+      }
+
+      const products = db.getProducts().filter(p => p.approvedByAdmin);
+      const suggestions = new Set();
+
+      products.forEach(p => {
+        if (p.name.toLowerCase().includes(val)) {
+          suggestions.add(JSON.stringify({ text: p.name, type: 'product', target: p.name }));
+        }
+        const catLabel = translations[currentLanguage][p.category] || p.category;
+        if (catLabel.toLowerCase().includes(val) || p.category.toLowerCase().includes(val)) {
+          suggestions.add(JSON.stringify({ text: catLabel, type: 'category', target: p.category }));
+        }
+      });
+
+      for (const key in synonymMap) {
+        if (key.includes(val)) {
+          synonymMap[key].forEach(target => {
+            const label = translations[currentLanguage][target] || target;
+            suggestions.add(JSON.stringify({ text: label, type: 'synonym', target: target }));
+          });
+        }
+      }
+
+      const list = Array.from(suggestions).map(s => JSON.parse(s)).slice(0, 5);
+      if (list.length === 0) {
+        suggestionEl.innerHTML = '';
+        suggestionEl.classList.add('hidden');
+        return;
+      }
+
+      suggestionEl.innerHTML = list.map(item => {
+        let icon = '🔍';
+        if (item.type === 'product') icon = '📦';
+        if (item.type === 'category') icon = '🏷️';
+        return `
+          <div onclick="selectSuggestion('${item.target}', '${item.type}')" class="flex items-center gap-2 px-3 py-2 text-xs hover:bg-slate-100 cursor-pointer rounded-xl transition text-slate-700">
+            <span>${icon}</span>
+            <span class="font-semibold">${item.text}</span>
+          </div>
+        `;
+      }).join('');
+      suggestionEl.classList.remove('hidden');
+    }
+
+    window.selectSuggestion = function(target, type) {
+      const desktopInput = document.getElementById('search-input');
+      const mobileInput = document.getElementById('search-input-mobile');
+
+      if (type === 'category') {
+        filterCategory(target);
+        if (desktopInput) desktopInput.value = '';
+        if (mobileInput) mobileInput.value = '';
+      } else {
+        if (desktopInput) desktopInput.value = target;
+        if (mobileInput) mobileInput.value = target;
+        filterSearch({ target: { value: target } });
+      }
+
+      document.getElementById('search-autocomplete-desktop')?.classList.add('hidden');
+      document.getElementById('search-autocomplete-mobile')?.classList.add('hidden');
+    }
+
+    // UPGRADE 14: Collaborative Cart Link Sharing
+    window.shareCart = function() {
+      if (cart.length === 0) {
+        showToast(currentLanguage === 'gu' ? "કાર્ટ ખાલી છે!" : "Cart is empty!");
+        return;
+      }
+      const itemsStr = cart.map(item => `${item.productId}:${item.quantity}`).join(',');
+      const shareUrl = `${window.location.origin}${window.location.pathname}?cart_share=${encodeURIComponent(itemsStr)}`;
+      
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast(currentLanguage === 'gu' ? "શેર્ડ કાર્ટ લિંક કોપી થઈ ગઈ છે!" : "Shared cart link copied to clipboard!");
+      }).catch(err => {
+        console.error("Failed to copy cart link: ", err);
+        alert(`Copy this link: ${shareUrl}`);
+      });
+    }
+
+    // UPGRADE 10: Voice-Interactive Language Toggle Greeting
+    window.playVoiceGreeting = function(lang) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        let msg = lang === 'gu' ? "ગુજરાતી ભાષા સેટ થઈ ગઈ છે." : "English language has been set.";
+        let utterance = new SpeechSynthesisUtterance(msg);
+        utterance.lang = lang === 'gu' ? 'gu-IN' : 'en-IN';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // UPGRADE 2: Filter products by selected badge
+    window.filterBadge = function() {
+      renderProducts();
+    }
+
     // Navigation bar states
     function updateNavUI() {
       const navUser = document.getElementById('nav-user-actions');
@@ -373,14 +639,20 @@
 
     // Load Products Grid
     let currentCategoryFilter = 'all';
+    window.currentShopFilter = new URLSearchParams(window.location.search).get('shop') || null;
     
     function renderCategoriesBar() {
       const bar = document.getElementById('dynamic-categories-bar');
       if (!bar) return;
       
-      const allProds = db.getProducts().filter(p => p.approvedByAdmin === true);
-      const uniqueCats = new Set();
+      let allProds = db.getProducts().filter(p => p.approvedByAdmin === true);
       
+      // UPGRADE 3: Individual Vendor Micro-Storefront category filtering
+      if (window.currentShopFilter) {
+        allProds = allProds.filter(p => p.vendorId === window.currentShopFilter);
+      }
+
+      const uniqueCats = new Set();
       allProds.forEach(p => {
         if (p.category) uniqueCats.add(p.category);
       });
@@ -420,11 +692,19 @@
       if (!grid) return;
       grid.innerHTML = '';
       
-      const allProds = db.getProducts();
-      // Only show approved products
+      let allProds = db.getProducts();
+      
+      // UPGRADE 3: Individual Vendor Micro-Storefront product filtering
+      if (window.currentShopFilter) {
+        allProds = allProds.filter(p => p.vendorId === window.currentShopFilter);
+      }
+
+      // Only show approved products and filter by selected badge
+      const badgeFilter = document.getElementById('badge-filter')?.value || 'all';
       const filtered = allProds.filter(p => {
         if (!p.approvedByAdmin) return false;
         if (currentCategoryFilter !== 'all' && p.category !== currentCategoryFilter) return false;
+        if (badgeFilter !== 'all' && p.badge !== badgeFilter) return false;
         return true;
       });
 
@@ -434,9 +714,53 @@
       }
 
       filtered.forEach(p => {
+        // UPGRADE 2: Glowing Product Badges
+        let badgeHtml = '';
+        if (p.badge && p.badge !== 'none') {
+          let badgeColor = 'bg-brand text-white shadow-sm shadow-orange-500/20';
+          if (p.badge === 'Bestseller') badgeColor = 'bg-amber-500 text-white';
+          if (p.badge === 'Trending') badgeColor = 'bg-red-500 text-white animate-pulse';
+          badgeHtml = `<span class="absolute top-2 left-2 ${badgeColor} text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full z-10">${p.badge}</span>`;
+        }
+
+        // UPGRADE 8: Smart Stock Alerts & Locks
+        const isOutOfStock = p.stock <= 0;
+        const isLowStock = p.stock > 0 && p.stock <= 5;
+        
+        let stockBadgeHtml = '';
+        let cardOverlayHtml = '';
+        let addToCartBtnHtml = '';
+        
+        if (isOutOfStock) {
+          stockBadgeHtml = `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full z-10">SOLD OUT</span>`;
+          cardOverlayHtml = `<div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px] z-10 flex items-center justify-center pointer-events-none"><span class="text-white text-xs font-black bg-slate-950/80 px-4 py-1.5 rounded-full border border-slate-700">OUT OF STOCK</span></div>`;
+          addToCartBtnHtml = `
+            <button disabled class="bg-slate-100 text-slate-450 p-2.5 rounded-full cursor-not-allowed" title="Out of Stock">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+            </button>
+          `;
+        } else {
+          if (isLowStock) {
+            stockBadgeHtml = `<span class="absolute top-2 right-2 bg-amber-550 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full z-10 animate-bounce">ONLY ${p.stock} LEFT</span>`;
+          }
+          addToCartBtnHtml = `
+            <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </button>
+          `;
+        }
+
+        // UPGRADE 13: WhatsApp Product Status Share Builder
+        const cleanVendorId = p.vendorId;
+        const shareText = `તમારો ધંધો, તમારી દુકાન પર આ શાનદાર આઈટમ જુઓ:\n*${p.name}*\nકિંમત: ₹${p.price}\n\nખરીદવા માટે લિંક પર ક્લિક કરો:\n${window.location.origin + window.location.pathname}?prod=${p.id}`;
+        const shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+
         grid.innerHTML += `
-          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm relative">
+            ${badgeHtml}
+            ${stockBadgeHtml}
             <div class="relative overflow-hidden cursor-pointer" onclick="showProductDetails('${p.id}')">
+              ${cardOverlayHtml}
               <img src="${p.imageUrl}" class="w-full h-48 object-cover zoom-img" alt="${p.name}">
               <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                 <span class="text-xs bg-white text-slate-800 px-4 py-2 rounded-full font-bold shadow-sm uppercase tracking-wider">View Details</span>
@@ -449,9 +773,12 @@
               </div>
               <div class="mt-4 flex items-center justify-between">
                 <span class="text-lg font-extrabold text-slate-950">₹${p.price}</span>
-                <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </button>
+                <div class="flex gap-1.5">
+                  <a href="${shareLink}" target="_blank" class="bg-slate-100 hover:bg-emerald-500 hover:text-white hover:scale-105 text-slate-500 p-2.5 rounded-full transition duration-300" title="WhatsApp Share">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" width="16" height="16"><path d="M12.031 2C6.49 2 2 6.48 2 12.02c0 1.91.53 3.69 1.45 5.23L2 22l4.89-1.28c1.47.8 3.14 1.25 4.93 1.25 5.54 0 10.03-4.48 10.03-10.02S17.57 2 12.031 2zm.05 18.25c-1.68 0-3.32-.44-4.75-1.28l-.34-.2-2.92.77.78-2.85-.22-.35a8.216 8.216 0 0 1-1.26-4.32c0-4.52 3.68-8.19 8.21-8.19 4.53 0 8.21 3.67 8.21 8.19 0 4.52-3.68 8.19-8.21 8.19z"/></svg>
+                  </a>
+                  ${addToCartBtnHtml}
+                </div>
               </div>
             </div>
           </div>
@@ -467,7 +794,12 @@
       const term = e.target.value.toLowerCase();
       const grid = document.getElementById('product-grid');
       grid.innerHTML = '';
-      const allProds = db.getProducts();
+      
+      let allProds = db.getProducts();
+      if (window.currentShopFilter) {
+        allProds = allProds.filter(p => p.vendorId === window.currentShopFilter);
+      }
+
       const filtered = allProds.filter(p => {
         if (!p.approvedByAdmin) return false;
         return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term) || p.category.toLowerCase().includes(term);
@@ -605,6 +937,70 @@
           .join('');
       }
 
+      // UPGRADE 8: Low Stock Warnings & Out of Stock Logic
+      const isOutOfStock = p.stock <= 0;
+      const isLowStock = p.stock > 0 && p.stock <= 5;
+      
+      let stockBadgeHtml = '';
+      if (isOutOfStock) {
+        stockBadgeHtml = `<span class="text-xs bg-red-50 text-red-600 border border-red-100 px-2.5 py-1 rounded-full font-semibold">Sold Out / આઉટ ઓફ સ્ટોક</span>`;
+      } else if (isLowStock) {
+        stockBadgeHtml = `<span class="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full font-semibold animate-pulse">Only ${p.stock} left! / માત્ર ${p.stock} બાકી!</span>`;
+      } else {
+        stockBadgeHtml = `<span class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-full font-semibold">In Stock / હાજરમાં છે</span>`;
+      }
+
+      let actionButtonsHtml = '';
+      if (isOutOfStock) {
+        actionButtonsHtml = `
+          <button disabled class="w-full bg-slate-100 border border-slate-200 text-slate-400 py-3 rounded-full font-semibold cursor-not-allowed text-center">Out of Stock / સ્ટોક ખાલી છે</button>
+        `;
+      } else {
+        actionButtonsHtml = `
+          <button onclick="addToCart('${p.id}'); toggleDetailDrawer(false);" class="flex-1 btn-secondary text-slate-800 py-3 rounded-full font-semibold transition">Add To Cart</button>
+          <button onclick="buyNow('${p.id}')" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Buy Now</button>
+        `;
+      }
+
+      // UPGRADE 5: Chat with Seller WhatsApp Widget
+      const users = db.getUsers();
+      const vendor = users.find(u => u.uid === p.vendorId);
+      const vendorWa = vendor ? vendor.whatsapp : '';
+      let cleanWa = vendorWa.replace(/\D/g, '');
+      if (cleanWa.length === 10) cleanWa = '91' + cleanWa;
+      
+      const waMessage = `નમસ્તે, મને તમારી આ પ્રોડક્ટ ખરીદવામાં રસ છે:\n- ${p.name} (કિંમત: ₹${p.price})\nલિંક: ${window.location.origin + window.location.pathname}?prod=${p.id}`;
+      const waLink = cleanWa ? `https://wa.me/${cleanWa}?text=${encodeURIComponent(waMessage)}` : '#';
+      
+      const waChatButtonHtml = cleanWa ? `
+        <a href="${waLink}" target="_blank" class="w-full mt-3 bg-emerald-50 border border-emerald-100 text-emerald-700 py-2.5 rounded-full font-semibold text-xs transition flex items-center justify-center gap-2 hover:bg-emerald-100/50 shadow-sm shadow-emerald-500/5">
+          <svg class="w-4.5 h-4.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24" width="18" height="18"><path d="M12.031 2C6.49 2 2 6.48 2 12.02c0 1.91.53 3.69 1.45 5.23L2 22l4.89-1.28c1.47.8 3.14 1.25 4.93 1.25 5.54 0 10.03-4.48 10.03-10.02S17.57 2 12.031 2zm.05 18.25c-1.68 0-3.32-.44-4.75-1.28l-.34-.2-2.92.77.78-2.85-.22-.35a8.216 8.216 0 0 1-1.26-4.32c0-4.52 3.68-8.19 8.21-8.19 4.53 0 8.21 3.67 8.21 8.19 0 4.52-3.68 8.19-8.21 8.19z"/></svg>
+          Chat with Seller / વિક્રેતા સાથે વાત કરો
+        </a>
+      ` : '';
+
+      // UPGRADE 9: Star Rating Reviews System UI
+      const approvedReviews = db.getReviews().filter(r => r.productId === p.id && r.approvedByAdmin);
+      let reviewsHtml = '';
+      if (approvedReviews.length === 0) {
+        reviewsHtml = `<p class="text-xs text-slate-400 italic text-center py-4">No approved reviews yet. / કોઈ રિવ્યૂ નથી.</p>`;
+      } else {
+        reviewsHtml = approvedReviews.map(r => {
+          const stars = '⭐'.repeat(r.rating);
+          const date = new Date(r.createdAt).toLocaleDateString();
+          return `
+            <div class="border-b border-slate-50 py-2.5 text-left">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-slate-700">${r.userName}</span>
+                <span class="text-slate-450 text-[10px]">${date}</span>
+              </div>
+              <div class="text-[10px] text-amber-500 my-0.5">${stars}</div>
+              <p class="text-xs text-slate-650 mt-1">${r.comment}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
       const container = document.getElementById('detail-content');
       container.innerHTML = `
         <img src="${p.imageUrl}" class="w-full h-64 object-cover rounded-2xl mb-6 shadow-md" />
@@ -614,7 +1010,7 @@
           
           <div class="flex items-center gap-4 mb-6">
             <span class="text-3xl font-black text-slate-950">₹${p.price}</span>
-            <span class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-full font-semibold">In Stock</span>
+            ${stockBadgeHtml}
           </div>
 
           <p class="text-sm text-slate-600 mb-6 leading-relaxed">${p.description}</p>
@@ -627,12 +1023,71 @@
           </div>
 
           <div class="flex gap-4">
-            <button onclick="addToCart('${p.id}'); toggleDetailDrawer(false);" class="flex-1 btn-secondary text-slate-800 py-3 rounded-full font-semibold transition">Add To Cart</button>
-            <button onclick="buyNow('${p.id}')" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Buy Now</button>
+            ${actionButtonsHtml}
+          </div>
+          
+          ${waChatButtonHtml}
+
+          <!-- Reviews System -->
+          <div class="mt-6 border-t border-slate-100 pt-6">
+            <h4 class="text-xs font-bold text-slate-450 uppercase tracking-wider mb-2">Customer Reviews / ગ્રાહક અભિપ્રાય</h4>
+            <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              ${reviewsHtml}
+            </div>
+            
+            <form onsubmit="submitReview(event, '${p.id}')" class="mt-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+              <h5 class="text-xs font-bold text-slate-700">Write a Review / રિવ્યૂ લખો</h5>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Your Name</label>
+                  <input type="text" id="rev-name" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs focus:outline-none" required>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Rating (1-5)</label>
+                  <select id="rev-rating" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs focus:outline-none" required>
+                    <option value="5" selected>5 Stars ⭐⭐⭐⭐⭐</option>
+                    <option value="4">4 Stars ⭐⭐⭐⭐</option>
+                    <option value="3">3 Stars ⭐⭐⭐</option>
+                    <option value="2">2 Stars ⭐⭐</option>
+                    <option value="1">1 Star ⭐</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Review / કમેન્ટ</label>
+                <textarea id="rev-comment" rows="2" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs focus:outline-none" required></textarea>
+              </div>
+              <button type="submit" class="w-full bg-brand text-white py-2 rounded-xl text-xs font-semibold hover:bg-orange-600 transition shadow-sm">Submit Review</button>
+            </form>
           </div>
         </div>
       `;
       toggleDetailDrawer(true);
+    }
+
+    function submitReview(e, productId) {
+      e.preventDefault();
+      const userName = document.getElementById('rev-name').value;
+      const rating = parseInt(document.getElementById('rev-rating').value);
+      const comment = document.getElementById('rev-comment').value;
+      
+      const newReview = {
+        id: 'rev_' + Date.now(),
+        productId: productId,
+        rating: rating,
+        comment: comment,
+        userName: userName,
+        approvedByAdmin: false, // Moderated by default!
+        createdAt: new Date().toISOString()
+      };
+      
+      db.saveReview(newReview);
+      
+      alert(currentLanguage === 'gu' 
+        ? "અભિપ્રાય સબમિટ થયો છે! ઓનર મંજૂર કરશે એટલે અહીં દેખાશે." 
+        : "Review submitted! It will appear here once approved by the Owner.");
+        
+      showProductDetails(productId); // Reload detail view
     }
 
     function buyNow(id) {
@@ -676,6 +1131,18 @@
         const remaining = globalRateLimiter.getRemainingTime(mobile || 'anon_checkout');
         alert(currentLanguage === 'gu' ? `ખૂબ જ ઝડપથી ઓર્ડર મૂકી રહ્યા છો. કૃપા કરીને ${remaining} સેકન્ડ રાહ જુઓ.` : `Too many checkout requests. Please wait ${remaining} seconds.`);
         return;
+      }
+
+      // UPGRADE 8: Smart Stock Checkout Lock
+      const products = db.getProducts();
+      for (const item of cart) {
+        const p = products.find(prod => prod.id === item.productId);
+        if (!p || p.stock < item.quantity) {
+          alert(currentLanguage === 'gu'
+            ? `ભૂલ: '${item.name}' નો સ્ટોક પૂરતો નથી (માત્ર ${p ? p.stock : 0} નંગ બાકી છે). કૃપા કરીને કાર્ટ અપડેટ કરો.`
+            : `Error: '${item.name}' does not have enough stock (only ${p ? p.stock : 0} left). Please update your cart.`);
+          return;
+        }
       }
       
       const primaryVendor = cart[0];
