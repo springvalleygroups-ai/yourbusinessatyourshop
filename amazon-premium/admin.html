@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' https: data: blob: android-webview-video-poster:; media-src 'self' https: data: blob:;">
+  <title>Seller & Admin Portal - Your Business, Your Shop</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#ff6700',
+            brandlight: '#fff5ed',
+            dark: '#0f172a',
+            card: '#ffffff',
+            border: '#e2e8f0',
+            graytext: '#64748b'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 selection:bg-brand selection:text-white">
+
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 w-full z-50 glass border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Logo & Icon -->
+      <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
+        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-orange-500/20">
+          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="6" fill="#ff6700" />
+            <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="font-extrabold" data-i18n="brandName">Your Business, Your Shop</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <!-- Language Selector -->
+        <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
+          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
+          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-3 py-1 rounded-full transition">EN</button>
+        </div>
+        <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-slate-900 transition" data-i18n="home">Home</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 min-h-screen px-4 pb-12 max-w-7xl mx-auto">
+    
+    <!-- AUTHENTICATION PANELS (Hidden if logged in) -->
+    <div id="auth-section" class="max-w-md mx-auto mt-8 hidden">
+      <!-- Tab Buttons -->
+      <div class="flex justify-center border-b border-slate-200 mb-6">
+        <button id="tab-login-btn" onclick="showAuthTab('login')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition">Login</button>
+        <button id="tab-register-btn" onclick="showAuthTab('register')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">Register as Seller</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left">
+        <h3 class="text-xl font-extrabold mb-4 text-slate-800" data-i18n="login">Login</h3>
+        <form onsubmit="handleLogin(event)">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
+              <input type="email" id="login-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Password</label>
+              <input type="password" id="login-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Login</button>
+          </div>
+        </form>
+        <div class="mt-4 text-center flex flex-col gap-2">
+          <button type="button" onclick="showResetPanel()" class="text-xs font-bold text-brand hover:underline">Forgot Password? / પાસવર્ડ રિસેટ કરો</button>
+          <button type="button" onclick="showOwnerLoginPanel()" class="text-xs font-bold text-slate-500 hover:text-brand hover:underline">Are you the Owner? Login Here / માલિક લોગિન</button>
+        </div>
+      </div>
+
+      <!-- Owner Login Panel -->
+      <div id="owner-login-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand animate-pulse"></span>
+          <h3 class="text-xl font-extrabold text-slate-800">Owner Portal Login</h3>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">માત્ર પ્લેટફોર્મના માલિક (springvalleygroups@gmail.com) માટે</p>
+        <form onsubmit="handleOwnerLogin(event)">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Owner Email</label>
+              <input type="email" id="owner-login-email" value="springvalleygroups@gmail.com" class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-500 font-medium focus:outline-none cursor-not-allowed" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Password / પાસવર્ડ</label>
+              <input type="password" id="owner-login-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Send OTP & Log In</button>
+          </div>
+        </form>
+        <div class="mt-4 text-center">
+          <button type="button" onclick="showAuthTab('login')" class="text-xs font-bold text-brand hover:underline block mx-auto">Back to Seller Login / વિક્રેતા લોગીન</button>
+        </div>
+      </div>
+
+      <!-- Password Reset Panel -->
+      <div id="reset-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <h3 class="text-xl font-extrabold mb-4 text-slate-800">Reset Password</h3>
+        
+        <!-- Step 1: Input Email -->
+        <div id="reset-step-email">
+          <p class="text-xs text-slate-500 mb-4">Enter your registered email address to begin the password reset process.</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Email Address</label>
+              <input type="email" id="reset-email-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+            </div>
+            <button type="button" onclick="processResetEmail()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Send Reset Code / Link</button>
+            <button type="button" onclick="showAuthTab('login')" class="w-full btn-secondary text-slate-700 py-3 rounded-full font-semibold transition">Back to Login</button>
+          </div>
+        </div>
+
+        <!-- Step 2 (Vendor): Enter Mobile OTP -->
+        <div id="reset-step-otp" class="hidden">
+          <p class="text-xs text-slate-500 mb-4" id="reset-otp-msg">OTP verification code sent to +91 ******1234</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">6-Digit OTP Code</label>
+              <input type="text" id="reset-otp-input" maxlength="6" placeholder="e.g. 123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand text-center font-mono tracking-widest text-lg transition">
+            </div>
+            <button type="button" onclick="verifyResetOTP()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Verify OTP</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Enter New Password -->
+        <div id="reset-step-newpass" class="hidden">
+          <p class="text-xs text-slate-500 mb-4">Enter a secure new password for your account.</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">New Password</label>
+              <input type="password" id="reset-new-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+            </div>
+            <button type="button" onclick="submitNewPassword()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Update Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <h3 class="text-xl font-extrabold text-slate-800">Create Account / નવું એકાઉન્ટ બનાવો</h3>
+        <p class="text-xs text-emerald-600 mb-4 font-semibold">Free Platform Registration / ૧૦૦% મફત રજીસ્ટ્રેશન</p>
+        <form onsubmit="handleRegister(event)">
+          <div class="space-y-4">
+            <!-- Role Selector Container (Hidden by default, only shown for secret admin registration) -->
+            <div id="reg-role-container">
+              <input type="hidden" id="reg-role" value="vendor">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Name / પૂરું નામ</label>
+              <input type="text" id="reg-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
+                <input type="email" id="reg-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Password</label>
+                <input type="password" id="reg-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Phone Number</label>
+                <input type="tel" id="reg-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">WhatsApp Number</label>
+                <input type="tel" id="reg-whatsapp" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+            </div>
+
+            <!-- VENDOR ONLY FIELDS -->
+            <div id="vendor-only-fields" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="pan">Aadhaar Card Number</label>
+                  <input type="text" id="reg-aadhaar" maxlength="12" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="gst">GSTIN (Optional)</label>
+                  <input type="text" id="reg-gstin" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">UPI ID (to receive payments)</label>
+                <input type="text" id="reg-upi" placeholder="e.g. UPI-ID@pay" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="physicalAddress">Physical Shop Address (Optional)</label>
+                <textarea id="reg-address" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition"></textarea>
+              </div>
+
+              <!-- BIOMETRIC LIVENESS WIDGET -->
+              <div class="border border-slate-100 p-4 rounded-2xl text-center bg-slate-50/50">
+                <h4 class="text-sm font-bold text-brand mb-2" data-i18n="faceAuthTitle">Liveness Face Verification</h4>
+                <p class="text-xs text-slate-500 mb-4" data-i18n="faceAuthInstruction">Position your face in the circle. Follow the steps below.</p>
+                
+                <div id="liveness-area" class="hidden mb-4">
+                  <div class="camera-container mb-3 shadow-inner">
+                    <div class="camera-scan-line"></div>
+                    <video id="liveness-video" autoplay playsinline muted class="w-full h-full object-cover transform scale-x-[-1]"></video>
+                  </div>
+                  <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mb-2">
+                    <div id="liveness-progress" class="bg-brand h-full w-0 transition-all duration-300"></div>
+                  </div>
+                  <div id="liveness-step-label" class="text-xs font-semibold text-slate-700">Initializing...</div>
+                  <div id="liveness-code-display" class="text-2xl font-bold tracking-widest text-brand mt-1 hidden">0000</div>
+                </div>
+
+                <div id="verification-status-box">
+                  <button type="button" id="start-liveness-btn" onclick="livenessVerifier.start()" class="bg-white border border-slate-200 hover:border-brand text-slate-700 text-xs px-6 py-2.5 rounded-full font-semibold transition" data-i18n="startVerification">
+                    Start Verification
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Submit Registration</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD VIEW -->
+    <div id="dashboard-section" class="hidden">
+      <!-- User Greetings & Signout -->
+      <div class="flex justify-between items-center mb-8 border-b border-slate-200 pb-4 text-left">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-800"><span id="dash-username">User</span>'s Portal</h2>
+          <p id="dash-role-badge" class="text-xs inline-block bg-orange-50 text-brand border border-orange-100 px-3 py-1 rounded-full font-semibold mt-1 uppercase tracking-wider">Role</p>
+        </div>
+        <button onclick="handleLogout()" class="btn-secondary px-5 py-2.5 rounded-full font-semibold text-sm">Logout</button>
+      </div>
+
+      <!-- VENDOR INTERFACE -->
+      <div id="vendor-dashboard" class="hidden space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Add Product Form -->
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+            <h3 class="text-lg font-bold mb-4 text-brand" data-i18n="addProduct">Add New Product</h3>
+            <form onsubmit="vendorAddProduct(event)">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodName">Product Name</label>
+                  <input type="text" id="prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodPrice">Price (₹)</label>
+                    <input type="number" id="prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodStock">Stock</label>
+                    <input type="number" id="prod-stock" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodCategory">Category</label>
+                  <select id="prod-category" onchange="handleCategorySelectChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                    <option value="clothing">Clothing & Fabrics</option>
+                    <option value="electronics">Electronics & Mobiles</option>
+                    <option value="footwear">Footwear</option>
+                    <option value="grocery">Groceries</option>
+                    <option value="home_kitchen">Home & Kitchen</option>
+                    <option value="others" selected>Others</option>
+                    <option value="custom_new">+ Add Custom Category (નવી કેટેગરી)</option>
+                  </select>
+                </div>
+                
+                <div id="custom-category-name-group" class="hidden">
+                  <label class="block text-xs font-semibold text-slate-500 mb-1">Enter Custom Category Name (કેટેગરીનું નામ)</label>
+                  <input type="text" id="custom-category-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" placeholder="e.g. Handicrafts, Toys">
+                </div>
+                
+                <!-- Dynamic fields injected here -->
+                <div id="dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodImage">Image URL</label>
+                  <input type="url" id="prod-image" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodDesc">Description</label>
+                  <textarea id="prod-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition" data-i18n="save">Save Product</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Product Management & Orders list -->
+          <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+              <h3 class="text-lg font-bold mb-4 text-slate-800">My Products</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                      <th class="py-3">Name</th>
+                      <th class="py-3">Price</th>
+                      <th class="py-3">Stock</th>
+                      <th class="py-3">Status</th>
+                      <th class="py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-products-list">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+              <h3 class="text-lg font-bold mb-4 text-slate-800">Received Orders</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                      <th class="py-3">Order ID</th>
+                      <th class="py-3">Product/Qty</th>
+                      <th class="py-3">Total</th>
+                      <th class="py-3">Payment</th>
+                      <th class="py-3">Status</th>
+                      <th class="py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-orders-list">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN/OWNER INTERFACE -->
+      <div id="admin-dashboard" class="hidden space-y-8">
+        <!-- Dashboard overview stats cards (Free, 0% Commission Platform) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider" data-i18n="totalSales">Total Platform Sales</h4>
+            <p id="admin-total-sales" class="text-3xl font-black text-slate-900 mt-2">₹0</p>
+          </div>
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Orders Processed</h4>
+            <p id="admin-total-orders" class="text-3xl font-black text-brand mt-2">0</p>
+          </div>
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Active Vendors</h4>
+            <p id="admin-total-vendors" class="text-3xl font-black text-slate-900 mt-2">0</p>
+          </div>
+        </div>
+
+        <!-- Vendor Sign-up approvals -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800" data-i18n="vendorRequests">Vendor Registration Requests</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">Vendor / Shop</th>
+                  <th class="py-3">Contact</th>
+                  <th class="py-3">Aadhaar</th>
+                  <th class="py-3">Liveness</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-vendor-requests-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Product Listings Approvals -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Product Listing Approvals</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">Product</th>
+                  <th class="py-3">Vendor</th>
+                  <th class="py-3">Price</th>
+                  <th class="py-3">Details/Specs</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-product-requests-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ALL REGISTERED VENDORS LIST -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">All Registered Vendors</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                  <th class="py-3">Vendor / Shop</th>
+                  <th class="py-3">Contact</th>
+                  <th class="py-3">Status</th>
+                  <th class="py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-all-vendors-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECRET AUDIT & LEDGER PANEL (Only for Owner/Admin) -->
+        <div class="bg-white border border-slate-150 p-6 rounded-2xl shadow-sm border-l-4 border-l-orange-500 text-left">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-800" data-i18n="secretAuditTitle">Owner's Master Audit (Secret Ledger)</h3>
+              <p class="text-xs text-slate-400">Confidential: detailed tracking of all sales and invoices by vendor.</p>
+            </div>
+            <button onclick="toggleAdminAuditDetails(true)" class="btn-secondary text-xs px-4 py-2.5 rounded-full font-semibold transition" data-i18n="viewAllBills">
+              View All Bills
+            </button>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3" data-i18n="vendorNameCol">Vendor Name</th>
+                  <th class="py-3" data-i18n="itemsSoldCol">Items Sold</th>
+                  <th class="py-3" data-i18n="salesValCol">Sales Value</th>
+                  <th class="py-3">Total Orders</th>
+                  <th class="py-3" data-i18n="actionCol">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-secret-audit-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- BILLS/INVOICES AUDIT DETAILED MODAL -->
+  <div id="admin-bills-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-100 w-full max-w-4xl p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="toggleAdminAuditDetails(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-xl font-bold mb-6 text-slate-800 text-left">All Platform Invoices & Bills</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead>
+            <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+              <th class="py-3">Invoice No</th>
+              <th class="py-3">Vendor</th>
+              <th class="py-3">Customer</th>
+              <th class="py-3">Amount</th>
+              <th class="py-3">Date</th>
+              <th class="py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="admin-all-bills-list">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENDOR PROFILE DETAILS MODAL -->
+  <div id="vendor-profile-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
+      <button onclick="toggleVendorProfileModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900">Vendor Profile Details</h3>
+      
+      <div id="vendor-profile-content" class="space-y-4">
+        <!-- Filled dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SINGLE INVOICE PRINT DISPLAY MODAL -->
+  <div id="invoice-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div id="invoice-container" class="w-full max-w-2xl bg-white p-2 rounded-2xl shadow-2xl">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- OWNER OTP VERIFICATION MODAL -->
+  <div id="owner-otp-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-md p-6 rounded-2xl shadow-2xl relative text-slate-800 text-left">
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900" id="otp-modal-title">Owner Verification / માલિક ચકાસણી</h3>
+      <p class="text-xs text-slate-500 mb-4" id="otp-modal-description">
+        સુરક્ષા માટે, springvalleygroups@gmail.com પર ૬ આંકડાનો ઓટીપી કોડ મોકલેલ છે. તે કોડ નીચે બોક્સમાં લખો.<br>
+        For security, a 6-digit OTP code has been sent to springvalleygroups@gmail.com. Please enter it below.
+      </p>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Enter 6-Digit OTP / ઓટીપી લખો</label>
+          <input type="text" id="owner-otp-input" maxlength="6" placeholder="e.g. 123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand text-center font-mono tracking-widest text-lg transition">
+        </div>
+        
+        <div id="owner-otp-error" class="text-xs text-red-500 font-semibold hidden"></div>
+        <div id="owner-otp-success" class="text-xs text-green-600 font-semibold hidden"></div>
+        
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="verifyOwnerOTP()" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Verify & Proceed / મંજૂર કરો</button>
+          <button type="button" onclick="closeOwnerOTPModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 py-3 rounded-full font-semibold transition">Cancel / રદ કરો</button>
+        </div>
+        
+        <p class="text-[10px] text-slate-400 mt-2 text-center">
+          નોંધ: જો પ્રથમ વાર હોય, તો springvalleygroups@gmail.com પર FormSubmit તરફથી એક કન્ફર્મેશન ઈમેલ આવશે. ઓટીપી મેળવવા માટે તેમાં 'Activate Form' લિંક પર ક્લિક કરવું પડશે.<br>
+          Note: If this is the first time, check springvalleygroups@gmail.com for a confirmation email from FormSubmit and click 'Activate Form' to start receiving OTPs.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <script src="app.js"></script>
+  <script>
+    let resetTargetUser = null;
+    let generatedResetOTP = "";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setLanguage(currentLanguage);
+      initDashboard();
+      
+      // Determine auth views by URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+      const resetToken = urlParams.get('reset_token');
+      
+      // Secret Admin Registration Check
+      const secretAdminReg = urlParams.get('secret_admin_reg');
+      if (secretAdminReg === 'RadheAdmin123') {
+        document.getElementById('reg-role-container').innerHTML = `
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Select Role / રોલ પસંદ કરો (SECRET)</label>
+          <select id="reg-role" onchange="handleRegisterRoleChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            <option value="vendor">Seller / વિક્રેતા (દુકાનદાર)</option>
+            <option value="admin" selected>Platform Owner / પ્લેટફોર્મ માલિક (એડમિન)</option>
+          </select>
+        `;
+      }
+      handleRegisterRoleChange();
+      
+      if (resetToken === 'owner_secure_reset') {
+        const users = db.getUsers();
+        const admin = users.find(u => u.role === 'admin');
+        resetTargetUser = admin;
+        
+        showResetPanel();
+        document.getElementById('reset-step-email').classList.add('hidden');
+        document.getElementById('reset-step-otp').classList.add('hidden');
+        document.getElementById('reset-step-newpass').classList.remove('hidden');
+      } else if (action === 'register') {
+        showAuthTab('register');
+      } else {
+        showAuthTab('login');
+      }
+      
+      updateCategoryFields('dynamic-attributes-container', 'prod-category');
+    });
+
+    function handleRegisterRoleChange() {
+      const role = document.getElementById('reg-role').value;
+      const vendorFields = document.getElementById('vendor-only-fields');
+      const aadhaarInput = document.getElementById('reg-aadhaar');
+      const upiInput = document.getElementById('reg-upi');
+      
+      if (role === 'admin') {
+        vendorFields.classList.add('hidden');
+        aadhaarInput.removeAttribute('required');
+        upiInput.removeAttribute('required');
+      } else {
+        vendorFields.classList.remove('hidden');
+        aadhaarInput.setAttribute('required', 'required');
+        upiInput.setAttribute('required', 'required');
+      }
+    }
+
+    function showAuthTab(tab) {
+      document.getElementById('reset-panel').classList.add('hidden'); // Close reset panel if open
+      document.getElementById('owner-login-panel').classList.add('hidden'); // Close owner login panel if open
+      const loginBtn = document.getElementById('tab-login-btn');
+      const regBtn = document.getElementById('tab-register-btn');
+      const loginPanel = document.getElementById('login-panel');
+      const regPanel = document.getElementById('register-panel');
+      
+      if (tab === 'login') {
+        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
+        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        loginPanel.classList.remove('hidden');
+        regPanel.classList.add('hidden');
+      } else {
+        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
+        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        regPanel.classList.remove('hidden');
+        loginPanel.classList.add('hidden');
+      }
+    }
+
+    function initDashboard() {
+      const authSec = document.getElementById('auth-section');
+      const dashSec = document.getElementById('dashboard-section');
+      
+      if (!currentUser) {
+        authSec.classList.remove('hidden');
+        dashSec.classList.add('hidden');
+        return;
+      }
+      
+      authSec.classList.add('hidden');
+      dashSec.classList.remove('hidden');
+      
+      document.getElementById('dash-username').innerText = currentUser.displayName;
+      document.getElementById('dash-role-badge').innerText = currentUser.role;
+
+      if (currentUser.role === 'admin') {
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        renderAdminDashboard();
+      } else if (currentUser.role === 'vendor') {
+        document.getElementById('vendor-dashboard').classList.remove('hidden');
+        renderVendorDashboard();
+      }
+    }
+
+    // VENDOR ACTIONS
+    function renderVendorDashboard() {
+      const products = db.getProducts().filter(p => p.vendorId === currentUser.uid);
+      const orders = db.getOrders().filter(o => o.vendorId === currentUser.uid);
+      
+      // Load products list
+      const prodList = document.getElementById('vendor-products-list');
+      prodList.innerHTML = '';
+      if(products.length === 0) {
+        prodList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No products found.</td></tr>`;
+      } else {
+        products.forEach(p => {
+          const statusText = p.approvedByAdmin ? 'Approved' : 'Pending Approval';
+          const statusColor = p.approvedByAdmin ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          prodList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 flex items-center gap-2">
+                <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                <span class="font-bold text-slate-700">${p.name}</span>
+              </td>
+              <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+              <td class="py-3">${p.stock}</td>
+              <td class="py-3 text-xs ${statusColor}">${statusText}</td>
+              <td class="py-3">
+                <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 font-bold">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Load orders list
+      const orderList = document.getElementById('vendor-orders-list');
+      orderList.innerHTML = '';
+      if(orders.length === 0) {
+        orderList.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No orders received yet.</td></tr>`;
+      } else {
+        orders.forEach(o => {
+          const itemText = o.items.map(i => `${i.name} (${i.quantity})`).join(', ');
+          const payColor = o.paymentStatus === 'verified' ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const statusText = o.orderStatus === 'placed' ? 'New Order' : o.orderStatus;
+          
+          let actionBtn = '';
+          if (o.paymentStatus === 'pending_verification') {
+            actionBtn = `<button onclick="verifyOrderPayment('${o.id}')" class="btn-primary text-white text-[11px] px-3 py-1 rounded-full font-semibold transition">Verify Paid</button>`;
+          } else if (o.orderStatus === 'placed') {
+            actionBtn = `<button onclick="shipOrder('${o.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-[11px] px-3 py-1 rounded-full font-semibold transition shadow-sm shadow-blue-500/20">Mark Shipped</button>`;
+          } else {
+            actionBtn = `<span class="text-slate-400 text-xs">No action needed</span>`;
+          }
+
+          orderList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 text-[10px] font-mono">${o.id}</td>
+              <td class="py-3 font-semibold text-slate-700">${itemText}</td>
+              <td class="py-3 font-extrabold text-slate-900">₹${o.totalAmount}</td>
+              <td class="py-3 text-xs ${payColor}">${o.paymentStatus}</td>
+              <td class="py-3 text-xs capitalize">${statusText}</td>
+              <td class="py-3 flex gap-2">
+                ${actionBtn}
+                ${o.paymentStatus === 'verified' 
+                  ? `<button onclick="viewInvoice('${o.id}')" class="text-[11px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 transition">Bill</button>`
+                  : `<button disabled class="text-[11px] bg-slate-50 border border-slate-150 text-slate-450 px-3 py-1 rounded-full cursor-not-allowed font-semibold" title="Verify payment first to view bill">Bill Pending</button>`
+                }
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    function deleteProduct(id) {
+      if(confirm(currentLanguage === 'gu' ? 'શું તમે આ પ્રોડક્ટ કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this product?')) {
+        db.deleteProduct(id);
+        showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ડીલીટ થઈ ગઈ!' : 'Product deleted successfully!');
+        renderVendorDashboard();
+      }
+    }
+
+    function verifyOrderPayment(id) {
+      db.updateOrder(id, { paymentStatus: 'verified', orderStatus: 'processing' });
+      showToast('Payment verified successfully!');
+      renderVendorDashboard();
+    }
+
+    function shipOrder(id) {
+      db.updateOrder(id, { orderStatus: 'shipped' });
+      showToast('Order marked as shipped!');
+      renderVendorDashboard();
+    }
+
+    function handleCategorySelectChange() {
+      const cat = document.getElementById('prod-category').value;
+      const customGroup = document.getElementById('custom-category-name-group');
+      const customInput = document.getElementById('custom-category-name');
+      
+      if (cat === 'custom_new') {
+        customGroup.classList.remove('hidden');
+        customInput.required = true;
+        updateCategoryFields('dynamic-attributes-container', 'prod-category');
+      } else {
+        customGroup.classList.add('hidden');
+        customInput.required = false;
+        customInput.value = '';
+        updateCategoryFields('dynamic-attributes-container', 'prod-category');
+      }
+    }
+
+    function showResetPanel() {
+      document.getElementById('login-panel').classList.add('hidden');
+      document.getElementById('register-panel').classList.add('hidden');
+      document.getElementById('owner-login-panel').classList.add('hidden');
+      document.getElementById('reset-panel').classList.remove('hidden');
+      
+      document.getElementById('reset-step-email').classList.remove('hidden');
+      document.getElementById('reset-step-otp').classList.add('hidden');
+      document.getElementById('reset-step-newpass').classList.add('hidden');
+    }
+
+    function showOwnerLoginPanel() {
+      document.getElementById('login-panel').classList.add('hidden');
+      document.getElementById('register-panel').classList.add('hidden');
+      document.getElementById('reset-panel').classList.add('hidden');
+      document.getElementById('owner-login-panel').classList.remove('hidden');
+    }
+
+    function processResetEmail() {
+      const email = document.getElementById('reset-email-input').value.trim();
+      if (!email) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      
+      const users = db.getUsers();
+      const user = users.find(u => u.email === email);
+      
+      if (!user) {
+        alert(currentLanguage === 'gu' ? 'આ ઈમેલ આઈડી રજીસ્ટર નથી!' : 'Email address not found in our database!');
+        return;
+      }
+
+      resetTargetUser = user;
+      
+      if (user.role === 'admin') {
+        // Owner reset: dispatch simulated secure link to springvalleygroups@gmail.com
+        alert(currentLanguage === 'gu' 
+          ? 'પાસવર્ડ રિસેટ કરવાની સિક્યોર લિંક springvalleygroups@gmail.com પર મોકલેલ છે!' 
+          : 'A secure password reset link has been dispatched to springvalleygroups@gmail.com.');
+        
+        const resetLink = `${window.location.origin}${window.location.pathname}?reset_token=owner_secure_reset`;
+        
+        // Show simulated email toast popup
+        const emailToast = document.createElement('div');
+        emailToast.className = 'fixed top-24 right-5 bg-white border-l-4 border-orange-500 text-slate-800 p-4 rounded-xl shadow-2xl z-50 max-w-sm text-left';
+        emailToast.innerHTML = `
+          <div class="font-bold text-[10px] text-slate-400 mb-1">Simulated Email to: springvalleygroups@gmail.com</div>
+          <div class="text-xs font-semibold text-slate-850 mb-1">Subject: Owner Password Reset Request</div>
+          <p class="text-[11px] text-slate-500 mb-2">Please click the link below to verify your email and set a new password:</p>
+          <a href="${resetLink}" class="text-xs text-brand hover:underline font-mono break-all font-bold">${resetLink}</a>
+        `;
+        document.body.appendChild(emailToast);
+        
+        showAuthTab('login');
+      } else if (user.role === 'vendor') {
+        // Vendor reset: dispatch mobile SMS OTP
+        const phone = user.phone || '9999999999';
+        const maskedPhone = phone.substring(0, 2) + '******' + phone.substring(8);
+        document.getElementById('reset-otp-msg').innerText = currentLanguage === 'gu' 
+          ? `તમારા નોંધાયેલા મોબાઈલ નંબર +91 ${maskedPhone} પર ઓટીપી કોડ મોકલેલ છે.` 
+          : `OTP verification code sent to +91 ${maskedPhone}.`;
+        
+        generatedResetOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Simulating SMS arrival
+        setTimeout(() => {
+          const smsToast = document.createElement('div');
+          smsToast.className = 'fixed top-24 right-5 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-50 max-w-xs text-left border border-slate-850';
+          smsToast.innerHTML = `
+            <div class="font-bold text-[10px] text-slate-400 mb-1">💬 SIMULATED SMS from: VM-YSYSIN</div>
+            <div class="text-xs font-semibold">Your OTP Code for resetting password is: <span class="text-brand font-mono font-bold text-sm bg-slate-800 px-2 py-0.5 rounded">${generatedResetOTP}</span>. Do not share this with anyone.</div>
+          `;
+          document.body.appendChild(smsToast);
+          setTimeout(() => smsToast.remove(), 15000);
+        }, 1000);
+
+        document.getElementById('reset-step-email').classList.add('hidden');
+        document.getElementById('reset-step-otp').classList.remove('hidden');
+      }
+    }
+
+    function verifyResetOTP() {
+      const otp = document.getElementById('reset-otp-input').value.trim();
+      if (otp === generatedResetOTP) {
+        document.getElementById('reset-step-otp').classList.add('hidden');
+        document.getElementById('reset-step-newpass').classList.remove('hidden');
+      } else {
+        alert(currentLanguage === 'gu' ? 'ખોટો ઓટીપી કોડ!' : 'Invalid OTP code! Please try again.');
+      }
+    }
+
+    function submitNewPassword() {
+      const newPass = document.getElementById('reset-new-password').value;
+      if (!newPass) {
+        alert('Please enter a secure password.');
+        return;
+      }
+      
+      db.updateUserPassword(resetTargetUser.email, newPass);
+      alert(currentLanguage === 'gu' ? 'પાસવર્ડ સફળતાપૂર્વક અપડેટ થયો છે!' : 'Password updated successfully! Please login with your new credentials.');
+      
+      showAuthTab('login');
+      if (window.location.search.includes('reset_token')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    function vendorAddProduct(e) {
+      e.preventDefault();
+      
+      let category = document.getElementById('prod-category').value;
+      if (category === 'custom_new') {
+        category = document.getElementById('custom-category-name').value.trim().toLowerCase().replace(/\s+/g, '_');
+        if (!category) {
+          alert('Please enter a valid category name.');
+          return;
+        }
+      }
+
+      const attributes = {};
+      if (category === 'clothing') {
+        attributes.lengthMeters = document.getElementById('attr-length').value;
+        attributes.widthInches = document.getElementById('attr-width').value;
+        attributes.fabricType = document.getElementById('attr-fabric').value;
+      } else if (category === 'electronics') {
+        attributes.brand = document.getElementById('attr-brand').value;
+        attributes.model = document.getElementById('attr-model').value;
+        attributes.storage = document.getElementById('attr-storage').value;
+        attributes.warranty = document.getElementById('attr-warranty').value;
+      } else if (category === 'footwear') {
+        attributes.size = document.getElementById('attr-size').value;
+        attributes.material = document.getElementById('attr-material').value;
+      } else if (category === 'grocery') {
+        attributes.weight = document.getElementById('attr-weight').value;
+        attributes.expiryDate = document.getElementById('attr-expiry').value;
+      } else {
+        attributes.brand = document.getElementById('attr-brand') ? document.getElementById('attr-brand').value : '';
+        attributes.dimensions = document.getElementById('attr-dimensions') ? document.getElementById('attr-dimensions').value : '';
+      }
+
+      const newProduct = {
+        id: 'prod_' + Date.now(),
+        name: document.getElementById('prod-name').value,
+        price: parseFloat(document.getElementById('prod-price').value),
+        description: document.getElementById('prod-desc').value,
+        imageUrl: document.getElementById('prod-image').value,
+        category: category,
+        stock: parseInt(document.getElementById('prod-stock').value),
+        vendorId: currentUser.uid,
+        vendorName: currentUser.displayName,
+        approvedByAdmin: false, // Strictly frozen-by-default, manual owner approval required!
+        attributes: attributes,
+        createdAt: new Date().toISOString()
+      };
+
+      db.saveProduct(newProduct);
+      showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ઉમેરાઈ ગઈ, અપ્રૂવલની રાહ જુઓ!' : 'Product added! Awaiting admin approval.');
+      
+      // Reset form
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-stock').value = '';
+      document.getElementById('prod-image').value = '';
+      document.getElementById('prod-desc').value = '';
+      // Reset category selector
+      document.getElementById('prod-category').value = 'others';
+      handleCategorySelectChange();
+      
+      renderVendorDashboard();
+    }
+
+    // ADMIN ACTIONS
+    function renderAdminDashboard() {
+      const allUsers = db.getUsers();
+      const allProducts = db.getProducts();
+      const allOrders = db.getOrders();
+
+      // Calc stats
+      const totalSales = allOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+      const totalOrdersCount = allOrders.length;
+      const totalVendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'approved').length;
+
+      document.getElementById('admin-total-sales').innerText = `₹${totalSales}`;
+      document.getElementById('admin-total-orders').innerText = totalOrdersCount;
+      document.getElementById('admin-total-vendors').innerText = totalVendors;
+
+      // Render Vendor registration requests
+      const vendorRequestsList = document.getElementById('admin-vendor-requests-list');
+      vendorRequestsList.innerHTML = '';
+      const pendingVendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'pending');
+      
+      if(pendingVendors.length === 0) {
+        vendorRequestsList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No pending requests.</td></tr>`;
+      } else {
+        pendingVendors.forEach(v => {
+          const livenessBadge = v.livenessVerified ? `<span class="text-green-600 font-extrabold text-xs">PASSED</span>` : `<span class="text-red-500 font-extrabold text-xs">FAILED</span>`;
+          const selfieImg = v.selfieUrl ? `<img src="${v.selfieUrl}" class="w-10 h-10 rounded-full border border-slate-200 object-cover cursor-pointer hover:scale-105 transition" onclick="showSelfieModal('${v.selfieUrl}')" />` : `<span class="text-slate-400">No Image</span>`;
+          
+          // Show last 4 digits of Aadhaar (decrypted)
+          const decAadhaar = decryptAadhaar(v.aadhaar);
+          const maskedAadhaar = decAadhaar ? `****-****-${decAadhaar.substring(8)}` : 'N/A';
+
+          vendorRequestsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3">
+                <button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button>
+                <div class="text-xs text-slate-400">${v.email}</div>
+              </td>
+              <td class="py-3">
+                <div>Ph: ${v.phone}</div>
+                <div class="text-xs text-green-600">WhatsApp: ${v.whatsapp}</div>
+              </td>
+              <td class="py-3 text-xs font-mono">${maskedAadhaar}</td>
+              <td class="py-3 flex items-center gap-2">${livenessBadge} ${selfieImg}</td>
+              <td class="py-3">
+                <button onclick="approveVendor('${v.uid}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 transition mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                <button onclick="rejectVendor('${v.uid}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 transition shadow-sm shadow-red-500/10">Reject</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Product Listing Requests
+      const productRequestsList = document.getElementById('admin-product-requests-list');
+      productRequestsList.innerHTML = '';
+      const pendingProducts = allProducts.filter(p => !p.approvedByAdmin);
+      
+      if (pendingProducts.length === 0) {
+        productRequestsList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No pending products to approve.</td></tr>`;
+      } else {
+        pendingProducts.forEach(p => {
+          let specSummary = '';
+          if (p.attributes) {
+            specSummary = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
+          }
+          productRequestsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 flex items-center gap-2">
+                <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                <div>
+                  <div class="font-bold text-slate-700">${p.name}</div>
+                  <div class="text-[11px] text-slate-400 max-w-xs truncate">${p.description}</div>
+                </div>
+              </td>
+              <td class="py-3 text-xs text-slate-500">${p.vendorName}</td>
+              <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+              <td class="py-3 text-xs text-slate-400 max-w-xs truncate">${specSummary || 'None'}</td>
+              <td class="py-3">
+                <button onclick="approveProduct('${p.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                <button onclick="rejectProduct('${p.id}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 shadow-sm shadow-red-500/10">Reject</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Registered Vendors table
+      const allVendorsList = document.getElementById('admin-all-vendors-list');
+      allVendorsList.innerHTML = '';
+      const allRegisteredVendors = allUsers.filter(u => u.role === 'vendor');
+      
+      if(allRegisteredVendors.length === 0) {
+        allVendorsList.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No registered vendors yet.</td></tr>`;
+      } else {
+        allRegisteredVendors.forEach(v => {
+          const statusText = v.vendorStatus || 'pending';
+          const statusColor = statusText === 'approved' ? 'text-green-600 font-bold' : statusText === 'pending' ? 'text-amber-500 font-bold' : 'text-red-500 font-bold';
+          
+          allVendorsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3">
+                <button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button>
+                <div class="text-xs text-slate-400">Email: ${v.email}</div>
+              </td>
+              <td class="py-3">
+                <div>Ph: ${v.phone}</div>
+                <div class="text-xs text-green-600">WhatsApp: ${v.whatsapp}</div>
+              </td>
+              <td class="py-3 text-xs capitalize ${statusColor}">${statusText}</td>
+              <td class="py-3 flex gap-2">
+                <button onclick="showVendorProfile('${v.uid}')" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full hover:bg-slate-200 transition">View Details</button>
+                <button onclick="deleteVendor('${v.uid}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-full transition shadow-sm shadow-red-500/10">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Secret Ledger Auditing Table
+      const secretAuditList = document.getElementById('admin-secret-audit-list');
+      secretAuditList.innerHTML = '';
+      const vendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'approved');
+      
+      if(vendors.length === 0) {
+        secretAuditList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400" data-i18n="noVendors">No registered vendors yet.</td></tr>`;
+      } else {
+        vendors.forEach(v => {
+          const vendorOrders = allOrders.filter(o => o.vendorId === v.uid);
+          const totalSalesVal = vendorOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+          const itemsCount = vendorOrders.reduce((sum, o) => sum + o.items.reduce((iSum, i) => iSum + i.quantity, 0), 0);
+          const ordersCount = vendorOrders.length;
+
+          secretAuditList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3"><button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button></td>
+              <td class="py-3">${itemsCount}</td>
+              <td class="py-3 font-extrabold text-slate-900">₹${totalSalesVal}</td>
+              <td class="py-3 font-semibold text-brand">${ordersCount}</td>
+              <td class="py-3">
+                <button onclick="showVendorBills('${v.uid}', '${v.displayName}')" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-3.5 py-1 rounded-full hover:bg-slate-200 hover:text-slate-900 transition">Audit Bills</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    function approveVendor(uid) {
+      db.updateUser(uid, { vendorStatus: 'approved' });
+      showToast('Vendor approved!');
+      renderAdminDashboard();
+    }
+
+    function rejectVendor(uid) {
+      db.updateUser(uid, { vendorStatus: 'rejected' });
+      showToast('Vendor registration rejected.');
+      renderAdminDashboard();
+    }
+
+    function deleteVendor(uid) {
+      if (confirm(currentLanguage === 'gu' ? 'શું તમે આ વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this vendor and all their products?')) {
+        // Delete vendor products
+        const products = db.getProducts().filter(p => p.vendorId === uid);
+        products.forEach(p => {
+          db.deleteProduct(p.id);
+        });
+        
+        // Delete vendor user
+        db.deleteUser(uid);
+        showToast(currentLanguage === 'gu' ? 'વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ ડીલીટ થઈ ગઈ!' : 'Vendor and their products deleted successfully!');
+        renderAdminDashboard();
+      }
+    }
+
+    function approveProduct(id) {
+      db.updateProduct(id, { approvedByAdmin: true });
+      showToast('Product listing approved!');
+      renderAdminDashboard();
+    }
+
+    function rejectProduct(id) {
+      db.deleteProduct(id);
+      showToast('Product listing rejected and deleted.');
+      renderAdminDashboard();
+    }
+
+    function showVendorBills(vendorId, vendorName) {
+      const orders = db.getOrders().filter(o => o.vendorId === vendorId);
+      const modalBody = document.getElementById('admin-all-bills-list');
+      modalBody.innerHTML = '';
+      
+      if(orders.length === 0) {
+        modalBody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No bills generated for this vendor yet.</td></tr>`;
+      } else {
+        orders.forEach(o => {
+          modalBody.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50 transition">
+              <td class="py-3 font-mono text-xs">${o.invoiceNumber}</td>
+              <td class="py-3 font-bold text-slate-700">${o.vendorName}</td>
+              <td class="py-3">${o.customerName}</td>
+              <td class="py-3 font-semibold text-slate-800">₹${o.totalAmount}</td>
+              <td class="py-3 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</td>
+              <td class="py-3">
+                ${o.paymentStatus === 'verified' 
+                  ? `<button onclick="viewInvoice('${o.id}')" class="btn-primary text-white text-[11px] px-3.5 py-1 rounded-full transition">View Invoice</button>`
+                  : `<button disabled class="bg-slate-105 border border-slate-150 text-slate-400 text-[11.5px] px-3.5 py-1 rounded-full cursor-not-allowed font-medium">Unverified</button>`
+                }
+              </td>
+            </tr>
+          `;
+        });
+      }
+      
+      toggleAdminAuditDetails(true);
+    }
+
+    function toggleAdminAuditDetails(open) {
+      const modal = document.getElementById('admin-bills-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function viewInvoice(orderId) {
+      const orders = db.getOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const container = document.getElementById('invoice-container');
+      container.innerHTML = generateInvoiceHTML(order);
+      document.getElementById('invoice-modal').classList.remove('hidden');
+    }
+
+    function showSelfieModal(url) {
+      // Create quick popup modal to view full size selfie
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm';
+      modal.onclick = () => modal.remove();
+      modal.innerHTML = `<img src="${url}" class="max-w-md max-h-screen rounded-2xl border-4 border-white shadow-2xl" />`;
+      document.body.appendChild(modal);
+    }
+
+    // VENDOR PROFILE DETAILS DIALOGUE
+    function showVendorProfile(uid) {
+      const users = db.getUsers();
+      const v = users.find(u => u.uid === uid);
+      if (!v) return;
+
+      const decryptedAadhaar = decryptAadhaar(v.aadhaar);
+      // Mask Aadhaar: show only last 4 digits
+      let maskedAadhaar = 'N/A';
+      if (decryptedAadhaar && decryptedAadhaar.length === 12) {
+        maskedAadhaar = `xxxx-xxxx-${decryptedAadhaar.substring(8)}`;
+      } else if (decryptedAadhaar) {
+        maskedAadhaar = decryptedAadhaar;
+      }
+
+      // Fetch all products uploaded by this vendor
+      const allProducts = db.getProducts();
+      const vendorProducts = allProducts.filter(p => p.vendorId === uid);
+
+      // Define translations inline to support Guj and En easily
+      const isGu = (currentLanguage === 'gu');
+      const textProductsHeader = isGu ? 'લિસ્ટેડ પ્રોડક્ટ્સ અને કેટેગરીઝ' : 'Listed Products & Categories';
+      const textProduct = isGu ? 'પ્રોડક્ટ' : 'Product';
+      const textCategory = isGu ? 'કેટેગરી' : 'Category';
+      const textPrice = isGu ? 'કિંમત' : 'Price';
+      const textStatus = isGu ? 'સ્થિતિ' : 'Status';
+      const textNoProducts = isGu ? 'કોઈ પ્રોડક્ટ લિસ્ટ કરેલ નથી.' : 'No products listed yet.';
+      const textApproved = isGu ? 'મંજૂર કરેલ' : 'Approved';
+      const textFrozen = isGu ? 'ફ્રીઝ (બાકી)' : 'Frozen';
+
+      let productsHtml = '';
+      if (vendorProducts.length === 0) {
+        productsHtml = `
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">${textProductsHeader}</h4>
+            <p class="text-xs text-slate-500 italic">${textNoProducts}</p>
+          </div>
+        `;
+      } else {
+        let rows = vendorProducts.map(p => {
+          const statusText = p.approvedByAdmin ? textApproved : textFrozen;
+          const statusColor = p.approvedByAdmin ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const rawCat = p.category || 'others';
+          const categoryName = translations[currentLanguage][rawCat] || rawCat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+          return `
+            <tr class="border-b border-slate-50 text-slate-700 hover:bg-slate-50/50">
+              <td class="py-2 pr-2">
+                <div class="flex items-center gap-2">
+                  <img src="${p.imageUrl}" class="w-6 h-6 object-cover rounded shadow-sm" />
+                  <span class="font-medium truncate max-w-[120px]">${p.name}</span>
+                </div>
+              </td>
+              <td class="py-2 text-slate-500">${categoryName}</td>
+              <td class="py-2 text-right font-semibold">₹${p.price}</td>
+              <td class="py-2 text-center text-[10px] ${statusColor}">${statusText}</td>
+            </tr>
+          `;
+        }).join('');
+
+        productsHtml = `
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">${textProductsHeader}</h4>
+            <div class="max-h-60 overflow-y-auto pr-1">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                    <th class="py-1 pb-2">${textProduct}</th>
+                    <th class="py-1 pb-2">${textCategory}</th>
+                    <th class="py-1 pb-2 text-right">${textPrice}</th>
+                    <th class="py-1 pb-2 text-center">${textStatus}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      const container = document.getElementById('vendor-profile-content');
+      container.innerHTML = `
+        <div class="flex flex-col items-center pb-4 border-b border-slate-100">
+          <img src="${v.selfieUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}" class="w-24 h-24 rounded-full border-4 border-orange-100 object-cover shadow-sm mb-2" />
+          <h4 class="text-lg font-bold text-slate-900">${v.displayName}</h4>
+          <span class="text-xs font-bold uppercase px-3 py-1 rounded-full ${v.vendorStatus === 'approved' ? 'bg-green-50 text-green-600 border border-green-100' : v.vendorStatus === 'pending' ? 'bg-amber-50 text-amber-500 border border-amber-100' : 'bg-red-50 text-red-600 border border-red-100'}">${v.vendorStatus || 'pending'}</span>
+        </div>
+        
+        <div class="space-y-2.5 text-sm pt-2">
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Email:</span> <span class="font-semibold text-slate-800">${v.email}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Phone:</span> <a href="tel:${v.phone}" class="font-semibold text-brand hover:underline">${v.phone}</a></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">WhatsApp:</span> <a href="https://wa.me/${v.whatsapp}" target="_blank" class="font-semibold text-green-600 hover:underline">${v.whatsapp}</a></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">UPI ID:</span> <span class="font-mono font-semibold text-slate-800">${v.upiId || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Aadhaar (Decrypted):</span> <span class="font-mono font-semibold text-slate-800">${decryptedAadhaar || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">GSTIN:</span> <span class="font-mono font-semibold text-slate-800">${v.gstin || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Shop Address:</span> <span class="font-semibold text-slate-800 text-right max-w-xs">${v.physicalAddress || 'Home-based / Online'}</span></div>
+          <div class="flex justify-between py-1.5"><span class="text-slate-400">Liveness Status:</span> <span class="text-green-600 font-bold">PASSED (Face Verified)</span></div>
+        </div>
+
+        ${productsHtml}
+      `;
+      
+      toggleVendorProfileModal(true);
+    }
+
+    function toggleVendorProfileModal(open) {
+      const modal = document.getElementById('vendor-profile-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' https: data: blob: android-webview-video-poster:; media-src 'self' https: data: blob:;">
+  <title>Your Business, Your Shop - Premium Marketplace</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#ff6700',
+            brandlight: '#fff5ed',
+            dark: '#0f172a',
+            card: '#ffffff',
+            border: '#e2e8f0',
+            graytext: '#64748b'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 selection:bg-brand selection:text-white overflow-x-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="fixed top-0 left-0 w-full z-50 glass border-b border-slate-200 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Logo & Icon -->
+      <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
+        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-orange-500/20">
+          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="6" fill="#ff6700" />
+            <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="font-extrabold" data-i18n="brandName">Your Business, Your Shop</span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="hidden md:flex items-center bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 w-96 focus-within:border-brand focus-within:bg-white focus-within:shadow-sm transition">
+        <svg class="w-4 h-4 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input type="text" id="search-input" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full">
+      </div>
+
+      <!-- Navigation & Controls -->
+      <div class="flex items-center gap-4">
+        <!-- Language Selector -->
+        <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
+          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-3 py-1 rounded-full transition">ગુજરાતી</button>
+          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-3 py-1 rounded-full transition">EN</button>
+        </div>
+
+        <!-- Cart Button -->
+        <button onclick="toggleCartDrawer(true)" class="relative p-2 text-slate-600 hover:text-brand transition duration-200">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+          <span id="cart-count" class="absolute -top-1 -right-1 bg-brand text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden shadow-sm">0</span>
+        </button>
+
+        <!-- User Accounts Link -->
+        <div id="nav-user-actions" class="flex items-center gap-2 text-sm text-slate-700">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE SEARCH BAR -->
+  <div class="md:hidden mt-20 px-4">
+    <div class="flex items-center bg-white border border-slate-200 rounded-full px-4 py-2 w-full focus-within:border-brand focus-within:shadow-sm transition">
+      <svg class="w-4 h-4 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <input type="text" id="search-input-mobile" data-i18n="searchPlaceholder" placeholder="Search products, categories..." class="bg-transparent text-sm text-slate-800 focus:outline-none w-full">
+    </div>
+  </div>
+
+  <!-- HERO SECTION WITH VIDEO BACKGROUND -->
+  <section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-100">
+    <!-- Background Video -->
+    <video autoplay loop muted playsinline class="absolute z-0 w-auto min-w-full min-h-full max-w-none opacity-20 object-cover">
+      <source src="https://assets.mixkit.co/videos/preview/mixkit-minimalist-living-room-with-a-lamp-42353-large.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    
+    <!-- Gradient Overlay (Light Theme) -->
+    <div class="absolute inset-0 z-10 bg-gradient-to-b from-white/30 via-slate-50/80 to-slate-50"></div>
+
+    <!-- Content -->
+    <div class="relative z-20 text-center px-6 max-w-4xl mx-auto mt-12">
+      <!-- Big Premium Custom Branding logo in Hero -->
+      <div class="flex justify-center mb-6 hero-logo opacity-0 scale-90">
+        <div class="relative w-20 h-20 flex items-center justify-center rounded-2xl overflow-hidden shadow-lg shadow-orange-500/10">
+          <svg class="w-full h-full text-brand" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="6" fill="#ff6700" />
+            <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="#ff6700" />
+            <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+      
+      <h1 class="text-4xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-4 uppercase leading-none hero-title">
+        <span class="text-brand">Your Business</span><br><span class="text-slate-800">Your Shop</span>
+      </h1>
+      <p class="text-lg md:text-2xl text-slate-600 font-light mb-2 hero-tagline" data-i18n="tagline">Your Business, Your Shop</p>
+      <p class="text-xs md:text-sm text-slate-500 mb-8 max-w-lg mx-auto hero-subtagline" data-i18n="subtagline">Anyone wishing to do business from home can list their products and kickstart their journey.</p>
+      
+      <div class="flex gap-4 justify-center hero-buttons">
+        <a href="#storefront" class="btn-primary text-white px-8 py-3.5 rounded-full font-semibold transition transform hover:scale-105 shadow-lg">Shop Now</a>
+        <a href="admin.html" class="btn-secondary text-slate-800 px-8 py-3.5 rounded-full font-semibold transition hover:bg-slate-50 border border-slate-200">Become a Seller</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION (Xiaomi Style Parallax) -->
+  <section class="py-24 bg-white border-t border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+      <div class="feature-card opacity-0 translate-y-10">
+        <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        </div>
+        <h4 class="text-lg font-bold mb-2 text-slate-900">Home to Market</h4>
+        <p class="text-sm text-slate-500 leading-relaxed">Every home business can now sell their high quality products directly to customers worldwide.</p>
+      </div>
+      <div class="feature-card opacity-0 translate-y-10">
+        <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        </div>
+        <h4 class="text-lg font-bold mb-2 text-slate-900">Verified Sellers</h4>
+        <p class="text-sm text-slate-500 leading-relaxed">All vendors undergo advanced multi-factor face and ID verification before listing items.</p>
+      </div>
+      <div class="feature-card opacity-0 translate-y-10">
+        <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        </div>
+        <h4 class="text-lg font-bold mb-2 text-slate-900">Transparent Bills</h4>
+        <p class="text-sm text-slate-500 leading-relaxed">Instantly generate standard invoices/receipts with clear order and vendor details.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES FILTER -->
+  <section class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-extrabold text-slate-800 tracking-tight" data-i18n="categories">Categories</h3>
+    </div>
+    <div id="dynamic-categories-bar" class="mobile-scroll gap-3 flex pb-2">
+      <!-- Populated dynamically by JS -->
+    </div>
+  </section>
+
+  <!-- STOREFRONT GRID -->
+  <section id="storefront" class="max-w-7xl mx-auto px-4 py-8 min-h-[400px]">
+    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- Populated dynamically by JS -->
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 bg-white py-16 text-center text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="mb-6">
+        <p class="text-sm text-slate-700 font-bold mb-2" data-i18n="aboutUs">About Our Platform</p>
+        <p class="max-w-md mx-auto leading-relaxed text-slate-500" data-i18n="taglineFull">દરેક ઘર બેઠો માણસ જેને ધંધો કરવો છે એ પોતાની વસ્તુ એની પાસે જે છે એ મૂકી શકે અને ધંધો કરી શકે.</p>
+      </div>
+      <p>&copy; 2026 Your Business, Your Shop. All Rights Reserved. Built for India's Home Entrepreneurs.</p>
+    </div>
+  </footer>
+
+  <!-- CART DRAWER -->
+  <div id="cart-drawer" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-sm transition-opacity duration-300">
+    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 p-6 flex flex-col justify-between shadow-2xl transition-transform duration-300 transform translate-x-full" id="cart-drawer-panel">
+      <div class="flex flex-col h-full justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+            <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+              My Cart
+            </h2>
+            <button onclick="toggleCartDrawer(false)" class="text-slate-400 hover:text-slate-950">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          <div id="cart-items-container" class="overflow-y-auto max-h-[60vh] py-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <div class="border-t border-slate-100 pt-6">
+          <div class="flex justify-between text-base font-extrabold text-slate-900 mb-6">
+            <span data-i18n="total">Total</span>
+            <span id="cart-total-amount" class="text-brand text-lg">₹0</span>
+          </div>
+          <button id="checkout-btn" onclick="openCheckoutModal()" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition flex items-center justify-center gap-2">
+            <span data-i18n="checkout">Checkout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS DRAWER -->
+  <div id="orders-drawer" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-sm transition-opacity duration-300">
+    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 p-6 flex flex-col justify-between shadow-2xl transition-transform duration-300 transform translate-x-full" id="orders-drawer-panel">
+      <div class="flex flex-col h-full justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+            <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+              <span data-i18n="myOrders">My Orders</span>
+            </h2>
+            <button onclick="toggleOrdersDrawer(false)" class="text-slate-400 hover:text-slate-950">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          
+          <!-- Search by phone number for guest checkout -->
+          <div class="my-4 flex gap-2">
+            <input type="tel" id="orders-search-phone" placeholder="Enter Phone to track" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand focus:bg-white transition">
+            <button onclick="loadCustomerOrders()" class="btn-primary text-white text-xs px-4 rounded-xl transition">Track</button>
+          </div>
+
+          <div id="orders-items-container" class="overflow-y-auto max-h-[65vh] py-2 space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <div class="border-t border-slate-100 pt-4 text-center">
+          <button onclick="toggleOrdersDrawer(false)" class="text-xs text-slate-400 hover:text-slate-900" data-i18n="close">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL DRAWER -->
+  <div id="detail-drawer" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-sm">
+    <div class="fixed right-0 top-0 h-full w-full max-w-lg bg-white border-l border-slate-200 p-6 flex flex-col overflow-y-auto shadow-2xl transition-transform duration-300 transform translate-x-full" id="detail-drawer-panel">
+      <button onclick="toggleDetailDrawer(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 z-10">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <div id="detail-content" class="mt-4">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-100 shadow-2xl rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto relative">
+      <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <h2 class="text-xl font-extrabold mb-4 text-slate-800" data-i18n="checkout">Checkout</h2>
+      
+      <form id="checkout-form" onsubmit="submitOrder(event)">
+        <div class="space-y-4 mb-6 text-left">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="billingDetails">Billing Name</label>
+            <input type="text" id="ship-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="phone">Phone Number</label>
+              <input type="tel" id="ship-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="whatsapp">WhatsApp Number</label>
+              <input type="tel" id="ship-whatsapp" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="address">Shipping Address</label>
+            <textarea id="ship-address" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required></textarea>
+          </div>
+        </div>
+
+        <!-- QR CODE PAYMENT INFO -->
+        <div class="border-t border-slate-100 pt-6 mb-6 text-center">
+          <h3 class="text-sm font-bold mb-2 text-brand" data-i18n="qrScanCode">Scan QR Code to Pay</h3>
+          
+          <div class="bg-slate-50 p-3 inline-block rounded-2xl mb-4 border border-slate-100 shadow-inner">
+            <img id="checkout-qr" src="" class="w-40 h-40 mx-auto rounded-lg" alt="UPI QR Code">
+          </div>
+          <p class="text-xs text-slate-500 px-4 leading-relaxed" data-i18n="paymentInstructions">
+            Please scan the QR code using Google Pay or any other UPI app, make the payment, and click 'Place Order'. The vendor will verify your payment and process the order.
+          </p>
+        </div>
+
+        <div class="flex justify-between items-center border-t border-slate-100 pt-4">
+          <div class="text-left">
+            <span class="text-xs text-slate-400" data-i18n="total">Total</span>
+            <div id="checkout-total-price" class="text-xl font-extrabold text-brand">₹0</div>
+          </div>
+          <button type="submit" class="btn-primary text-white px-8 py-3 rounded-full font-semibold transition" data-i18n="placeOrder">
+            Place Order (I Have Paid)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- INVOICE MODAL -->
+  <div id="invoice-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div id="invoice-container" class="w-full max-w-2xl bg-white p-2 rounded-2xl shadow-2xl">
+      <!-- Appended by JS -->
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <!-- APP SCRIPTS -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Page Controls
+    document.addEventListener("DOMContentLoaded", () => {
+      setLanguage(currentLanguage);
+      renderCategoriesBar();
+      renderProducts();
+      updateCartUI();
+      updateNavUI();
+
+      // GSAP Animations
+      gsap.from("header", { y: -100, opacity: 0, duration: 1, ease: "power4.out" });
+      gsap.to(".hero-logo", { scale: 1, opacity: 1, duration: 1, delay: 0.1, ease: "back.out(1.7)" });
+      gsap.from(".hero-title", { scale: 0.9, opacity: 0, duration: 1.2, delay: 0.3, ease: "power3.out" });
+      gsap.from(".hero-tagline", { opacity: 0, y: 30, duration: 1, delay: 0.6 });
+      gsap.from(".hero-subtagline", { opacity: 0, y: 30, duration: 1, delay: 0.8 });
+      gsap.from(".hero-buttons", { opacity: 0, y: 30, duration: 1, delay: 1.0 });
+
+      // Features Cards Scroll Animation
+      gsap.from(".feature-card", {
+        scrollTrigger: {
+          trigger: ".feature-card",
+          start: "top 85%"
+        },
+        opacity: 0,
+        y: 50,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power2.out"
+      });
+    });
+
+    // Navigation bar states
+    function updateNavUI() {
+      const navUser = document.getElementById('nav-user-actions');
+      if (!navUser) return;
+      if (currentUser) {
+        navUser.innerHTML = `
+          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
+          <a href="admin.html" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="dashboard">${translations[currentLanguage].dashboard}</a>
+          <button onclick="handleLogout()" class="border border-slate-200 bg-white text-slate-700 px-4 py-1.5 rounded-full hover:bg-slate-50 hover:border-slate-300 transition" data-i18n="logout">${translations[currentLanguage].logout}</button>
+        `;
+      } else {
+        navUser.innerHTML = `
+          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
+          <a href="admin.html?action=login" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="login">${translations[currentLanguage].login}</a>
+          <a href="admin.html?action=register" class="btn-primary text-white px-4 py-1.5 rounded-full font-semibold transition" data-i18n="register">${translations[currentLanguage].register}</a>
+        `;
+      }
+    }
+
+    // Load Products Grid
+    let currentCategoryFilter = 'all';
+    
+    function renderCategoriesBar() {
+      const bar = document.getElementById('dynamic-categories-bar');
+      if (!bar) return;
+      
+      const allProds = db.getProducts().filter(p => p.approvedByAdmin === true);
+      const uniqueCats = new Set();
+      
+      allProds.forEach(p => {
+        if (p.category) uniqueCats.add(p.category);
+      });
+      
+      let buttonsHtml = `
+        <button onclick="filterCategory('all')" id="cat-btn-all" class="category-btn border-brand text-brand px-6 py-2 rounded-full border bg-white text-xs font-semibold hover:border-brand transition">All Products</button>
+      `;
+      
+      uniqueCats.forEach(cat => {
+        const i18nLabel = translations[currentLanguage][cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const isActive = currentCategoryFilter === cat;
+        const btnClass = isActive ? 'border-brand text-brand' : 'border-slate-200 text-slate-500 hover:border-brand hover:text-brand';
+        buttonsHtml += `
+          <button onclick="filterCategory('${cat}')" id="cat-btn-${cat}" class="category-btn ${btnClass} px-6 py-2 rounded-full border bg-white text-xs font-semibold transition">${i18nLabel}</button>
+        `;
+      });
+      
+      bar.innerHTML = buttonsHtml;
+    }
+
+    function filterCategory(cat) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('border-brand', 'text-brand');
+        btn.classList.add('border-slate-200', 'text-slate-500');
+      });
+      const targetBtn = document.getElementById(`cat-btn-${cat}`);
+      if (targetBtn) {
+        targetBtn.classList.remove('border-slate-200', 'text-slate-500');
+        targetBtn.classList.add('border-brand', 'text-brand');
+      }
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const allProds = db.getProducts();
+      // Only show approved products
+      const filtered = allProds.filter(p => {
+        if (!p.approvedByAdmin) return false;
+        if (currentCategoryFilter !== 'all' && p.category !== currentCategoryFilter) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16" data-i18n="noProducts">${translations[currentLanguage].noProducts}</div>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        grid.innerHTML += `
+          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+            <div class="relative overflow-hidden cursor-pointer" onclick="showProductDetails('${p.id}')">
+              <img src="${p.imageUrl}" class="w-full h-48 object-cover zoom-img" alt="${p.name}">
+              <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-xs bg-white text-slate-800 px-4 py-2 rounded-full font-bold shadow-sm uppercase tracking-wider">View Details</span>
+              </div>
+            </div>
+            <div class="p-4 flex flex-col justify-between flex-grow">
+              <div class="text-left">
+                <h3 class="font-bold text-slate-800 text-base leading-tight hover:text-brand cursor-pointer transition" onclick="showProductDetails('${p.id}')">${p.name}</h3>
+                <p class="text-xs text-slate-400 mt-1">${p.vendorName}</p>
+              </div>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-lg font-extrabold text-slate-950">₹${p.price}</span>
+                <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // SEARCH FILTER
+    document.getElementById('search-input').addEventListener('input', filterSearch);
+    document.getElementById('search-input-mobile').addEventListener('input', filterSearch);
+
+    function filterSearch(e) {
+      const term = e.target.value.toLowerCase();
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = '';
+      const allProds = db.getProducts();
+      const filtered = allProds.filter(p => {
+        if (!p.approvedByAdmin) return false;
+        return p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term) || p.category.toLowerCase().includes(term);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center text-slate-400 py-16" data-i18n="noProducts">${translations[currentLanguage].noProducts}</div>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        grid.innerHTML += `
+          <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:border-orange-200 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group shadow-sm">
+            <div class="relative overflow-hidden cursor-pointer" onclick="showProductDetails('${p.id}')">
+              <img src="${p.imageUrl}" class="w-full h-48 object-cover zoom-img" alt="${p.name}">
+              <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-xs bg-white text-slate-800 px-4 py-2 rounded-full font-bold shadow-sm">View Details</span>
+              </div>
+            </div>
+            <div class="p-4 flex flex-col justify-between flex-grow">
+              <div class="text-left">
+                <h3 class="font-bold text-slate-800 text-base leading-tight cursor-pointer" onclick="showProductDetails('${p.id}')">${p.name}</h3>
+                <p class="text-xs text-slate-400 mt-1">${p.vendorName}</p>
+              </div>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-lg font-extrabold text-slate-950">₹${p.price}</span>
+                <button onclick="addToCart('${p.id}')" class="bg-slate-100 hover:bg-brand hover:text-white hover:scale-105 text-slate-600 p-2.5 rounded-full transition duration-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // DRAWERS & MODALS
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById('cart-drawer');
+      const panel = document.getElementById('cart-drawer-panel');
+      if (open) {
+        drawer.classList.remove('hidden');
+        setTimeout(() => panel.classList.remove('translate-x-full'), 10);
+      } else {
+        panel.classList.add('translate-x-full');
+        setTimeout(() => drawer.classList.add('hidden'), 300);
+      }
+    }
+
+    function toggleDetailDrawer(open) {
+      const drawer = document.getElementById('detail-drawer');
+      const panel = document.getElementById('detail-drawer-panel');
+      if (open) {
+        drawer.classList.remove('hidden');
+        setTimeout(() => panel.classList.remove('translate-x-full'), 10);
+      } else {
+        panel.classList.add('translate-x-full');
+        setTimeout(() => drawer.classList.add('hidden'), 300);
+      }
+    }
+
+    function toggleOrdersDrawer(open) {
+      const drawer = document.getElementById('orders-drawer');
+      const panel = document.getElementById('orders-drawer-panel');
+      if (open) {
+        drawer.classList.remove('hidden');
+        setTimeout(() => {
+          panel.classList.remove('translate-x-full');
+          loadCustomerOrders();
+        }, 10);
+      } else {
+        panel.classList.add('translate-x-full');
+        setTimeout(() => drawer.classList.add('hidden'), 300);
+      }
+    }
+
+    function loadCustomerOrders() {
+      const searchPhone = document.getElementById('orders-search-phone').value.trim();
+      const container = document.getElementById('orders-items-container');
+      container.innerHTML = '';
+      
+      const allOrders = db.getOrders();
+      let matched = [];
+
+      if (searchPhone) {
+        matched = allOrders.filter(o => o.customerMobile === searchPhone);
+      } else if (currentUser) {
+        matched = allOrders.filter(o => o.customerId === currentUser.uid);
+      }
+
+      if (matched.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">No orders found. Please enter your mobile number above to search.</p>`;
+        return;
+      }
+
+      matched.forEach(o => {
+        const dateStr = new Date(o.createdAt).toLocaleDateString();
+        const itemsList = o.items.map(i => `${i.name} (x${i.quantity})`).join(', ');
+        
+        let billBtnHtml = '';
+        if (o.paymentStatus === 'verified') {
+          billBtnHtml = `<button onclick="viewInvoice('${o.id}')" class="w-full btn-primary text-white text-xs py-2 rounded-xl transition">View Bill / બિલ જુઓ</button>`;
+        } else {
+          billBtnHtml = `<button disabled class="w-full bg-slate-100 text-slate-400 text-xs py-2 rounded-xl cursor-not-allowed font-semibold text-center">પેમેન્ટ બાકી: બિલ મંજૂરી પછી મળશે (Awaiting Verification)</button>`;
+        }
+
+        container.innerHTML += `
+          <div class="bg-white border border-slate-100 p-4 rounded-2xl text-left space-y-2 shadow-sm">
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>Date: ${dateStr}</span>
+              <span class="font-mono">${o.invoiceNumber}</span>
+            </div>
+            <div class="text-sm font-bold text-slate-800">${itemsList}</div>
+            <div class="flex justify-between items-center pt-2">
+              <span class="text-brand font-extrabold text-sm">Total: ₹${o.totalAmount}</span>
+              <span class="text-[10px] bg-slate-50 border border-slate-100 text-slate-600 px-2 py-0.5 rounded-full uppercase font-bold">${o.paymentStatus === 'verified' ? 'Verified' : 'Pending Verification'}</span>
+            </div>
+            <div class="pt-2 flex gap-2">
+              ${billBtnHtml}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function showProductDetails(id) {
+      const products = db.getProducts();
+      const p = products.find(prod => prod.id === id);
+      if (!p) return;
+
+      let attrsHtml = '';
+      if (p.attributes) {
+        attrsHtml = Object.entries(p.attributes)
+          .map(([key, val]) => val ? `<div class="flex justify-between py-2.5 border-b border-slate-100 text-sm"><span class="text-slate-500 capitalize">${key.replace(/([A-Z])/g, ' $1')}:</span> <span class="font-semibold text-slate-800">${val}</span></div>` : '')
+          .join('');
+      }
+
+      const container = document.getElementById('detail-content');
+      container.innerHTML = `
+        <img src="${p.imageUrl}" class="w-full h-64 object-cover rounded-2xl mb-6 shadow-md" />
+        <div class="text-left">
+          <h2 class="text-2xl font-extrabold text-slate-900 mb-1">${p.name}</h2>
+          <p class="text-sm text-slate-400 mb-4">Sold by: <span class="text-brand font-bold">${p.vendorName}</span></p>
+          
+          <div class="flex items-center gap-4 mb-6">
+            <span class="text-3xl font-black text-slate-950">₹${p.price}</span>
+            <span class="text-xs bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-full font-semibold">In Stock</span>
+          </div>
+
+          <p class="text-sm text-slate-600 mb-6 leading-relaxed">${p.description}</p>
+          
+          <div class="mb-6">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Specifications</h4>
+            <div class="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+              ${attrsHtml || '<p class="text-xs text-slate-400">No specifications provided.</p>'}
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <button onclick="addToCart('${p.id}'); toggleDetailDrawer(false);" class="flex-1 btn-secondary text-slate-800 py-3 rounded-full font-semibold transition">Add To Cart</button>
+            <button onclick="buyNow('${p.id}')" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Buy Now</button>
+          </div>
+        </div>
+      `;
+      toggleDetailDrawer(true);
+    }
+
+    function buyNow(id) {
+      toggleDetailDrawer(false);
+      cart = [];
+      addToCart(id);
+      openCheckoutModal();
+    }
+
+    function openCheckoutModal() {
+      if (cart.length === 0) {
+        alert(currentLanguage === 'gu' ? 'કાર્ટ ખાલી છે!' : 'Cart is empty!');
+        return;
+      }
+      
+      toggleCartDrawer(false);
+      
+      let total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      document.getElementById('checkout-total-price').innerText = `₹${total}`;
+
+      const primaryVendorId = cart[0].vendorId;
+      const users = db.getUsers();
+      const vendor = users.find(u => u.uid === primaryVendorId);
+      const upi = vendor ? vendor.upiId : 'platform@upi';
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${upi}&pn=${encodeURIComponent(vendor?.displayName || 'Merchant')}&am=${total}&cu=INR`)}`;
+      document.getElementById('checkout-qr').src = qrUrl;
+
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      
+      const mobile = document.getElementById('ship-phone').value;
+      if (!globalRateLimiter.isAllowed(mobile || 'anon_checkout')) {
+        const remaining = globalRateLimiter.getRemainingTime(mobile || 'anon_checkout');
+        alert(currentLanguage === 'gu' ? `ખૂબ જ ઝડપથી ઓર્ડર મૂકી રહ્યા છો. કૃપા કરીને ${remaining} સેકન્ડ રાહ જુઓ.` : `Too many checkout requests. Please wait ${remaining} seconds.`);
+        return;
+      }
+      
+      const primaryVendor = cart[0];
+      const users = db.getUsers();
+      const vendorInfo = users.find(u => u.uid === primaryVendor.vendorId);
+      
+      const newOrder = {
+        id: 'ord_' + Date.now(),
+        customerId: currentUser ? currentUser.uid : 'guest_' + Date.now(),
+        customerName: document.getElementById('ship-name').value,
+        customerMobile: document.getElementById('ship-phone').value,
+        shippingAddress: document.getElementById('ship-address').value,
+        vendorId: primaryVendor.vendorId,
+        vendorName: primaryVendor.vendorName,
+        vendorPhone: vendorInfo ? vendorInfo.phone : '',
+        vendorAddress: vendorInfo ? vendorInfo.physicalAddress : '',
+        vendorUpi: vendorInfo ? vendorInfo.upiId : '',
+        items: [...cart],
+        totalAmount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        paymentStatus: "pending_verification",
+        orderStatus: "placed",
+        commissionAmount: 0, // 100% Free
+        invoiceNumber: 'INV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000),
+        createdAt: new Date().toISOString()
+      };
+
+      db.saveOrder(newOrder);
+      
+      cart = [];
+      saveCart();
+      closeCheckoutModal();
+
+      // Generate WhatsApp bill message to vendor
+      const whatsappNumber = vendorInfo ? vendorInfo.whatsapp : '';
+      let cleanWhatsapp = whatsappNumber.replace(/\D/g, '');
+      if (cleanWhatsapp.length === 10) {
+        cleanWhatsapp = '91' + cleanWhatsapp;
+      }
+      
+      let itemsText = '';
+      newOrder.items.forEach(item => {
+        itemsText += `- ${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}\n`;
+      });
+
+      const billMessage = `🧾 *${newOrder.vendorName.toUpperCase()}* 🧾\n` +
+        `----------------------------------------\n` +
+        `*નવો ઓર્ડર / NEW ORDER*\n` +
+        `----------------------------------------\n` +
+        `*ઓર્ડર ID:* ${newOrder.id}\n` +
+        `*ગ્રાહકનું નામ:* ${newOrder.customerName}\n` +
+        `*મોબાઈલ:* ${newOrder.customerMobile}\n` +
+        `*સરનામું:* ${newOrder.shippingAddress}\n\n` +
+        `*આઈટમ્સ / Items:*\n${itemsText}\n` +
+        `*કુલ રકમ / Total:* ₹${newOrder.totalAmount}\n` +
+        `*પેમેન્ટ સ્ટેટસ:* પેન્ડિંગ ચકાસણી (Pending Verification)\n` +
+        `----------------------------------------\n` +
+        `મેં QR કોડ સ્કેન કરીને ચૂકવણી કરી દીધી છે. કૃપા કરીને ઓર્ડર ચકાસીને મંજૂર કરો.`;
+
+      const encodedMessage = encodeURIComponent(billMessage);
+      const whatsappUrl = `https://wa.me/${cleanWhatsapp}?text=${encodedMessage}`;
+
+      const successMsg = currentLanguage === 'gu' 
+        ? "ઓર્ડર મુકાઈ ગયો છે! વિક્રેતાને વોટ્સએપ પર બિલની વિગતો મોકલવા માટે ઓકે દબાવો. પેમેન્ટ મંજૂર થયા પછી જ ઓફિશિયલ બિલ જનરેટ થશે."
+        : "Order placed successfully! Click OK to send the bill details to the vendor's WhatsApp. The official invoice will be generated once payment is verified.";
+      alert(successMsg);
+
+      try {
+        window.open(whatsappUrl, '_blank');
+      } catch (e) {
+        window.location.href = whatsappUrl;
+      }
+
+      showToast(translations[currentLanguage].orderSuccess);
+      renderProducts();
+    }
+
+    function viewInvoice(orderId) {
+      const orders = db.getOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const container = document.getElementById('invoice-container');
+      container.innerHTML = generateInvoiceHTML(order);
+      document.getElementById('invoice-modal').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
