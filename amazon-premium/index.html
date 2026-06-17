@@ -466,7 +466,7 @@
             shopHeader.classList.remove('hidden');
             
             document.getElementById('vendor-shop-title').innerText = vendor.displayName;
-            document.getElementById('vendor-shop-avatar').src = vendor.selfieUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200";
+            document.getElementById('vendor-shop-avatar').src = vendor.avatar || vendor.selfieUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200";
             document.getElementById('vendor-shop-address').innerText = vendor.physicalAddress || (currentLanguage === 'gu' ? "ઓનલાઈન સ્ટોર" : "Online Store");
             
             // Count products
