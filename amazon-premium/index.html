@@ -365,9 +365,16 @@
           <div class="bg-slate-50 p-3 inline-block rounded-2xl mb-4 border border-slate-100 shadow-inner">
             <img id="checkout-qr" src="" class="w-40 h-40 mx-auto rounded-lg" alt="UPI QR Code">
           </div>
-          <p class="text-xs text-slate-500 px-4 leading-relaxed" data-i18n="paymentInstructions">
+          <p class="text-xs text-slate-500 px-4 leading-relaxed mb-4" data-i18n="paymentInstructions">
             Please scan the QR code using Google Pay or any other UPI app, make the payment, and click 'Place Order'. The vendor will verify your payment and process the order.
           </p>
+          
+          <!-- UTR Ref Number Input -->
+          <div class="text-left max-w-sm mx-auto px-4">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">UPI Transaction Ref / UTR No. (12 Digits) / યુપીઆઈ ટ્રાન્ઝેક્શન નંબર</label>
+            <input type="text" id="ship-utr" pattern="\d{12}" minlength="12" maxlength="12" placeholder="e.g. 306512345678" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition text-center font-mono tracking-widest" required>
+            <span class="text-[10px] text-slate-400 mt-1 block">આ નંબર તમારા ગૂગલ પે / ફોન પે ની રસીદમાં (UTR/Ref No.) જોવા મળશે.</span>
+          </div>
         </div>
 
         <div class="flex justify-between items-center border-t border-slate-100 pt-4">
@@ -1197,6 +1204,7 @@
         items: [...cart],
         totalAmount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         paymentStatus: "pending_verification",
+        paymentUtr: document.getElementById('ship-utr') ? document.getElementById('ship-utr').value.trim() : '',
         orderStatus: "placed",
         commissionAmount: 0, // 100% Free
         invoiceNumber: 'INV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000),
@@ -1228,19 +1236,20 @@
         `*ઓર્ડર ID:* ${newOrder.id}\n` +
         `*ગ્રાહકનું નામ:* ${newOrder.customerName}\n` +
         `*મોબાઈલ:* ${newOrder.customerMobile}\n` +
-        `*સરનામું:* ${newOrder.shippingAddress}\n\n` +
+        `*સરનામું:* ${newOrder.shippingAddress}\n` +
+        `*પેમેન્ટ UTR No:* ${newOrder.paymentUtr}\n\n` +
         `*આઈટમ્સ / Items:*\n${itemsText}\n` +
         `*કુલ રકમ / Total:* ₹${newOrder.totalAmount}\n` +
         `*પેમેન્ટ સ્ટેટસ:* પેન્ડિંગ ચકાસણી (Pending Verification)\n` +
         `----------------------------------------\n` +
-        `મેં QR કોડ સ્કેન કરીને ચૂકવણી કરી દીધી છે. કૃપા કરીને ઓર્ડર ચકાસીને મંજૂર કરો.`;
+        `મેં QR કોડ સ્કેન કરીને ચૂકવણી કરી દીધી છે. UTR નંબર સાથે ઓર્ડર ચકાસીને મંજૂર કરવા વિનંતી.`;
 
       const encodedMessage = encodeURIComponent(billMessage);
       const whatsappUrl = `https://wa.me/${cleanWhatsapp}?text=${encodedMessage}`;
 
       const successMsg = currentLanguage === 'gu' 
-        ? "ઓર્ડર મુકાઈ ગયો છે! વિક્રેતાને વોટ્સએપ પર બિલની વિગતો મોકલવા માટે ઓકે દબાવો. પેમેન્ટ મંજૂર થયા પછી જ ઓફિશિયલ બિલ જનરેટ થશે."
-        : "Order placed successfully! Click OK to send the bill details to the vendor's WhatsApp. The official invoice will be generated once payment is verified.";
+        ? "ઓર્ડર મુકાઈ ગયો છે! વિક્રેતાને વોટ્સએપ પર બિલની વિગતો અને UTR નંબર મોકલવા માટે ઓકે દબાવો. પેમેન્ટ મંજૂર થયા પછી જ ઓફિશિયલ બિલ જનરેટ થશે."
+        : "Order placed successfully! Click OK to send the bill details and UTR to the vendor's WhatsApp. The official invoice will be generated once payment is verified.";
       alert(successMsg);
 
       try {
