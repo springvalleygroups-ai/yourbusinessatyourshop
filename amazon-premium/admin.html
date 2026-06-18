@@ -1024,6 +1024,14 @@
         return;
       }
       
+      // Double check role tampering
+      const verifiedUser = db.getUsers().find(u => u.uid === currentUser.uid);
+      if (!verifiedUser || verifiedUser.role !== currentUser.role) {
+        console.warn('Security alert: Role tampering or user not found. Logging out.');
+        handleLogout();
+        return;
+      }
+      
       authSec.classList.add('hidden');
       dashSec.classList.remove('hidden');
       
@@ -1106,7 +1114,10 @@
               <td class="py-3 text-[10px] font-mono">${o.id}</td>
               <td class="py-3 font-semibold text-slate-700">${itemText}</td>
               <td class="py-3 font-extrabold text-slate-900">₹${o.totalAmount}</td>
-              <td class="py-3 text-xs ${payColor}">${o.paymentStatus}</td>
+              <td class="py-3 text-xs ${payColor}">
+                ${o.paymentStatus}
+                ${o.paymentUtr ? `<div class="text-[9px] text-slate-400 font-mono mt-0.5">UTR: ${o.paymentUtr}</div>` : ''}
+              </td>
               <td class="py-3 text-xs capitalize">${statusText}</td>
               <td class="py-3 flex gap-2">
                 ${actionBtn}
@@ -1684,7 +1695,10 @@
           modalBody.innerHTML += `
             <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50 transition">
               <td class="py-3 font-mono text-xs">${o.invoiceNumber}</td>
-              <td class="py-3 font-bold text-slate-700">${o.vendorName}</td>
+              <td class="py-3 font-bold text-slate-700">
+                ${o.vendorName}
+                ${o.paymentUtr ? `<div class="text-[9px] text-slate-400 font-mono mt-0.5">UTR: ${o.paymentUtr}</div>` : ''}
+              </td>
               <td class="py-3">${o.customerName}</td>
               <td class="py-3 font-semibold text-slate-800">₹${o.totalAmount}</td>
               <td class="py-3 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</td>
