@@ -1313,6 +1313,12 @@
 
     async function vendorAddProduct(e) {
       e.preventDefault();
+      if (!currentUser || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Session invalid or modified. Logging out.");
+        showToast(currentLanguage === 'gu' ? "ભૂલ: સત્ર અમાન્ય છે, કૃપા કરીને ફરીથી લોગિન કરો." : "Error: Invalid session, please log in again.");
+        handleLogout();
+        return;
+      }
       
       if (window.uploadedProductImages.length === 0) {
         alert(currentLanguage === 'gu' ? 'કૃપા કરીને ઓછામાં ઓછી ૧ ઇમેજ અપલોડ કરો.' : 'Please upload at least 1 product image.');
@@ -1641,18 +1647,36 @@
     }
 
     function approveVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       db.updateUser(uid, { vendorStatus: 'approved' });
       showToast('Vendor approved!');
       renderAdminDashboard();
     }
 
     function rejectVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized rejectVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       db.updateUser(uid, { vendorStatus: 'rejected' });
       showToast('Vendor registration rejected.');
       renderAdminDashboard();
     }
 
     function deleteVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       if (confirm(currentLanguage === 'gu' ? 'શું તમે આ વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this vendor and all their products?')) {
         // Delete vendor products
         const products = db.getProducts().filter(p => p.vendorId === uid);
@@ -1668,12 +1692,24 @@
     }
 
     function approveProduct(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveProduct attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       db.updateProduct(id, { approvedByAdmin: true });
       showToast('Product listing approved!');
       renderAdminDashboard();
     }
 
     function rejectProduct(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized rejectProduct attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       db.deleteProduct(id);
       showToast('Product listing rejected and deleted.');
       renderAdminDashboard();
@@ -1926,9 +1962,11 @@
       const p = db.getProducts().find(prod => prod.id === id);
       if (!p) return;
 
-      // Security Check: If vendor, verify ownership
-      if (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid) {
+      // Security Check: If vendor, verify ownership and ensure session signature is valid
+      if (!currentUser || !verifyUserSession(currentUser) || (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid)) {
+        console.warn("Security Alert: Unauthorized product edit attempt!");
         showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
+        handleLogout();
         return;
       }
 
@@ -2018,6 +2056,12 @@
     }
 
     window.deleteProductFromAdmin = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteProductFromAdmin attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       if (confirm('Are you sure you want to delete this product?')) {
         db.deleteProduct(id);
         showToast('Product deleted successfully!');
@@ -2065,6 +2109,12 @@
     // UPGRADE 7: Save announcement banner settings
     window.saveAdminBannerSettings = function(e) {
       e.preventDefault();
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized saveAdminBannerSettings attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       const text = document.getElementById('banner-text').value;
       const active = document.getElementById('banner-active').checked;
       
@@ -2074,12 +2124,24 @@
 
     // UPGRADE 9: Star rating review approval and deletions
     window.approveReview = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveReview attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       db.updateReview(id, { approvedByAdmin: true });
       showToast('Review approved and rating recalculated!');
       renderAdminDashboard();
     }
     
     window.deleteReview = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteReview attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       if (confirm('Are you sure you want to delete/reject this review?')) {
         db.deleteReview(id);
         showToast('Review deleted!');
@@ -2089,6 +2151,12 @@
 
     // UPGRADE 15: Excel/CSV Master Ledger Bookkeeping Exporter
     window.exportLedgerToCSV = function() {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized exportLedgerToCSV attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       const orders = db.getOrders();
       if (orders.length === 0) {
         showToast('No transaction logs found to export!');
@@ -2380,6 +2448,12 @@
 
     // SECURE AUDIT: On-demand Aadhaar Decryption (delegated to Cloud Function / Secure closure)
     window.viewAadhaar = async function(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized viewAadhaar attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
       const users = db.getUsers();
       const v = users.find(u => u.uid === uid);
       if (v && v.aadhaar) {
