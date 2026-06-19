@@ -1041,10 +1041,10 @@
         return;
       }
       
-      // Double check role tampering
+      // Double check role tampering & cryptographic signature verification
       const verifiedUser = db.getUsers().find(u => u.uid === currentUser.uid);
-      if (!verifiedUser || verifiedUser.role !== currentUser.role) {
-        console.warn('Security alert: Role tampering or user not found. Logging out.');
+      if (!verifiedUser || verifiedUser.role !== currentUser.role || !verifyUserSession(currentUser)) {
+        console.warn('Security alert: Role tampering or invalid signature. Logging out.');
         handleLogout();
         return;
       }
