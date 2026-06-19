@@ -1561,7 +1561,6 @@ async function initiateOwnerOTPVerification(user, actionType) {
   // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   window.generatedOwnerOTP = otp;
-  console.log("🔒 [SECURITY] Generated OTP for " + (user.email || user.displayName) + " is:", otp);
   
   // Open the OTP Modal
   const modal = document.getElementById('owner-otp-modal');
