@@ -803,7 +803,8 @@
   <script src="app.js"></script>
   <script>
     let resetTargetUser = null;
-    let generatedResetOTP = "";
+    let generatedResetOTP = null;
+    let isResetOTPVerified = false;
 
     // Image Upload State & Processing
     window.uploadedProductImages = [];
@@ -979,6 +980,7 @@
         const users = db.getUsers();
         const admin = users.find(u => u.role === 'admin');
         resetTargetUser = admin;
+        isResetOTPVerified = true;
         
         showResetPanel();
         document.getElementById('reset-step-email').classList.add('hidden');
@@ -1287,7 +1289,12 @@
 
     function verifyResetOTP() {
       const otp = document.getElementById('reset-otp-input').value.trim();
+      if (!generatedResetOTP || !otp) {
+        alert(currentLanguage === 'gu' ? 'પ્રક્રિયા અમાન્ય છે!' : 'Invalid OTP code!');
+        return;
+      }
       if (otp === generatedResetOTP) {
+        isResetOTPVerified = true;
         document.getElementById('reset-step-otp').classList.add('hidden');
         document.getElementById('reset-step-newpass').classList.remove('hidden');
       } else {
@@ -1296,6 +1303,10 @@
     }
 
     function submitNewPassword() {
+      if (!isResetOTPVerified || !resetTargetUser) {
+        alert(currentLanguage === 'gu' ? 'અનધિકૃત ઍક્સેસ!' : 'Unauthorized access!');
+        return;
+      }
       const newPass = document.getElementById('reset-new-password').value;
       if (!newPass) {
         alert('Please enter a secure password.');
@@ -1303,6 +1314,12 @@
       }
       
       db.updateUserPassword(resetTargetUser.email, newPass);
+      
+      // Reset verification state variables securely
+      isResetOTPVerified = false;
+      resetTargetUser = null;
+      generatedResetOTP = null;
+      
       alert(currentLanguage === 'gu' ? 'પાસવર્ડ સફળતાપૂર્વક અપડેટ થયો છે!' : 'Password updated successfully! Please login with your new credentials.');
       
       showAuthTab('login');
@@ -2339,7 +2356,7 @@
       const file = e.target.files[0];
       if (!file) return;
       
-      compressImage(file, 300, 300, 0.8, (compressedDataUrl) => {
+      compressImage(file, 150, 150, 0.5, (compressedDataUrl) => {
         window.tempUploadedAvatar = compressedDataUrl;
         const preview = document.getElementById('profile-settings-avatar-preview');
         if (preview) {
@@ -2379,21 +2396,7 @@
       }
 
       let finalAvatarUrl = window.tempUploadedAvatar;
-
-      // Background upload to Firebase Storage if configured (using fast synchronous blob conversion)
-      if (finalAvatarUrl && finalAvatarUrl.startsWith('data:') && typeof firebase !== 'undefined' && firebase.apps.length) {
-        try {
-          const storageRef = firebase.storage().ref();
-          const ref = storageRef.child(`avatars/${currentUser.uid}.jpg`);
-          const blob = dataURLtoBlob(finalAvatarUrl);
-          if (blob) {
-            const snapshot = await ref.put(blob);
-            finalAvatarUrl = await snapshot.ref.getDownloadURL();
-          }
-        } catch (err) {
-          console.warn("Firebase Storage avatar upload failed, using local base64:", err);
-        }
-      }
+      const isBase64 = finalAvatarUrl && finalAvatarUrl.startsWith('data:');
 
       // Prepare updated fields
       const updatedFields = {
@@ -2410,10 +2413,10 @@
       }
 
       try {
-        // Save to Database
+        // Save to Database immediately
         db.updateUser(currentUser.uid, updatedFields);
 
-        // Update local session
+        // Update local session immediately
         currentUser.displayName = displayName;
         currentUser.phone = phone;
         currentUser.whatsapp = whatsapp;
@@ -2425,18 +2428,50 @@
         }
         setCurrentUser(currentUser);
 
-        // Refresh UI
+        // Refresh UI immediately
         document.getElementById('dash-username').innerText = displayName;
         const dashAvatar = document.getElementById('dash-avatar');
         if (dashAvatar) {
           dashAvatar.src = finalAvatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100";
         }
 
-        // Close modal
+        // Close modal immediately
         window.toggleProfileSettingsModal(false);
 
-        // Toast success message
+        // Toast success message immediately
         showToast(currentLanguage === 'gu' ? '✅ પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થઈ ગઈ!' : '✅ Profile updated successfully!');
+
+        // Run Firebase Storage upload in the background if configured
+        if (isBase64 && typeof firebase !== 'undefined' && firebase.apps.length) {
+          (async () => {
+            try {
+              const storageRef = firebase.storage().ref();
+              const ref = storageRef.child(`avatars/${currentUser.uid}.jpg`);
+              const blob = dataURLtoBlob(finalAvatarUrl);
+              if (blob) {
+                const snapshot = await ref.put(blob);
+                const downloadUrl = await snapshot.ref.getDownloadURL();
+                
+                // Update user with the firebase URL in background database
+                db.updateUser(currentUser.uid, { avatar: downloadUrl });
+                
+                // Also update active session if user is still logged in
+                const checkUser = JSON.parse(localStorage.getItem('current_user'));
+                if (checkUser && checkUser.uid === currentUser.uid) {
+                  checkUser.avatar = downloadUrl;
+                  setCurrentUser(checkUser);
+                  
+                  // Update header avatar too
+                  const activeAvatar = document.getElementById('dash-avatar');
+                  if (activeAvatar) activeAvatar.src = downloadUrl;
+                }
+                console.log("Background avatar upload completed successfully:", downloadUrl);
+              }
+            } catch (bgErr) {
+              console.warn("Background avatar upload to Firebase Storage failed:", bgErr);
+            }
+          })();
+        }
       } catch (err) {
         console.error("Error saving profile settings:", err);
         alert(currentLanguage === 'gu' ? "પ્રોફાઇલ સેવ કરવામાં ભૂલ આવી!" : "Error saving profile settings!");
@@ -2480,3 +2515,4 @@
   </script>
 </body>
 </html>
+
