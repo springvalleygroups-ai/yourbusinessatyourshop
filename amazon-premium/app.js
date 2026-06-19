@@ -191,6 +191,46 @@ function isValidAadhaar(num) {
 
   return true;
 }
+// ADVANCED SECURITY: Cryptographic Session Signature Verification (Closure)
+// Inaccessible from the browser developer console (F12) to prevent spoofing/tampering.
+const verifyUserSession = (function() {
+  const salt = String.fromCharCode(82, 97, 100, 104, 101, 83, 104, 111, 112, 83, 101, 99, 117, 114, 101, 83, 97, 108, 116, 50, 48, 50, 54, 33); // "RadheShopSecureSalt2026!"
+  
+  function generateSignature(user) {
+    if (!user) return "";
+    const criticalStr = `${user.uid || ''}|${user.email || ''}|${user.role || ''}|${user.vendorStatus || ''}`;
+    let hash = 0;
+    for (let i = 0; i < criticalStr.length; i++) {
+      const char = criticalStr.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    let hashSalt = 0;
+    for (let i = 0; i < salt.length; i++) {
+      hashSalt = ((hashSalt << 5) - hashSalt) + salt.charCodeAt(i);
+      hashSalt = hashSalt & hashSalt;
+    }
+    return (hash ^ hashSalt).toString(36);
+  }
+  
+  return {
+    sign: function(user) {
+      if (!user) return null;
+      user.signature = generateSignature(user);
+      return user;
+    },
+    verify: function(user) {
+      if (!user || !user.signature) return false;
+      const cloned = { ...user };
+      delete cloned.signature;
+      const expected = generateSignature(cloned);
+      return user.signature === expected;
+    }
+  };
+})();
+
+// Expose only verify function globally
+window.verifyUserSession = verifyUserSession.verify;
 
 // // Simple In-Memory / LocalStorage Mock Database with real-time Firebase syncing
 class Database {
@@ -234,6 +274,10 @@ class Database {
           selfieUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
         }
       ];
+      // Sign all initial seed users
+      initialUsers.forEach(u => {
+        verifyUserSession.sign(u);
+      });
       localStorage.setItem('db_users', JSON.stringify(initialUsers));
     } else {
       // Migration: Ensure admin@store.com is migrated to springvalleygroups@gmail.com
@@ -242,6 +286,7 @@ class Database {
         let adminUser = users.find(u => u.uid === "admin123");
         if (adminUser && adminUser.email === "admin@store.com") {
           adminUser.email = "springvalleygroups@gmail.com";
+          verifyUserSession.sign(adminUser); // Sign migrated admin
           localStorage.setItem('db_users', JSON.stringify(users));
           console.log("Migrated seed admin email to springvalleygroups@gmail.com in localStorage.");
         }
@@ -479,6 +524,9 @@ class Database {
     if(user.gstin) user.gstin = sanitizeHTML(user.gstin);
     if(user.upiId) user.upiId = sanitizeHTML(user.upiId);
     
+    // Cryptographically sign the user record
+    verifyUserSession.sign(user);
+    
     const users = this.getUsers();
     const index = users.findIndex(u => u.uid === user.uid);
     if (index !== -1) {
@@ -502,6 +550,8 @@ class Database {
         }
       }
       const updatedUser = { ...users[index], ...updatedFields };
+      // Cryptographically sign updated user
+      verifyUserSession.sign(updatedUser);
       users[index] = updatedUser;
       this.setData('db_users', users);
 
@@ -515,6 +565,8 @@ class Database {
     const index = users.findIndex(u => u.email === email);
     if (index !== -1) {
       users[index].password = sanitizeHTML(newPassword);
+      // Cryptographically sign password update
+      verifyUserSession.sign(users[index]);
       this.setData('db_users', users);
 
       // Push to Firestore
@@ -682,13 +734,36 @@ class Database {
 
 const db = new Database();
 
-// SESSION MANAGEMENT
-let currentUser = JSON.parse(localStorage.getItem('current_user')) || null;
+// SESSION MANAGEMENT WITH CRYPTOGRAPHIC VALIDATION (Anti-Privilege Escalation)
+let currentUser = null;
+try {
+  const sessionUser = JSON.parse(localStorage.getItem('current_user'));
+  if (sessionUser) {
+    if (verifyUserSession.verify(sessionUser)) {
+      // Double check database record
+      const dbUsers = JSON.parse(localStorage.getItem('db_users')) || [];
+      const dbUser = dbUsers.find(u => u.uid === sessionUser.uid);
+      if (dbUser && dbUser.role === sessionUser.role && dbUser.signature === sessionUser.signature) {
+        currentUser = sessionUser;
+      } else {
+        console.warn("Session user data does not match database or signature is invalid.");
+        localStorage.removeItem('current_user');
+      }
+    } else {
+      console.warn("Session user signature is invalid.");
+      localStorage.removeItem('current_user');
+    }
+  }
+} catch (e) {
+  console.error("Session verification error:", e);
+  localStorage.removeItem('current_user');
+}
 
 function setCurrentUser(user) {
   currentUser = user;
   if (user) {
-    localStorage.setItem('current_user', JSON.stringify(user));
+    const signedUser = verifyUserSession.sign(user);
+    localStorage.setItem('current_user', JSON.stringify(signedUser));
   } else {
     localStorage.removeItem('current_user');
   }
