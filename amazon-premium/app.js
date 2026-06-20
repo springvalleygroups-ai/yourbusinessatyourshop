@@ -1267,7 +1267,6 @@ function collectAttributes(containerId) {
   }
   return attributes;
 }
-}
 
 // LIVENESS CAMERA VERIFICATION
 class LivenessVerifier {
