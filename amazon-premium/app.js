@@ -881,7 +881,9 @@ const translations = {
     viewAllBills: "View All Bills",
     backToDash: "Back to Dashboard",
     aboutUs: "About Our Platform",
-    taglineFull: "દરેક ઘર બેઠો માણસ જેને ધંધો કરવો છે એ પોતાની વસ્તુ એની પાસે જે છે એ મૂકી શકે અને ધંધો કરી શકે."
+    taglineFull: "દરેક ઘર બેઠો માણસ જેને ધંધો કરવો છે એ પોતાની વસ્તુ એની પાસે જે છે એ મૂકી શકે અને ધંધો કરી શકે.",
+    adminPortalBtn: "Admin / Owner Panel",
+    sellerPortalBtn: "Seller Portal"
   },
   gu: {
     brandName: "તમારો ધંધો, તમારી દુકાન",
@@ -993,7 +995,9 @@ const translations = {
     viewAllBills: "તમામ બિલો જુઓ",
     backToDash: "ડેશબોર્ડ પર પાછા જાઓ",
     aboutUs: "અમારા પ્લેટફોર્મ વિશે",
-    taglineFull: "દરેક ઘર બેઠો માણસ જેને ધંધો કરવો છે એ પોતાની વસ્તુ એની પાસે જે છે એ મૂકી શકે અને ધંધો કરી શકે."
+    taglineFull: "દરેક ઘર બેઠો માણસ જેને ધંધો કરવો છે એ પોતાની વસ્તુ એની પાસે જે છે એ મૂકી શકે અને ધંધો કરી શકે.",
+    adminPortalBtn: "એડમિન / ઓનર પેનલ",
+    sellerPortalBtn: "વિક્રેતા પોર્ટલ"
   }
 };
 
@@ -1653,7 +1657,7 @@ function verifyOwnerOTP() {
       if (actionType === 'login') {
         setCurrentUser(user);
         showToast(currentLanguage === 'gu' ? 'લોગિન સફળ!' : 'Login Successful!');
-        window.location.href = 'index.html';
+        window.location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
       } else if (actionType === 'register') {
         await db.saveUser(user);
         setCurrentUser(user);
