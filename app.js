@@ -1488,7 +1488,7 @@ async function handleRegister(e) {
   } else {
     setCurrentUser(finalUser);
     alert(currentLanguage === 'gu' ? 'રજીસ્ટ્રેશન સફળ!' : 'Registration successful!');
-    window.location.href = 'index.html';
+    window.location.href = 'admin.html';
   }
 }
 
@@ -1524,7 +1524,7 @@ function handleLogin(e) {
 
   setCurrentUser(user);
   showToast(currentLanguage === 'gu' ? 'લોગિન સફળ!' : 'Login Successful!');
-  window.location.href = 'index.html';
+  window.location.href = 'admin.html';
 }
 
 // DEDICATED OWNER LOGIN HANDLER
@@ -1667,12 +1667,12 @@ function verifyOwnerOTP() {
       if (actionType === 'login') {
         setCurrentUser(user);
         showToast(currentLanguage === 'gu' ? 'લોગિન સફળ!' : 'Login Successful!');
-        window.location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
+        window.location.href = 'admin.html';
       } else if (actionType === 'register') {
         await db.saveUser(user);
         setCurrentUser(user);
         alert(currentLanguage === 'gu' ? 'રજીસ્ટ્રેશન સફળ!' : 'Registration successful!');
-        window.location.href = 'index.html';
+        window.location.href = 'admin.html';
       }
       
       closeOwnerOTPModal();
