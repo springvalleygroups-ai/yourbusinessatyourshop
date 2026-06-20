@@ -1,0 +1,333 @@
+/* Custom Styles for Premium "Your Business, Your Shop" - Korean Trendy Theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
+:root {
+  --brand-peach: #FF8A7A;
+  --brand-peach-hover: #FF705E;
+  --brand-lilac: #D4B2D8;
+  --brand-lilac-hover: #C39DC8;
+  --brand-mint: #A3E4D7;
+  --brand-yellow: #F9E79F;
+  --brand-sky: #AED6F1;
+  --brand-pink: #FFB7C5;
+  --brand-charcoal: #1F2229;
+  
+  --brand-orange: #FF8A7A; /* Fallback for compatibility */
+  --brand-orange-hover: #FF705E;
+  --brand-blue: #AED6F1;
+  --brand-blue-hover: #9ecae6;
+  
+  --light-bg: #F7F3EE;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --border-color: rgba(226, 232, 240, 0.7);
+  --text-primary: #1F2229;
+  --text-secondary: #575F73;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  /* Korean aesthetic multi-color soft background gradient */
+  background: linear-gradient(135deg, #FFF5F5 0%, #F5F7FF 35%, #F0FFF4 70%, #FFFDF0 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 20s ease infinite;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(247, 243, 238, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--brand-lilac);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-peach);
+}
+
+/* Glassmorphism Elements (Light Theme) */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Premium Card Zoom & Shadow Effect - Korean Pastel style */
+.premium-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.premium-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px -5px rgba(31, 38, 135, 0.08);
+  border-color: var(--brand-lilac);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Korean Trendy Multi-colored Gradients */
+.gradient-peach-lilac {
+  background: linear-gradient(135deg, var(--brand-peach) 0%, var(--brand-lilac) 100%);
+}
+.gradient-pink-sky {
+  background: linear-gradient(135deg, var(--brand-pink) 0%, var(--brand-sky) 100%);
+}
+.gradient-mint-yellow {
+  background: linear-gradient(135deg, var(--brand-mint) 0%, var(--brand-yellow) 100%);
+}
+.text-gradient {
+  background: linear-gradient(135deg, #FF758C 0%, #FFA089 50%, #B388FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Premium Interactive Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-pink) 0%, var(--brand-peach) 100%);
+  color: white;
+  box-shadow: 0 4px 15px 0 rgba(255, 138, 122, 0.2);
+  transition: all 0.3s ease;
+  border: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px 0 rgba(255, 138, 122, 0.35);
+  background: linear-gradient(135deg, var(--brand-peach) 0%, var(--brand-lilac) 100%);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+.btn-secondary:hover {
+  background: #ffffff;
+  border-color: var(--brand-lilac);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Multi-colored Categories & Badges */
+.badge-korean-peach {
+  background-color: #FFF0ED;
+  color: #FF8A7A;
+  border: 1px solid #FFDCD6;
+}
+.badge-korean-lilac {
+  background-color: #F8F0FA;
+  color: #B388FF;
+  border: 1px solid #E8D4F7;
+}
+.badge-korean-mint {
+  background-color: #EBFBFA;
+  color: #1abc9c;
+  border: 1px solid #D1F2EB;
+}
+.badge-korean-yellow {
+  background-color: #FEF9E7;
+  color: #F39C12;
+  border: 1px solid #FCF3CF;
+}
+.badge-korean-sky {
+  background-color: #EBF5FB;
+  color: #2980b9;
+  border: 1px solid #D6EAF8;
+}
+
+/* 3D Rotating & Marquee Advertisements */
+.ad-banner-container {
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(90deg, var(--brand-pink) 0%, var(--brand-lilac) 50%, var(--brand-sky) 100%);
+  color: #1F2229;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.5s;
+  box-shadow: 0 4px 15px rgba(212, 178, 216, 0.15);
+}
+
+.ad-banner-container:hover {
+  transform: rotateX(8deg) scale(1.01);
+}
+
+.marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Liveness Camera Scan Indicator */
+.camera-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 6px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  margin: 0 auto;
+  background: #f1f5f9;
+}
+
+.camera-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, transparent, var(--brand-peach), transparent);
+  animation: scan 2.5s linear infinite;
+  z-index: 10;
+}
+
+@keyframes scan {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
+/* Print Invoice Styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-invoice, #printable-invoice * {
+    visibility: visible;
+  }
+  #printable-invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+    padding: 20px;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Horizontal Scrolling for Categories */
+.mobile-scroll {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mobile-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pulse Glow for Status Indicators */
+.pulse-glow-orange {
+  animation: pulse-orange 1.5s infinite alternate;
+}
+@keyframes pulse-orange {
+  0% { box-shadow: 0 0 5px rgba(255, 138, 122, 0.2); }
+  100% { box-shadow: 0 0 15px rgba(255, 138, 122, 0.5); }
+}
+
+/* Star Rating Animation */
+.star-rating i {
+  transition: color 0.2s;
+}
+.star-rating i:hover,
+.star-rating i.active {
+  color: #fbbf24;
+}
+
+/* Hero Section overlay */
+.hero-overlay {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(247, 243, 238, 0.9) 85%, var(--light-bg) 100%);
+}
+
+/* Image zoom effect */
+.zoom-img {
+  transition: transform 0.5s ease;
+}
+.zoom-img:hover {
+  transform: scale(1.08);
+}
+
+/* --- MOBILE & TABLET RESPONSIVENESS PERFECT OVERRIDES --- */
+@media (max-width: 639px) {
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.1 !important;
+  }
+  .hero-tagline {
+    font-size: 1.25rem !important;
+  }
+  .hero-subtagline {
+    font-size: 0.85rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  /* Storefront Grid Optimization for Mobile */
+  #product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important; /* tight 12px gap for mobile */
+  }
+  .product-card-image-wrapper {
+    height: 9.5rem !important; /* 152px image height on mobile */
+  }
+  .product-card-title {
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+  }
+  .product-card-price {
+    font-size: 0.95rem !important;
+  }
+  .product-card-padding {
+    padding: 0.75rem !important;
+  }
+  
+  /* Buttons adjustment for small screens */
+  .btn-action-group {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Tablet optimization */
+  #product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 1.25rem !important;
+  }
+  .product-card-image-wrapper {
+    height: 11rem !important;
+  }
+}
