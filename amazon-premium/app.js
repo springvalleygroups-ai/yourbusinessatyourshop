@@ -193,7 +193,7 @@ function isValidAadhaar(num) {
 }
 // ADVANCED SECURITY: Cryptographic Session Signature Verification (Closure)
 // Inaccessible from the browser developer console (F12) to prevent spoofing/tampering.
-const verifyUserSession = (function() {
+const sessionSigner = (function() {
   const salt = String.fromCharCode(82, 97, 100, 104, 101, 83, 104, 111, 112, 83, 101, 99, 117, 114, 101, 83, 97, 108, 116, 50, 48, 50, 54, 33); // "RadheShopSecureSalt2026!"
   
   function generateSignature(user) {
@@ -230,7 +230,8 @@ const verifyUserSession = (function() {
 })();
 
 // Expose only verify function globally
-window.verifyUserSession = verifyUserSession.verify;
+window.verifyUserSession = sessionSigner.verify;
+const verifyUserSession = sessionSigner.verify;
 
 // // Simple In-Memory / LocalStorage Mock Database with real-time Firebase syncing
 class Database {
@@ -276,7 +277,7 @@ class Database {
       ];
       // Sign all initial seed users
       initialUsers.forEach(u => {
-        verifyUserSession.sign(u);
+        sessionSigner.sign(u);
       });
       localStorage.setItem('db_users', JSON.stringify(initialUsers));
     } else {
@@ -286,7 +287,7 @@ class Database {
         let adminUser = users.find(u => u.uid === "admin123");
         if (adminUser && adminUser.email === "admin@store.com") {
           adminUser.email = "springvalleygroups@gmail.com";
-          verifyUserSession.sign(adminUser); // Sign migrated admin
+          sessionSigner.sign(adminUser); // Sign migrated admin
           localStorage.setItem('db_users', JSON.stringify(users));
           console.log("Migrated seed admin email to springvalleygroups@gmail.com in localStorage.");
         }
@@ -525,7 +526,7 @@ class Database {
     if(user.upiId) user.upiId = sanitizeHTML(user.upiId);
     
     // Cryptographically sign the user record
-    verifyUserSession.sign(user);
+    sessionSigner.sign(user);
     
     const users = this.getUsers();
     const index = users.findIndex(u => u.uid === user.uid);
@@ -551,7 +552,7 @@ class Database {
       }
       const updatedUser = { ...users[index], ...updatedFields };
       // Cryptographically sign updated user
-      verifyUserSession.sign(updatedUser);
+      sessionSigner.sign(updatedUser);
       users[index] = updatedUser;
       this.setData('db_users', users);
 
@@ -566,7 +567,7 @@ class Database {
     if (index !== -1) {
       users[index].password = sanitizeHTML(newPassword);
       // Cryptographically sign password update
-      verifyUserSession.sign(users[index]);
+      sessionSigner.sign(users[index]);
       this.setData('db_users', users);
 
       // Push to Firestore
@@ -739,7 +740,7 @@ let currentUser = null;
 try {
   const sessionUser = JSON.parse(localStorage.getItem('current_user'));
   if (sessionUser) {
-    if (verifyUserSession.verify(sessionUser)) {
+    if (sessionSigner.verify(sessionUser)) {
       // Double check database record
       const dbUsers = JSON.parse(localStorage.getItem('db_users')) || [];
       const dbUser = dbUsers.find(u => u.uid === sessionUser.uid);
@@ -762,7 +763,7 @@ try {
 function setCurrentUser(user) {
   currentUser = user;
   if (user) {
-    const signedUser = verifyUserSession.sign(user);
+    const signedUser = sessionSigner.sign(user);
     localStorage.setItem('current_user', JSON.stringify(signedUser));
   } else {
     localStorage.removeItem('current_user');
