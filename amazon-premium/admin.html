@@ -956,13 +956,21 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       setLanguage(currentLanguage);
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+
+      // If the owner explicitly wants to access the owner portal but is logged in as a vendor, log out first.
+      if (action === 'owner_login' && currentUser && currentUser.role !== 'admin') {
+        localStorage.removeItem('current_user');
+        currentUser = null;
+      }
+
       initDashboard();
       renderAddProductImagePreviews();
       
       // Determine auth views by URL params if not logged in
       if (!currentUser) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const action = urlParams.get('action');
         const resetToken = urlParams.get('reset_token');
         
         // Secret Admin Registration Check
