@@ -724,6 +724,7 @@
         </p>
       </div>
     </div>
+  </div>
   <!-- OWNER EDIT PRODUCT MODAL -->
   <div id="owner-edit-product-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
     <div class="bg-white border border-slate-150 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
@@ -988,6 +989,8 @@
         document.getElementById('reset-step-newpass').classList.remove('hidden');
       } else if (action === 'register') {
         showAuthTab('register');
+      } else if (action === 'owner_login') {
+        showOwnerLoginPanel();
       } else {
         showAuthTab('login');
       }
