@@ -296,6 +296,28 @@ class Database {
       }
     }
 
+    // Database Repair: Re-sign all users in local storage database to sync with current cryptographic salt/algorithm
+    try {
+      const users = JSON.parse(localStorage.getItem('db_users')) || [];
+      let dbUpdated = false;
+      users.forEach(u => {
+        const oldSig = u.signature;
+        const cloned = { ...u };
+        delete cloned.signature;
+        sessionSigner.sign(cloned);
+        if (cloned.signature !== oldSig) {
+          u.signature = cloned.signature;
+          dbUpdated = true;
+        }
+      });
+      if (dbUpdated && users.length > 0) {
+        localStorage.setItem('db_users', JSON.stringify(users));
+        console.log("Database Repair: Re-signed all users in db_users to match current cryptographic salt.");
+      }
+    } catch (e) {
+      console.error("Database signature repair failed:", e);
+    }
+
     if (!localStorage.getItem('db_products')) {
       const initialProducts = [
         {
