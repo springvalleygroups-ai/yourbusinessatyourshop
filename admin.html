@@ -84,8 +84,9 @@
     <div id="auth-section" class="max-w-md mx-auto mt-8 hidden">
       <!-- Tab Buttons -->
       <div class="flex justify-center border-b border-slate-200 mb-6">
-        <button id="tab-login-btn" onclick="showAuthTab('login')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition">Login</button>
-        <button id="tab-register-btn" onclick="showAuthTab('register')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">Register as Seller</button>
+        <button id="tab-login-btn" onclick="showAuthTab('login')" class="w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand text-brand transition">Seller Login</button>
+        <button id="tab-register-btn" onclick="showAuthTab('register')" class="w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">Register</button>
+        <button id="tab-owner-btn" onclick="showOwnerLoginPanel()" class="w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">Owner Portal</button>
       </div>
 
       <!-- Login Form -->
@@ -1030,17 +1031,20 @@
       document.getElementById('owner-login-panel').classList.add('hidden'); // Close owner login panel if open
       const loginBtn = document.getElementById('tab-login-btn');
       const regBtn = document.getElementById('tab-register-btn');
+      const ownerBtn = document.getElementById('tab-owner-btn');
       const loginPanel = document.getElementById('login-panel');
       const regPanel = document.getElementById('register-panel');
       
       if (tab === 'login') {
-        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
-        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        loginBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand text-brand transition";
+        regBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+        if (ownerBtn) ownerBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
         loginPanel.classList.remove('hidden');
         regPanel.classList.add('hidden');
       } else {
-        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
-        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        regBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand text-brand transition";
+        loginBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+        if (ownerBtn) ownerBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
         regPanel.classList.remove('hidden');
         loginPanel.classList.add('hidden');
       }
@@ -1234,6 +1238,14 @@
       document.getElementById('register-panel').classList.add('hidden');
       document.getElementById('reset-panel').classList.add('hidden');
       document.getElementById('owner-login-panel').classList.remove('hidden');
+      
+      const loginBtn = document.getElementById('tab-login-btn');
+      const regBtn = document.getElementById('tab-register-btn');
+      const ownerBtn = document.getElementById('tab-owner-btn');
+      
+      if (loginBtn) loginBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+      if (regBtn) regBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition";
+      if (ownerBtn) ownerBtn.className = "w-1/3 pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand text-brand transition";
     }
 
     function processResetEmail() {
