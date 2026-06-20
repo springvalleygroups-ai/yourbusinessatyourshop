@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' https: data: blob: android-webview-video-poster:; media-src 'self' https: data: blob:;">
+  <title>Seller & Admin Portal - Your Business, Your Shop</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        screens: {
+          'xs': '420px',
+          'sm': '640px',
+          'md': '768px',
+          'lg': '1024px',
+          'xl': '1280px',
+          '2xl': '1536px',
+        },
+        extend: {
+          colors: {
+            brand: '#FF8A7A',
+            brandlight: '#FFF0ED',
+            dark: '#1F2229',
+            card: 'rgba(255, 255, 255, 0.75)',
+            border: 'rgba(226, 232, 240, 0.7)',
+            graytext: '#575F73',
+            koreanpeach: '#FF8A7A',
+            koreanlavender: '#D4B2D8',
+            koreanmint: '#A3E4D7',
+            koreanyellow: '#F9E79F',
+            koreansky: '#AED6F1',
+            koreanpink: '#FFB7C5'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 selection:bg-brand selection:text-white">
+
+  <!-- HEADER -->
+  <header class="fixed top-0 left-0 w-full z-50 glass border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Logo & Icon -->
+      <a href="index.html" class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900">
+        <div class="relative w-9 h-9 flex items-center justify-center rounded-xl overflow-hidden shadow-sm">
+          <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad-admin-header" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFB7C5" />
+                <stop offset="50%" stop-color="#FF8A7A" />
+                <stop offset="100%" stop-color="#D4B2D8" />
+              </linearGradient>
+            </defs>
+            <rect width="24" height="24" rx="6" fill="url(#logo-grad-admin-header)" />
+            <path d="M6 10l6-4.5L18 10v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7z" fill="#ffffff" />
+            <rect x="10" y="13" width="4" height="5" rx="1" fill="url(#logo-grad-admin-header)" />
+            <path d="M9 7.5a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="font-extrabold hidden xs:inline" data-i18n="brandName">Your Business, Your Shop</span>
+        <span class="font-extrabold inline xs:hidden" data-i18n="brandNameShort">Your Shop</span>
+      </a>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Language Selector -->
+        <div class="flex bg-slate-100 rounded-full p-1 border border-slate-200 text-xs font-semibold">
+          <button id="lang-gu-btn" onclick="setLanguage('gu')" class="px-2 sm:px-3 py-1 rounded-full transition"><span class="sm:hidden">GUJ</span><span class="hidden sm:inline">ગુજરાતી</span></button>
+          <button id="lang-en-btn" onclick="setLanguage('en')" class="px-2 sm:px-3 py-1 rounded-full transition">EN</button>
+        </div>
+        <a href="index.html" class="text-sm font-semibold text-slate-650 hover:text-slate-900 transition" data-i18n="home">Home</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 min-h-screen px-4 pb-12 max-w-7xl mx-auto">
+    
+    <!-- AUTHENTICATION PANELS (Hidden if logged in) -->
+    <div id="auth-section" class="max-w-md mx-auto mt-8 hidden">
+      <!-- Tab Buttons -->
+      <div class="flex justify-center border-b border-slate-200 mb-6">
+        <button id="tab-login-btn" onclick="showAuthTab('login')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition">Login</button>
+        <button id="tab-register-btn" onclick="showAuthTab('register')" class="w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition">Register as Seller</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left">
+        <h3 class="text-xl font-extrabold mb-4 text-slate-800" data-i18n="login">Login</h3>
+        <form onsubmit="handleLogin(event)">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
+              <input type="email" id="login-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Password</label>
+              <input type="password" id="login-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Login</button>
+          </div>
+        </form>
+        <div class="mt-4 text-center flex flex-col gap-2">
+          <button type="button" onclick="showResetPanel()" class="text-xs font-bold text-brand hover:underline">Forgot Password? / પાસવર્ડ રિસેટ કરો</button>
+          <button type="button" onclick="showOwnerLoginPanel()" class="text-xs font-bold text-slate-500 hover:text-brand hover:underline">Are you the Owner? Login Here / માલિક લોગિન</button>
+        </div>
+      </div>
+
+      <!-- Owner Login Panel -->
+      <div id="owner-login-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand animate-pulse"></span>
+          <h3 class="text-xl font-extrabold text-slate-800">Owner Portal Login</h3>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">માત્ર પ્લેટફોર્મના માલિક (springvalleygroups@gmail.com) માટે</p>
+        <form onsubmit="handleOwnerLogin(event)">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Owner Email</label>
+              <input type="email" id="owner-login-email" value="springvalleygroups@gmail.com" class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-500 font-medium focus:outline-none cursor-not-allowed" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Password / પાસવર્ડ</label>
+              <input type="password" id="owner-login-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Send OTP & Log In</button>
+          </div>
+        </form>
+        <div class="mt-4 text-center">
+          <button type="button" onclick="showAuthTab('login')" class="text-xs font-bold text-brand hover:underline block mx-auto">Back to Seller Login / વિક્રેતા લોગીન</button>
+        </div>
+      </div>
+
+      <!-- Password Reset Panel -->
+      <div id="reset-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <h3 class="text-xl font-extrabold mb-4 text-slate-800">Reset Password</h3>
+        
+        <!-- Step 1: Input Email -->
+        <div id="reset-step-email">
+          <p class="text-xs text-slate-500 mb-4">Enter your registered email address to begin the password reset process.</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Email Address</label>
+              <input type="email" id="reset-email-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+            </div>
+            <button type="button" onclick="processResetEmail()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Send Reset Code / Link</button>
+            <button type="button" onclick="showAuthTab('login')" class="w-full btn-secondary text-slate-700 py-3 rounded-full font-semibold transition">Back to Login</button>
+          </div>
+        </div>
+
+        <!-- Step 2 (Vendor): Enter Mobile OTP -->
+        <div id="reset-step-otp" class="hidden">
+          <p class="text-xs text-slate-500 mb-4" id="reset-otp-msg">OTP verification code sent to +91 ******1234</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">6-Digit OTP Code</label>
+              <input type="text" id="reset-otp-input" maxlength="6" placeholder="e.g. 123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand text-center font-mono tracking-widest text-lg transition">
+            </div>
+            <button type="button" onclick="verifyResetOTP()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Verify OTP</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Enter New Password -->
+        <div id="reset-step-newpass" class="hidden">
+          <p class="text-xs text-slate-500 mb-4">Enter a secure new password for your account.</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">New Password</label>
+              <input type="password" id="reset-new-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+            </div>
+            <button type="button" onclick="submitNewPassword()" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Update Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl text-left hidden">
+        <h3 class="text-xl font-extrabold text-slate-800">Create Account / નવું એકાઉન્ટ બનાવો</h3>
+        <p class="text-xs text-emerald-600 mb-4 font-semibold">Free Platform Registration / ૧૦૦% મફત રજીસ્ટ્રેશન</p>
+        <form onsubmit="handleRegister(event)">
+          <div class="space-y-4">
+            <!-- Role Selector Container (Hidden by default, only shown for secret admin registration) -->
+            <div id="reg-role-container">
+              <input type="hidden" id="reg-role" value="vendor">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Name / પૂરું નામ</label>
+              <input type="text" id="reg-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Email</label>
+                <input type="email" id="reg-email" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Password</label>
+                <input type="password" id="reg-password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Phone Number</label>
+                <input type="tel" id="reg-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">WhatsApp Number</label>
+                <input type="tel" id="reg-whatsapp" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+            </div>
+
+            <!-- VENDOR ONLY FIELDS -->
+            <div id="vendor-only-fields" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="pan">Aadhaar Card Number</label>
+                  <input type="text" id="reg-aadhaar" maxlength="12" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="gst">GSTIN (Optional)</label>
+                  <input type="text" id="reg-gstin" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">UPI ID (to receive payments)</label>
+                <input type="text" id="reg-upi" placeholder="e.g. UPI-ID@pay" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="physicalAddress">Physical Shop Address (Optional)</label>
+                <textarea id="reg-address" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:border-brand focus:bg-white focus:outline-none transition"></textarea>
+              </div>
+
+              <!-- BIOMETRIC LIVENESS WIDGET -->
+              <div class="border border-slate-100 p-4 rounded-2xl text-center bg-slate-50/50">
+                <h4 class="text-sm font-bold text-brand mb-2" data-i18n="faceAuthTitle">Liveness Face Verification</h4>
+                <p class="text-xs text-slate-500 mb-4" data-i18n="faceAuthInstruction">Position your face in the circle. Follow the steps below.</p>
+                
+                <div id="liveness-area" class="hidden mb-4">
+                  <div class="camera-container mb-3 shadow-inner">
+                    <div class="camera-scan-line"></div>
+                    <video id="liveness-video" autoplay playsinline muted class="w-full h-full object-cover transform scale-x-[-1]"></video>
+                  </div>
+                  <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mb-2">
+                    <div id="liveness-progress" class="bg-brand h-full w-0 transition-all duration-300"></div>
+                  </div>
+                  <div id="liveness-step-label" class="text-xs font-semibold text-slate-700">Initializing...</div>
+                  <div id="liveness-code-display" class="text-2xl font-bold tracking-widest text-brand mt-1 hidden">0000</div>
+                </div>
+
+                <div id="verification-status-box">
+                  <button type="button" id="start-liveness-btn" onclick="livenessVerifier.start()" class="bg-white border border-slate-200 hover:border-brand text-slate-700 text-xs px-6 py-2.5 rounded-full font-semibold transition" data-i18n="startVerification">
+                    Start Verification
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Submit Registration</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD VIEW -->
+    <div id="dashboard-section" class="hidden">
+      <!-- User Greetings & Signout -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-200 pb-4 text-left">
+        <div class="flex items-center gap-4">
+          <div class="relative w-14 h-14 rounded-full overflow-hidden border-2 border-slate-200 shadow-sm cursor-pointer group" onclick="openProfileSettingsModal()">
+            <img id="dash-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+              <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </div>
+          </div>
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-800"><span id="dash-username">User</span>'s Portal</h2>
+            <p id="dash-role-badge" class="text-xs inline-block bg-orange-50 text-brand border border-orange-100 px-3 py-1 rounded-full font-semibold mt-1 uppercase tracking-wider">Role</p>
+          </div>
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button onclick="openProfileSettingsModal()" class="flex-1 sm:flex-none btn-secondary px-4 py-2 rounded-full font-semibold text-xs flex items-center justify-center gap-2">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            Edit Profile
+          </button>
+          <button onclick="handleLogout()" class="flex-1 sm:flex-none btn-secondary px-4 py-2 rounded-full font-semibold text-xs">Logout</button>
+        </div>
+      </div>
+
+      <!-- VENDOR INTERFACE -->
+      <div id="vendor-dashboard" class="hidden space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Add Product Form -->
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+            <h3 class="text-lg font-bold mb-4 text-brand" data-i18n="addProduct">Add New Product</h3>
+            <form onsubmit="vendorAddProduct(event)">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodName">Product Name</label>
+                  <input type="text" id="prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodPrice">Price (₹)</label>
+                    <input type="number" id="prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodStock">Stock</label>
+                    <input type="number" id="prod-stock" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="prodCategory">Category</label>
+                  <select id="prod-category" onchange="handleCategorySelectChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                    <option value="clothing">Clothing & Fabrics</option>
+                    <option value="electronics">Electronics & Mobiles</option>
+                    <option value="footwear">Footwear</option>
+                    <option value="grocery">Groceries</option>
+                    <option value="home_kitchen">Home & Kitchen</option>
+                    <option value="others" selected>Others</option>
+                    <option value="custom_new">+ Add Custom Category (નવી કેટેગરી)</option>
+                  </select>
+                </div>
+                
+                <div id="custom-category-name-group" class="hidden">
+                  <label class="block text-xs font-semibold text-slate-500 mb-1">Enter Custom Category Name (કેટેગરીનું નામ)</label>
+                  <input type="text" id="custom-category-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" placeholder="e.g. Handicrafts, Toys">
+                </div>
+                
+                <!-- Dynamic fields injected here -->
+                <div id="dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 mb-1">Upload Product Images / પ્રોડક્ટ ઇમેજ અપલોડ (Max 5)</label>
+                  <div class="grid grid-cols-5 gap-2 mt-1" id="image-upload-preview-grid">
+                    <!-- Dynamic preview grid -->
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-semibold text-slate-500" data-i18n="prodDesc">Description</label>
+                    <button type="button" onclick="triggerVendorAICopywriter()" class="text-xs font-bold text-brand hover:underline flex items-center gap-1">✨ Auto-Write (ઓટો-લખણ)</button>
+                  </div>
+                  <textarea id="prod-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition" data-i18n="save">Save Product</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Product Management & Orders list -->
+          <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+              <h3 class="text-lg font-bold mb-4 text-slate-800">My Products</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                      <th class="py-3">Name</th>
+                      <th class="py-3">Price</th>
+                      <th class="py-3">Stock</th>
+                      <th class="py-3">Status</th>
+                      <th class="py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-products-list">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+              <h3 class="text-lg font-bold mb-4 text-slate-800">Received Orders</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                      <th class="py-3">Order ID</th>
+                      <th class="py-3">Product/Qty</th>
+                      <th class="py-3">Total</th>
+                      <th class="py-3">Payment</th>
+                      <th class="py-3">Status</th>
+                      <th class="py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-orders-list">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN/OWNER INTERFACE -->
+      <div id="admin-dashboard" class="hidden space-y-8">
+        <!-- Dashboard overview stats cards (Free, 0% Commission Platform) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider" data-i18n="totalSales">Total Platform Sales</h4>
+            <p id="admin-total-sales" class="text-3xl font-black text-slate-900 mt-2">₹0</p>
+          </div>
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Orders Processed</h4>
+            <p id="admin-total-orders" class="text-3xl font-black text-brand mt-2">0</p>
+          </div>
+          <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Active Vendors</h4>
+            <p id="admin-total-vendors" class="text-3xl font-black text-slate-900 mt-2">0</p>
+          </div>
+        </div>
+
+        <!-- UPGRADE 6: SALES ANALYTICS GRAPH -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-1 text-slate-800">Sales Analytics Trend / વેચાણ વિશ્લેષણ આલેખ</h3>
+          <p class="text-xs text-slate-400 mb-4">Total platform transactions plotted over time.</p>
+          <div class="w-full relative h-48 bg-slate-50 rounded-xl p-2 border border-slate-100 flex items-center justify-center">
+            <svg id="admin-sales-chart" viewBox="0 0 500 150" class="w-full h-full text-brand overflow-visible"></svg>
+          </div>
+        </div>
+
+        <!-- UPGRADE 7: ANNOUNCEMENT BANNER MANAGER -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-1 text-slate-800">Announcement Banner Manager / જાહેરાત પટ્ટી મેનેજર</h3>
+          <p class="text-xs text-slate-400 mb-4">Set a promotional alert marquee text at the top of the homepage.</p>
+          <form onsubmit="saveAdminBannerSettings(event)" class="space-y-4">
+            <div class="flex items-center gap-2 mb-2">
+              <input type="checkbox" id="banner-active" class="w-4 h-4 text-brand focus:ring-brand border-gray-300 rounded">
+              <label for="banner-active" class="text-xs font-bold text-slate-700">Show Announcement / જાહેરાત પટ્ટી ચાલુ કરો</label>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Banner Text / લખાણ (Gujarati & English)</label>
+              <input type="text" id="banner-text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <button type="submit" class="btn-primary text-white text-xs px-5 py-2.5 rounded-full font-semibold transition">Save Banner Settings</button>
+          </form>
+        </div>
+
+        <!-- Vendor Sign-up approvals -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800" data-i18n="vendorRequests">Vendor Registration Requests</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">Vendor / Shop</th>
+                  <th class="py-3">Contact</th>
+                  <th class="py-3">Aadhaar</th>
+                  <th class="py-3">Liveness</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-vendor-requests-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Product Listings Approvals -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Product Listing Approvals</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">Product</th>
+                  <th class="py-3">Vendor</th>
+                  <th class="py-3">Price</th>
+                  <th class="py-3">Details/Specs</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-product-requests-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- UPGRADE 9: REVIEWS MODERATION PANEL -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Customer Reviews Moderation / અભિપ્રાય મંજૂરી</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3">User / Product</th>
+                  <th class="py-3">Rating</th>
+                  <th class="py-3">Comment / કમેન્ટ</th>
+                  <th class="py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-pending-reviews-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ALL REGISTERED VENDORS LIST -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">All Registered Vendors</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                  <th class="py-3">Vendor / Shop</th>
+                  <th class="py-3">Contact</th>
+                  <th class="py-3">Status</th>
+                  <th class="py-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-all-vendors-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- UPGRADE 1: ACTIVE APPROVED PRODUCTS LIST -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <h3 class="text-lg font-bold mb-4 text-slate-800">Active Approved Products / ચાલુ પ્રોડક્ટ્સ</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                  <th class="py-3">Product / વસ્તુ</th>
+                  <th class="py-3">Vendor / વિક્રેતા</th>
+                  <th class="py-3">Price / કિંમત</th>
+                  <th class="py-3">Stock / સ્ટોક</th>
+                  <th class="py-3">Badge / ટેગ</th>
+                  <th class="py-3">Actions / ક્રિયાઓ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-approved-products-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECRET AUDIT & LEDGER PANEL (Only for Owner/Admin) -->
+        <div class="bg-white border border-slate-150 p-6 rounded-2xl shadow-sm border-l-4 border-l-orange-500 text-left">
+          <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-800" data-i18n="secretAuditTitle">Owner's Master Audit (Secret Ledger)</h3>
+              <p class="text-xs text-slate-400">Confidential: detailed tracking of all sales and invoices by vendor.</p>
+            </div>
+            <div class="flex gap-2">
+              <!-- UPGRADE 15: Excel/CSV Master Ledger Bookkeeping Exporter -->
+              <button onclick="exportLedgerToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2.5 rounded-full font-semibold transition shadow-sm shadow-emerald-500/10">
+                Export CSV / એક્સેલ ડાઉનલોડ
+              </button>
+              <button onclick="toggleAdminAuditDetails(true)" class="btn-secondary text-xs px-4 py-2.5 rounded-full font-semibold transition" data-i18n="viewAllBills">
+                View All Bills
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                  <th class="py-3" data-i18n="vendorNameCol">Vendor Name</th>
+                  <th class="py-3" data-i18n="itemsSoldCol">Items Sold</th>
+                  <th class="py-3" data-i18n="salesValCol">Sales Value</th>
+                  <th class="py-3">Total Orders</th>
+                  <th class="py-3" data-i18n="actionCol">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-secret-audit-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- BILLS/INVOICES AUDIT DETAILED MODAL -->
+  <div id="admin-bills-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-100 w-full max-w-4xl p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="toggleAdminAuditDetails(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-xl font-bold mb-6 text-slate-800 text-left">All Platform Invoices & Bills</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead>
+            <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+              <th class="py-3">Invoice No</th>
+              <th class="py-3">Vendor</th>
+              <th class="py-3">Customer</th>
+              <th class="py-3">Amount</th>
+              <th class="py-3">Date</th>
+              <th class="py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="admin-all-bills-list">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENDOR PROFILE DETAILS MODAL -->
+  <div id="vendor-profile-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
+      <button onclick="toggleVendorProfileModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900">Vendor Profile Details</h3>
+      
+      <div id="vendor-profile-content" class="space-y-4">
+        <!-- Filled dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE SETTINGS MODAL -->
+  <div id="profile-settings-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-md p-6 rounded-2xl shadow-2xl relative text-slate-800 text-left max-h-[90vh] overflow-y-auto">
+      <button onclick="toggleProfileSettingsModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900">Profile Settings / પ્રોફાઇલ સેટિંગ્સ</h3>
+      <form id="profile-settings-form" onsubmit="saveProfileSettings(event)">
+        <div class="space-y-4">
+          <!-- Profile Pic Section -->
+          <div class="flex flex-col items-center gap-2 mb-4">
+            <div class="relative w-24 h-24 rounded-full overflow-hidden border-4 border-slate-100 shadow-inner group">
+              <img id="profile-settings-avatar-preview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-full h-full object-cover">
+              <label class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer text-white text-[10px] font-bold">
+                <input type="file" id="profile-avatar-input" class="hidden" accept="image/*" onchange="handleAvatarFileSelect(event)">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Upload
+              </label>
+            </div>
+            <button type="button" onclick="removeAvatarImage()" class="text-xs text-red-500 font-semibold hover:underline">Remove Photo / ફોટો દૂર કરો</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Display Name / પૂરું નામ</label>
+              <input type="text" id="profile-display-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Phone Number / ફોન નંબર</label>
+              <input type="tel" id="profile-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">WhatsApp Number / વોટ્સએપ નંબર</label>
+              <input type="tel" id="profile-whatsapp" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <div id="profile-upi-container">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">UPI ID (to receive payments)</label>
+              <input type="text" id="profile-upi" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+            </div>
+          </div>
+
+          <div id="profile-gstin-container">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">GSTIN (Optional)</label>
+            <input type="text" id="profile-gstin" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+          </div>
+
+          <div id="profile-address-container">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Physical Shop Address / દુકાનનું સરનામું</label>
+            <textarea id="profile-address" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition"></textarea>
+          </div>
+
+          <button type="submit" class="w-full btn-primary text-white py-3 rounded-full font-semibold transition">Save Profile Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SINGLE INVOICE PRINT DISPLAY MODAL -->
+  <div id="invoice-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div id="invoice-container" class="w-full max-w-2xl bg-white p-2 rounded-2xl shadow-2xl">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- OWNER OTP VERIFICATION MODAL -->
+  <div id="owner-otp-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-md p-6 rounded-2xl shadow-2xl relative text-slate-800 text-left">
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900" id="otp-modal-title">Owner Verification / માલિક ચકાસણી</h3>
+      <p class="text-xs text-slate-500 mb-4" id="otp-modal-description">
+        સુરક્ષા માટે, springvalleygroups@gmail.com પર ૬ આંકડાનો ઓટીપી કોડ મોકલેલ છે. તે કોડ નીચે બોક્સમાં લખો.<br>
+        For security, a 6-digit OTP code has been sent to springvalleygroups@gmail.com. Please enter it below.
+      </p>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Enter 6-Digit OTP / ઓટીપી લખો</label>
+          <input type="text" id="owner-otp-input" maxlength="6" placeholder="e.g. 123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand text-center font-mono tracking-widest text-lg transition">
+        </div>
+        
+        <div id="owner-otp-error" class="text-xs text-red-500 font-semibold hidden"></div>
+        <div id="owner-otp-success" class="text-xs text-green-600 font-semibold hidden"></div>
+        
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="verifyOwnerOTP()" class="flex-1 btn-primary text-white py-3 rounded-full font-semibold transition">Verify & Proceed / મંજૂર કરો</button>
+          <button type="button" onclick="closeOwnerOTPModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 py-3 rounded-full font-semibold transition">Cancel / રદ કરો</button>
+        </div>
+        
+        <p class="text-[10px] text-slate-400 mt-2 text-center">
+          નોંધ: જો પ્રથમ વાર હોય, તો springvalleygroups@gmail.com પર FormSubmit તરફથી એક કન્ફર્મેશન ઈમેલ આવશે. ઓટીપી મેળવવા માટે તેમાં 'Activate Form' લિંક પર ક્લિક કરવું પડશે.<br>
+          Note: If this is the first time, check springvalleygroups@gmail.com for a confirmation email from FormSubmit and click 'Activate Form' to start receiving OTPs.
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- OWNER EDIT PRODUCT MODAL -->
+  <div id="owner-edit-product-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-lg p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
+      <button onclick="toggleOwnerEditProductModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h3 class="text-xl font-extrabold mb-4 text-slate-900">Edit Product (માલિક દ્વારા સુધારો)</h3>
+      <form id="owner-edit-product-form" onsubmit="submitOwnerProductEdit(event)">
+        <input type="hidden" id="edit-prod-id">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Product Name / નામ</label>
+            <input type="text" id="edit-prod-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Price (₹) / કિંમત</label>
+              <input type="number" id="edit-prod-price" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Stock / જથ્થો</label>
+              <input type="number" id="edit-prod-stock" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div id="edit-prod-category-container" class="col-span-1">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Category / કેટેગરી</label>
+              <select id="edit-prod-category" onchange="handleEditCategoryChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+                <option value="clothing">Clothing & Fabrics</option>
+                <option value="electronics">Electronics & Mobiles</option>
+                <option value="footwear">Footwear</option>
+                <option value="grocery">Groceries</option>
+                <option value="home_kitchen">Home & Kitchen</option>
+                <option value="others">Others</option>
+              </select>
+            </div>
+            <div id="edit-prod-badge-container" class="col-span-1">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Highlight Badge / ટેગ</label>
+              <select id="edit-prod-badge" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition">
+                <option value="none">None / કોઈ નહીં</option>
+                <option value="Trending">Trending / ટ્રેન્ડિંગ</option>
+                <option value="Bestseller">Bestseller / બેસ્ટસેલર</option>
+                <option value="Featured">Featured / ખાસ પ્રોડક્ટ્સ</option>
+                <option value="New Arrival">New Arrival / નવી વસ્તુઓ</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Dynamic specs inside edit modal -->
+          <div id="edit-dynamic-attributes-container" class="border-t border-slate-100 pt-4"></div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Upload Product Images / પ્રોડક્ટ ઇમેજ અપલોડ (Max 5)</label>
+            <div class="grid grid-cols-5 gap-2 mt-1" id="edit-image-upload-preview-grid">
+              <!-- Dynamic preview grid -->
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs font-semibold text-slate-500">Description / વર્ણન</label>
+              <button type="button" onclick="triggerEditAICopywriter()" class="text-xs font-bold text-brand hover:underline flex items-center gap-1">✨ Auto-Write (ઓટો-લખણ)</button>
+            </div>
+            <textarea id="edit-prod-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required></textarea>
+          </div>
+          
+          <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition">Save Changes / સેવ કરો</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+  <script src="app.js?v=2"></script>
+  <script>
+    let resetTargetUser = null;
+    let generatedResetOTP = null;
+    let isResetOTPVerified = false;
+
+    // Image Upload State & Processing
+    window.uploadedProductImages = [];
+    window.uploadedEditProductImages = [];
+
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          callback(dataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadProductImageToFirebase(productId, imgIndex, dataUrl) {
+      if (typeof firebase === 'undefined' || !firebase.apps.length) return dataUrl;
+      try {
+        const storageRef = firebase.storage().ref();
+        const ref = storageRef.child(`products/${productId}/image_${imgIndex}.jpg`);
+        const blob = dataURLtoBlob(dataUrl);
+        if (!blob) return dataUrl;
+        const snapshot = await ref.put(blob);
+        const downloadUrl = await snapshot.ref.getDownloadURL();
+        return downloadUrl;
+      } catch (e) {
+        console.error("Firebase Storage product upload failed, using base64:", e);
+        return dataUrl;
+      }
+    }
+
+    function renderAddProductImagePreviews() {
+      const grid = document.getElementById('image-upload-preview-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      window.uploadedProductImages.forEach((img, idx) => {
+        grid.innerHTML += `
+          <div class="col-span-1 aspect-square rounded-xl overflow-hidden relative border border-slate-100 shadow-sm">
+            <img src="${img}" class="w-full h-full object-cover">
+            <button type="button" onclick="removeAddProductImage(${idx})" class="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white rounded-full p-0.5 shadow transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        `;
+      });
+      if (window.uploadedProductImages.length < 5) {
+        grid.innerHTML += `
+          <div id="image-upload-btn-container" class="col-span-1 aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-brand transition group relative">
+            <input type="file" id="prod-image-file" onchange="handleAddProductImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="text-[8px] text-slate-400 mt-1 font-bold group-hover:text-brand transition">Add / ઉમેરો</span>
+          </div>
+        `;
+      }
+    }
+
+    window.handleAddProductImageUpload = function(e) {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - window.uploadedProductImages.length;
+      const filesToProcess = files.slice(0, remainingSlots);
+      let processedCount = 0;
+      if (filesToProcess.length === 0) return;
+      filesToProcess.forEach(file => {
+        compressImage(file, 500, 500, 0.55, (compressedDataUrl) => {
+          window.uploadedProductImages.push(compressedDataUrl);
+          processedCount++;
+          if (processedCount === filesToProcess.length) {
+            renderAddProductImagePreviews();
+          }
+        });
+      });
+    };
+
+    window.removeAddProductImage = function(idx) {
+      window.uploadedProductImages.splice(idx, 1);
+      renderAddProductImagePreviews();
+    };
+
+    function renderEditProductImagePreviews() {
+      const grid = document.getElementById('edit-image-upload-preview-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      window.uploadedEditProductImages.forEach((img, idx) => {
+        grid.innerHTML += `
+          <div class="col-span-1 aspect-square rounded-xl overflow-hidden relative border border-slate-100 shadow-sm">
+            <img src="${img}" class="w-full h-full object-cover">
+            <button type="button" onclick="removeEditProductImage(${idx})" class="absolute top-1 right-1 bg-red-500 hover:bg-red-650 text-white rounded-full p-0.5 shadow transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        `;
+      });
+      if (window.uploadedEditProductImages.length < 5) {
+        grid.innerHTML += `
+          <div id="edit-image-upload-btn-container" class="col-span-1 aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-brand transition group relative">
+            <input type="file" id="edit-prod-image-file" onchange="handleEditProductImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple>
+            <svg class="w-5 h-5 text-slate-400 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span class="text-[8px] text-slate-400 mt-1 font-bold group-hover:text-brand transition">Add / ઉમેરો</span>
+          </div>
+        `;
+      }
+    }
+
+    window.handleEditProductImageUpload = function(e) {
+      const files = Array.from(e.target.files);
+      const remainingSlots = 5 - window.uploadedEditProductImages.length;
+      const filesToProcess = files.slice(0, remainingSlots);
+      let processedCount = 0;
+      if (filesToProcess.length === 0) return;
+      filesToProcess.forEach(file => {
+        compressImage(file, 500, 500, 0.55, (compressedDataUrl) => {
+          window.uploadedEditProductImages.push(compressedDataUrl);
+          processedCount++;
+          if (processedCount === filesToProcess.length) {
+            renderEditProductImagePreviews();
+          }
+        });
+      });
+    };
+
+    window.removeEditProductImage = function(idx) {
+      window.uploadedEditProductImages.splice(idx, 1);
+      renderEditProductImagePreviews();
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setLanguage(currentLanguage);
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+
+      // If the owner explicitly wants to access the owner portal but is logged in as a vendor, log out first.
+      if (action === 'owner_login' && currentUser && currentUser.role !== 'admin') {
+        localStorage.removeItem('current_user');
+        currentUser = null;
+      }
+
+      initDashboard();
+      renderAddProductImagePreviews();
+      
+      // Determine auth views by URL params if not logged in
+      if (!currentUser) {
+        const resetToken = urlParams.get('reset_token');
+        
+        // Secret Admin Registration Check
+        const secretAdminReg = urlParams.get('secret_admin_reg');
+        if (secretAdminReg === 'RadheAdmin123') {
+          document.getElementById('reg-role-container').innerHTML = `
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Select Role / રોલ પસંદ કરો (SECRET)</label>
+            <select id="reg-role" onchange="handleRegisterRoleChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:bg-white focus:border-brand transition" required>
+              <option value="vendor">Seller / વિક્રેતા (દુકાનદાર)</option>
+              <option value="admin" selected>Platform Owner / પ્લેટફોર્મ માલિક (એડમિન)</option>
+            </select>
+          `;
+        }
+        handleRegisterRoleChange();
+        
+        if (resetToken === 'owner_secure_reset') {
+          const users = db.getUsers();
+          const admin = users.find(u => u.role === 'admin');
+          resetTargetUser = admin;
+          isResetOTPVerified = true;
+          
+          showResetPanel();
+          document.getElementById('reset-step-email').classList.add('hidden');
+          document.getElementById('reset-step-otp').classList.add('hidden');
+          document.getElementById('reset-step-newpass').classList.remove('hidden');
+        } else if (action === 'register') {
+          showAuthTab('register');
+        } else if (action === 'owner_login') {
+          showOwnerLoginPanel();
+        } else {
+          showAuthTab('login');
+        }
+      }
+      
+      updateCategoryFields('dynamic-attributes-container', 'prod-category');
+    });
+
+    function handleRegisterRoleChange() {
+      const role = document.getElementById('reg-role').value;
+      const vendorFields = document.getElementById('vendor-only-fields');
+      const aadhaarInput = document.getElementById('reg-aadhaar');
+      const upiInput = document.getElementById('reg-upi');
+      
+      if (role === 'admin') {
+        vendorFields.classList.add('hidden');
+        aadhaarInput.removeAttribute('required');
+        upiInput.removeAttribute('required');
+      } else {
+        vendorFields.classList.remove('hidden');
+        aadhaarInput.setAttribute('required', 'required');
+        upiInput.setAttribute('required', 'required');
+      }
+    }
+
+    function showAuthTab(tab) {
+      document.getElementById('reset-panel').classList.add('hidden'); // Close reset panel if open
+      document.getElementById('owner-login-panel').classList.add('hidden'); // Close owner login panel if open
+      const loginBtn = document.getElementById('tab-login-btn');
+      const regBtn = document.getElementById('tab-register-btn');
+      const loginPanel = document.getElementById('login-panel');
+      const regPanel = document.getElementById('register-panel');
+      
+      if (tab === 'login') {
+        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
+        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        loginPanel.classList.remove('hidden');
+        regPanel.classList.add('hidden');
+      } else {
+        regBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-brand text-brand transition";
+        loginBtn.className = "w-1/2 pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-650 transition";
+        regPanel.classList.remove('hidden');
+        loginPanel.classList.add('hidden');
+      }
+    }
+
+    function initDashboard() {
+      const authSec = document.getElementById('auth-section');
+      const dashSec = document.getElementById('dashboard-section');
+      
+      if (!currentUser) {
+        authSec.classList.remove('hidden');
+        dashSec.classList.add('hidden');
+        return;
+      }
+      
+      // Double check role tampering & cryptographic signature verification
+      const verifiedUser = db.getUsers().find(u => u.uid === currentUser.uid);
+      if (!verifiedUser || verifiedUser.role !== currentUser.role || !verifyUserSession(currentUser)) {
+        console.warn('Security alert: Role tampering or invalid signature. Logging out.');
+        handleLogout();
+        return;
+      }
+      
+      authSec.classList.add('hidden');
+      dashSec.classList.remove('hidden');
+      
+      document.getElementById('dash-username').innerText = currentUser.displayName;
+      document.getElementById('dash-role-badge').innerText = currentUser.role;
+      const avatarEl = document.getElementById('dash-avatar');
+      if (avatarEl) {
+        avatarEl.src = currentUser.avatar || currentUser.selfieUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100";
+      }
+
+      if (currentUser.role === 'admin') {
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        renderAdminDashboard();
+      } else if (currentUser.role === 'vendor') {
+        document.getElementById('vendor-dashboard').classList.remove('hidden');
+        renderVendorDashboard();
+      }
+    }
+
+    // VENDOR ACTIONS
+    function renderVendorDashboard() {
+      const products = db.getProducts().filter(p => p.vendorId === currentUser.uid);
+      const orders = db.getOrders().filter(o => o.vendorId === currentUser.uid);
+      
+      // Load products list
+      const prodList = document.getElementById('vendor-products-list');
+      prodList.innerHTML = '';
+      if(products.length === 0) {
+        prodList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No products found.</td></tr>`;
+      } else {
+        products.forEach(p => {
+          const statusText = p.approvedByAdmin ? 'Approved' : 'Pending Approval';
+          const statusColor = p.approvedByAdmin ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const uploadingBadge = p.imagesUploading
+            ? `<span class="ml-1 inline-flex items-center gap-1 text-[10px] text-blue-500 font-semibold animate-pulse">
+                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                Uploading…
+              </span>`
+            : '';
+          prodList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 flex items-center gap-2">
+                <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                <span class="font-bold text-slate-700">${p.name}</span>
+              </td>
+              <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+              <td class="py-3">${p.stock}</td>
+              <td class="py-3 text-xs ${statusColor}">${statusText}${uploadingBadge}</td>
+              <td class="py-3 flex gap-2">
+                <button onclick="openOwnerEditProductModal('${p.id}')" class="text-brand hover:text-orange-600 font-bold mr-2">Edit</button>
+                <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-600 font-bold">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Load orders list
+      const orderList = document.getElementById('vendor-orders-list');
+      orderList.innerHTML = '';
+      if(orders.length === 0) {
+        orderList.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No orders received yet.</td></tr>`;
+      } else {
+        orders.forEach(o => {
+          const itemText = o.items.map(i => `${i.name} (${i.quantity})`).join(', ');
+          const payColor = o.paymentStatus === 'verified' ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const statusText = o.orderStatus === 'placed' ? 'New Order' : o.orderStatus;
+          
+          let actionBtn = '';
+          if (o.paymentStatus === 'pending_verification') {
+            actionBtn = `<button onclick="verifyOrderPayment('${o.id}')" class="btn-primary text-white text-[11px] px-3 py-1 rounded-full font-semibold transition">Verify Paid</button>`;
+          } else if (o.orderStatus === 'placed') {
+            actionBtn = `<button onclick="shipOrder('${o.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-[11px] px-3 py-1 rounded-full font-semibold transition shadow-sm shadow-blue-500/20">Mark Shipped</button>`;
+          } else {
+            actionBtn = `<span class="text-slate-400 text-xs">No action needed</span>`;
+          }
+
+          orderList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 text-[10px] font-mono">${o.id}</td>
+              <td class="py-3 font-semibold text-slate-700">${itemText}</td>
+              <td class="py-3 font-extrabold text-slate-900">₹${o.totalAmount}</td>
+              <td class="py-3 text-xs ${payColor}">
+                ${o.paymentStatus}
+                ${o.paymentUtr ? `<div class="text-[9px] text-slate-400 font-mono mt-0.5">UTR: ${o.paymentUtr}</div>` : ''}
+              </td>
+              <td class="py-3 text-xs capitalize">${statusText}</td>
+              <td class="py-3 flex gap-2">
+                ${actionBtn}
+                ${o.paymentStatus === 'verified' 
+                  ? `<button onclick="viewInvoice('${o.id}')" class="text-[11px] bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1 rounded-full hover:bg-slate-200 transition">Bill</button>`
+                  : `<button disabled class="text-[11px] bg-slate-50 border border-slate-150 text-slate-450 px-3 py-1 rounded-full cursor-not-allowed font-semibold" title="Verify payment first to view bill">Bill Pending</button>`
+                }
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    function deleteProduct(id) {
+      if(confirm(currentLanguage === 'gu' ? 'શું તમે આ પ્રોડક્ટ કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this product?')) {
+        db.deleteProduct(id);
+        showToast(currentLanguage === 'gu' ? 'પ્રોડક્ટ ડીલીટ થઈ ગઈ!' : 'Product deleted successfully!');
+        renderVendorDashboard();
+      }
+    }
+
+    function verifyOrderPayment(id) {
+      const order = db.getOrders().find(o => o.id === id);
+      if (order) {
+        // Decrement stock for each item
+        order.items.forEach(item => {
+          const prod = db.getProducts().find(p => p.id === item.productId);
+          if (prod) {
+            const newStock = Math.max(0, prod.stock - item.quantity);
+            db.updateProduct(prod.id, { stock: newStock });
+          }
+        });
+        db.updateOrder(id, { paymentStatus: 'verified', orderStatus: 'processing' });
+        
+        // UPGRADE 11: Play soundbox announcement
+        if (typeof playPaymentSoundbox === 'function') {
+          playPaymentSoundbox(order.totalAmount);
+        }
+        
+        showToast('Payment verified successfully!');
+        renderVendorDashboard();
+      }
+    }
+
+    function shipOrder(id) {
+      db.updateOrder(id, { orderStatus: 'shipped' });
+      showToast('Order marked as shipped!');
+      renderVendorDashboard();
+    }
+
+    function handleCategorySelectChange() {
+      const cat = document.getElementById('prod-category').value;
+      const customGroup = document.getElementById('custom-category-name-group');
+      const customInput = document.getElementById('custom-category-name');
+      
+      if (cat === 'custom_new') {
+        customGroup.classList.remove('hidden');
+        customInput.required = true;
+        updateCategoryFields('dynamic-attributes-container', 'prod-category');
+      } else {
+        customGroup.classList.add('hidden');
+        customInput.required = false;
+        customInput.value = '';
+        updateCategoryFields('dynamic-attributes-container', 'prod-category');
+      }
+    }
+
+    function showResetPanel() {
+      document.getElementById('login-panel').classList.add('hidden');
+      document.getElementById('register-panel').classList.add('hidden');
+      document.getElementById('owner-login-panel').classList.add('hidden');
+      document.getElementById('reset-panel').classList.remove('hidden');
+      
+      document.getElementById('reset-step-email').classList.remove('hidden');
+      document.getElementById('reset-step-otp').classList.add('hidden');
+      document.getElementById('reset-step-newpass').classList.add('hidden');
+    }
+
+    function showOwnerLoginPanel() {
+      document.getElementById('login-panel').classList.add('hidden');
+      document.getElementById('register-panel').classList.add('hidden');
+      document.getElementById('reset-panel').classList.add('hidden');
+      document.getElementById('owner-login-panel').classList.remove('hidden');
+    }
+
+    function processResetEmail() {
+      const email = document.getElementById('reset-email-input').value.trim();
+      if (!email) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      
+      const users = db.getUsers();
+      const user = users.find(u => u.email === email);
+      
+      if (!user) {
+        alert(currentLanguage === 'gu' ? 'આ ઈમેલ આઈડી રજીસ્ટર નથી!' : 'Email address not found in our database!');
+        return;
+      }
+
+      resetTargetUser = user;
+      
+      if (user.role === 'admin') {
+        // Owner reset: dispatch simulated secure link to springvalleygroups@gmail.com
+        alert(currentLanguage === 'gu' 
+          ? 'પાસવર્ડ રિસેટ કરવાની સિક્યોર લિંક springvalleygroups@gmail.com પર મોકલેલ છે!' 
+          : 'A secure password reset link has been dispatched to springvalleygroups@gmail.com.');
+        
+        const resetLink = `${window.location.origin}${window.location.pathname}?reset_token=owner_secure_reset`;
+        
+        // Show simulated email toast popup
+        const emailToast = document.createElement('div');
+        emailToast.className = 'fixed top-24 right-5 bg-white border-l-4 border-orange-500 text-slate-800 p-4 rounded-xl shadow-2xl z-50 max-w-sm text-left';
+        emailToast.innerHTML = `
+          <div class="font-bold text-[10px] text-slate-400 mb-1">Simulated Email to: springvalleygroups@gmail.com</div>
+          <div class="text-xs font-semibold text-slate-850 mb-1">Subject: Owner Password Reset Request</div>
+          <p class="text-[11px] text-slate-500 mb-2">Please click the link below to verify your email and set a new password:</p>
+          <a href="${resetLink}" class="text-xs text-brand hover:underline font-mono break-all font-bold">${resetLink}</a>
+        `;
+        document.body.appendChild(emailToast);
+        
+        showAuthTab('login');
+      } else if (user.role === 'vendor') {
+        // Vendor reset: dispatch mobile SMS OTP
+        const phone = user.phone || '9999999999';
+        const maskedPhone = phone.substring(0, 2) + '******' + phone.substring(8);
+        document.getElementById('reset-otp-msg').innerText = currentLanguage === 'gu' 
+          ? `તમારા નોંધાયેલા મોબાઈલ નંબર +91 ${maskedPhone} પર ઓટીપી કોડ મોકલેલ છે.` 
+          : `OTP verification code sent to +91 ${maskedPhone}.`;
+        
+        generatedResetOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Simulating SMS arrival
+        setTimeout(() => {
+          const smsToast = document.createElement('div');
+          smsToast.className = 'fixed top-24 right-5 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-50 max-w-xs text-left border border-slate-850';
+          smsToast.innerHTML = `
+            <div class="font-bold text-[10px] text-slate-400 mb-1">💬 SIMULATED SMS from: VM-YSYSIN</div>
+            <div class="text-xs font-semibold">Your OTP Code for resetting password is: <span class="text-brand font-mono font-bold text-sm bg-slate-800 px-2 py-0.5 rounded">${generatedResetOTP}</span>. Do not share this with anyone.</div>
+          `;
+          document.body.appendChild(smsToast);
+          setTimeout(() => smsToast.remove(), 15000);
+        }, 1000);
+
+        document.getElementById('reset-step-email').classList.add('hidden');
+        document.getElementById('reset-step-otp').classList.remove('hidden');
+      }
+    }
+
+    function verifyResetOTP() {
+      const otp = document.getElementById('reset-otp-input').value.trim();
+      if (!generatedResetOTP || !otp) {
+        alert(currentLanguage === 'gu' ? 'પ્રક્રિયા અમાન્ય છે!' : 'Invalid OTP code!');
+        return;
+      }
+      if (otp === generatedResetOTP) {
+        isResetOTPVerified = true;
+        document.getElementById('reset-step-otp').classList.add('hidden');
+        document.getElementById('reset-step-newpass').classList.remove('hidden');
+      } else {
+        alert(currentLanguage === 'gu' ? 'ખોટો ઓટીપી કોડ!' : 'Invalid OTP code! Please try again.');
+      }
+    }
+
+    function submitNewPassword() {
+      if (!isResetOTPVerified || !resetTargetUser) {
+        alert(currentLanguage === 'gu' ? 'અનધિકૃત ઍક્સેસ!' : 'Unauthorized access!');
+        return;
+      }
+      const newPass = document.getElementById('reset-new-password').value;
+      if (!newPass) {
+        alert('Please enter a secure password.');
+        return;
+      }
+      
+      db.updateUserPassword(resetTargetUser.email, newPass);
+      
+      // Reset verification state variables securely
+      isResetOTPVerified = false;
+      resetTargetUser = null;
+      generatedResetOTP = null;
+      
+      alert(currentLanguage === 'gu' ? 'પાસવર્ડ સફળતાપૂર્વક અપડેટ થયો છે!' : 'Password updated successfully! Please login with your new credentials.');
+      
+      showAuthTab('login');
+      if (window.location.search.includes('reset_token')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+
+    async function vendorAddProduct(e) {
+      e.preventDefault();
+      if (!currentUser || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Session invalid or modified. Logging out.");
+        showToast(currentLanguage === 'gu' ? "ભૂલ: સત્ર અમાન્ય છે, કૃપા કરીને ફરીથી લોગિન કરો." : "Error: Invalid session, please log in again.");
+        handleLogout();
+        return;
+      }
+      
+      if (window.uploadedProductImages.length === 0) {
+        alert(currentLanguage === 'gu' ? 'કૃપા કરીને ઓછામાં ઓછી ૧ ઇમેજ અપલોડ કરો.' : 'Please upload at least 1 product image.');
+        return;
+      }
+      
+      // Set submit button to loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving...';
+
+      let category = document.getElementById('prod-category').value;
+      if (category === 'custom_new') {
+        category = document.getElementById('custom-category-name').value.trim().toLowerCase().replace(/\s+/g, '_');
+        if (!category) {
+          alert('Please enter a valid category name.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          return;
+        }
+      }
+
+      const attributes = collectAttributes('dynamic-attributes-container');
+
+      const prodId = 'prod_' + Date.now();
+      // Snapshot images as base64 now (already compressed)
+      const base64Images = [...window.uploadedProductImages];
+
+      try {
+        // ── STEP 1: Save IMMEDIATELY with base64 images ──
+        // Product is visible to vendor & owner within ~1 second
+        const newProduct = {
+          id: prodId,
+          name: document.getElementById('prod-name').value,
+          price: parseFloat(document.getElementById('prod-price').value),
+          description: document.getElementById('prod-desc').value,
+          imageUrl: base64Images[0] || '',
+          imageUrls: base64Images,
+          category: category,
+          stock: parseInt(document.getElementById('prod-stock').value),
+          vendorId: currentUser.uid,
+          vendorName: currentUser.displayName,
+          approvedByAdmin: false,
+          attributes: attributes,
+          createdAt: new Date().toISOString(),
+          imagesUploading: true // flag: background upload in progress
+        };
+
+        db.saveProduct(newProduct);
+
+        // Reset form immediately so vendor can add next product
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-stock').value = '';
+        document.getElementById('prod-desc').value = '';
+        window.uploadedProductImages = [];
+        renderAddProductImagePreviews();
+        document.getElementById('prod-category').value = 'others';
+        handleCategorySelectChange();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+
+        showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ ઉમેરાઈ ગઈ! ઓનર અપ્રૂવ કરે પછી લાઈવ થશે.' : '✅ Product listed! Awaiting owner approval.');
+        renderVendorDashboard();
+
+        // ── STEP 2: Upload images to Firebase in BACKGROUND ──
+        // UI is already updated; this runs silently
+        if (typeof firebase !== 'undefined' && firebase.apps.length) {
+          (async () => {
+            try {
+              const firebaseUrls = await Promise.all(
+                base64Images.map((dataUrl, i) => uploadProductImageToFirebase(prodId, i, dataUrl))
+              );
+              // Update product with real Firebase URLs
+              db.updateProduct(prodId, {
+                imageUrl: firebaseUrls[0] || base64Images[0],
+                imageUrls: firebaseUrls,
+                imagesUploading: false
+              });
+              // Refresh dashboard silently to show updated image URLs
+              if (currentUser && currentUser.role === 'vendor') renderVendorDashboard();
+            } catch (uploadErr) {
+              console.warn('Background Firebase image upload failed, keeping base64:', uploadErr);
+              db.updateProduct(prodId, { imagesUploading: false });
+            }
+          })();
+        }
+
+      } catch (err) {
+        console.error("Error adding product:", err);
+        alert("Failed to add product. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    }
+
+    // ADMIN ACTIONS
+    function renderAdminDashboard() {
+      const allUsers = db.getUsers();
+      const allProducts = db.getProducts();
+      const allOrders = db.getOrders();
+
+      // Calc stats
+      const totalSales = allOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+      const totalOrdersCount = allOrders.length;
+      const totalVendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'approved').length;
+
+      document.getElementById('admin-total-sales').innerText = `₹${totalSales}`;
+      document.getElementById('admin-total-orders').innerText = totalOrdersCount;
+      document.getElementById('admin-total-vendors').innerText = totalVendors;
+
+      // UPGRADE 6: Render Sales Graph
+      if (typeof renderSalesChart === 'function') {
+        renderSalesChart(allOrders);
+      }
+
+      // UPGRADE 7: Fetch Announcement Settings
+      const banner = db.getBannerSettings();
+      if (document.getElementById('banner-text')) {
+        document.getElementById('banner-text').value = banner.text || '';
+      }
+      if (document.getElementById('banner-active')) {
+        document.getElementById('banner-active').checked = banner.active || false;
+      }
+
+      // Render Vendor registration requests
+      const vendorRequestsList = document.getElementById('admin-vendor-requests-list');
+      vendorRequestsList.innerHTML = '';
+      const pendingVendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'pending');
+      
+      if(pendingVendors.length === 0) {
+        vendorRequestsList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No pending requests.</td></tr>`;
+      } else {
+        pendingVendors.forEach(v => {
+          const livenessBadge = v.livenessVerified ? `<span class="text-green-600 font-extrabold text-xs">PASSED</span>` : `<span class="text-red-500 font-extrabold text-xs">FAILED</span>`;
+          const selfieImg = v.selfieUrl ? `<img src="${v.selfieUrl}" class="w-10 h-10 rounded-full border border-slate-200 object-cover cursor-pointer hover:scale-105 transition" onclick="showSelfieModal('${v.selfieUrl}')" />` : `<span class="text-slate-400">No Image</span>`;
+          
+          vendorRequestsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3">
+                <button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button>
+                <div class="text-xs text-slate-400">${v.email}</div>
+              </td>
+              <td class="py-3">
+                <div>Ph: ${v.phone}</div>
+                <div class="text-xs text-green-600">WhatsApp: ${v.whatsapp}</div>
+              </td>
+              <td class="py-3 text-xs font-mono">
+                <button onclick="viewAadhaar('${v.uid}')" class="text-brand hover:underline font-semibold bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full text-[10px]">Verify Aadhaar</button>
+              </td>
+              <td class="py-3 flex items-center gap-2">${livenessBadge} ${selfieImg}</td>
+              <td class="py-3">
+                <button onclick="approveVendor('${v.uid}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 transition mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                <button onclick="rejectVendor('${v.uid}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 transition shadow-sm shadow-red-500/10">Reject</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Product Listing Requests
+      const productRequestsList = document.getElementById('admin-product-requests-list');
+      productRequestsList.innerHTML = '';
+      const pendingProducts = allProducts.filter(p => !p.approvedByAdmin);
+      
+      if (pendingProducts.length === 0) {
+        productRequestsList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No pending products to approve.</td></tr>`;
+      } else {
+        pendingProducts.forEach(p => {
+          let specSummary = '';
+          if (p.attributes) {
+            specSummary = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
+          }
+          const syncingNote = p.imagesUploading
+            ? `<div class="inline-flex items-center gap-1 text-[10px] text-blue-500 font-semibold animate-pulse mt-0.5">
+                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                Image syncing…
+              </div>`
+            : '';
+          const approveBtn = p.imagesUploading
+            ? `<button disabled title="Wait for image upload to finish" class="bg-slate-200 text-slate-400 text-xs px-3 py-1.5 rounded-full mr-2 cursor-not-allowed">Wait…</button>`
+            : `<button onclick="approveProduct('${p.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>`;
+          productRequestsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3 flex items-center gap-2">
+                <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                <div>
+                  <div class="font-bold text-slate-700">${p.name}</div>
+                  <div class="text-[11px] text-slate-400 max-w-xs truncate">${p.description}</div>
+                  ${syncingNote}
+                </div>
+              </td>
+              <td class="py-3 text-xs text-slate-500">${p.vendorName}</td>
+              <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+              <td class="py-3 text-xs text-slate-400 max-w-xs truncate">${specSummary || 'None'}</td>
+              <td class="py-3">
+                ${approveBtn}
+                <button onclick="rejectProduct('${p.id}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 shadow-sm shadow-red-500/10">Reject</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // UPGRADE 9: Render Pending Reviews
+      const pendingReviewsList = document.getElementById('admin-pending-reviews-list');
+      if (pendingReviewsList) {
+        pendingReviewsList.innerHTML = '';
+        const pendingReviews = db.getReviews().filter(r => !r.approvedByAdmin);
+        if (pendingReviews.length === 0) {
+          pendingReviewsList.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No pending reviews.</td></tr>`;
+        } else {
+          pendingReviews.forEach(r => {
+            const p = allProducts.find(prod => prod.id === r.productId);
+            const prodName = p ? p.name : 'Unknown Product';
+            const stars = '⭐'.repeat(r.rating);
+            
+            pendingReviewsList.innerHTML += `
+              <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+                <td class="py-3">
+                  <div class="font-bold text-slate-700">${r.userName}</div>
+                  <div class="text-[10px] text-slate-400">${prodName}</div>
+                </td>
+                <td class="py-3 text-amber-500 text-xs">${stars}</td>
+                <td class="py-3 text-xs italic">${r.comment}</td>
+                <td class="py-3">
+                  <button onclick="approveReview('${r.id}')" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 mr-2 shadow-sm shadow-green-500/10">Approve</button>
+                  <button onclick="deleteReview('${r.id}')" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full hover:bg-red-650 shadow-sm shadow-red-500/10">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      }
+
+      // Render Registered Vendors table
+      const allVendorsList = document.getElementById('admin-all-vendors-list');
+      allVendorsList.innerHTML = '';
+      const allRegisteredVendors = allUsers.filter(u => u.role === 'vendor');
+      
+      if(allRegisteredVendors.length === 0) {
+        allVendorsList.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No registered vendors yet.</td></tr>`;
+      } else {
+        allRegisteredVendors.forEach(v => {
+          const statusText = v.vendorStatus || 'pending';
+          const statusColor = statusText === 'approved' ? 'text-green-600 font-bold' : statusText === 'pending' ? 'text-amber-500 font-bold' : 'text-red-500 font-bold';
+          
+          allVendorsList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3">
+                <button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button>
+                <div class="text-xs text-slate-400">Email: ${v.email}</div>
+              </td>
+              <td class="py-3">
+                <div>Ph: ${v.phone}</div>
+                <div class="text-xs text-green-600">WhatsApp: ${v.whatsapp}</div>
+              </td>
+              <td class="py-3 text-xs capitalize ${statusColor}">${statusText}</td>
+              <td class="py-3 flex gap-2">
+                <button onclick="showVendorProfile('${v.uid}')" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full hover:bg-slate-200 transition">View Details</button>
+                <button onclick="deleteVendor('${v.uid}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-full transition shadow-sm shadow-red-500/10">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // UPGRADE 1: Render Approved Products Table
+      const approvedProductsList = document.getElementById('admin-approved-products-list');
+      if (approvedProductsList) {
+        approvedProductsList.innerHTML = '';
+        const approvedProducts = allProducts.filter(p => p.approvedByAdmin);
+        if (approvedProducts.length === 0) {
+          approvedProductsList.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">No active approved products yet.</td></tr>`;
+        } else {
+          approvedProducts.forEach(p => {
+            const badgeLabel = p.badge && p.badge !== 'none' ? p.badge : 'None';
+            approvedProductsList.innerHTML += `
+              <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+                <td class="py-3 flex items-center gap-2">
+                  <img src="${p.imageUrl}" class="w-8 h-8 object-cover rounded shadow-sm" />
+                  <span class="font-bold text-slate-700">${p.name}</span>
+                </td>
+                <td class="py-3 text-xs">${p.vendorName}</td>
+                <td class="py-3 font-semibold text-slate-800">₹${p.price}</td>
+                <td class="py-3">${p.stock}</td>
+                <td class="py-3 text-xs text-slate-500">${badgeLabel}</td>
+                <td class="py-3 flex gap-2">
+                  <button onclick="openOwnerEditProductModal('${p.id}')" class="bg-brand text-white text-xs px-3 py-1 rounded-full font-semibold transition hover:bg-orange-600 shadow-sm shadow-orange-500/10">Edit</button>
+                  <button onclick="deleteProductFromAdmin('${p.id}')" class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-semibold transition hover:bg-red-600 shadow-sm shadow-red-500/10">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      }
+
+      // Render Secret Ledger Auditing Table
+      const secretAuditList = document.getElementById('admin-secret-audit-list');
+      secretAuditList.innerHTML = '';
+      const vendors = allUsers.filter(u => u.role === 'vendor' && u.vendorStatus === 'approved');
+      
+      if(vendors.length === 0) {
+        secretAuditList.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400" data-i18n="noVendors">No registered vendors yet.</td></tr>`;
+      } else {
+        vendors.forEach(v => {
+          const vendorOrders = allOrders.filter(o => o.vendorId === v.uid);
+          const totalSalesVal = vendorOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+          const itemsCount = vendorOrders.reduce((sum, o) => sum + o.items.reduce((iSum, i) => iSum + i.quantity, 0), 0);
+          const ordersCount = vendorOrders.length;
+
+          secretAuditList.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+              <td class="py-3"><button onclick="showVendorProfile('${v.uid}')" class="font-bold text-brand hover:underline text-left">${v.displayName}</button></td>
+              <td class="py-3">${itemsCount}</td>
+              <td class="py-3 font-extrabold text-slate-900">₹${totalSalesVal}</td>
+              <td class="py-3 font-semibold text-brand">${ordersCount}</td>
+              <td class="py-3">
+                <button onclick="showVendorBills('${v.uid}', '${v.displayName}')" class="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-3.5 py-1 rounded-full hover:bg-slate-200 hover:text-slate-900 transition">Audit Bills</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    function approveVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      db.updateUser(uid, { vendorStatus: 'approved' });
+      showToast('Vendor approved!');
+      renderAdminDashboard();
+    }
+
+    function rejectVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized rejectVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      db.updateUser(uid, { vendorStatus: 'rejected' });
+      showToast('Vendor registration rejected.');
+      renderAdminDashboard();
+    }
+
+    function deleteVendor(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteVendor attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      if (confirm(currentLanguage === 'gu' ? 'શું તમે આ વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this vendor and all their products?')) {
+        // Delete vendor products
+        const products = db.getProducts().filter(p => p.vendorId === uid);
+        products.forEach(p => {
+          db.deleteProduct(p.id);
+        });
+        
+        // Delete vendor user
+        db.deleteUser(uid);
+        showToast(currentLanguage === 'gu' ? 'વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ ડીલીટ થઈ ગઈ!' : 'Vendor and their products deleted successfully!');
+        renderAdminDashboard();
+      }
+    }
+
+    function approveProduct(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveProduct attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      db.updateProduct(id, { approvedByAdmin: true });
+      showToast('Product listing approved!');
+      renderAdminDashboard();
+    }
+
+    function rejectProduct(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized rejectProduct attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      db.deleteProduct(id);
+      showToast('Product listing rejected and deleted.');
+      renderAdminDashboard();
+    }
+
+    function showVendorBills(vendorId, vendorName) {
+      const orders = db.getOrders().filter(o => o.vendorId === vendorId);
+      const modalBody = document.getElementById('admin-all-bills-list');
+      modalBody.innerHTML = '';
+      
+      if(orders.length === 0) {
+        modalBody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No bills generated for this vendor yet.</td></tr>`;
+      } else {
+        orders.forEach(o => {
+          modalBody.innerHTML += `
+            <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50 transition">
+              <td class="py-3 font-mono text-xs">${o.invoiceNumber}</td>
+              <td class="py-3 font-bold text-slate-700">
+                ${o.vendorName}
+                ${o.paymentUtr ? `<div class="text-[9px] text-slate-400 font-mono mt-0.5">UTR: ${o.paymentUtr}</div>` : ''}
+              </td>
+              <td class="py-3">${o.customerName}</td>
+              <td class="py-3 font-semibold text-slate-800">₹${o.totalAmount}</td>
+              <td class="py-3 text-xs text-slate-400">${new Date(o.createdAt).toLocaleDateString()}</td>
+              <td class="py-3">
+                ${o.paymentStatus === 'verified' 
+                  ? `<button onclick="viewInvoice('${o.id}')" class="btn-primary text-white text-[11px] px-3.5 py-1 rounded-full transition">View Invoice</button>`
+                  : `<button disabled class="bg-slate-105 border border-slate-150 text-slate-400 text-[11.5px] px-3.5 py-1 rounded-full cursor-not-allowed font-medium">Unverified</button>`
+                }
+              </td>
+            </tr>
+          `;
+        });
+      }
+      
+      toggleAdminAuditDetails(true);
+    }
+
+    function toggleAdminAuditDetails(open) {
+      const modal = document.getElementById('admin-bills-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function viewInvoice(orderId) {
+      const orders = db.getOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const container = document.getElementById('invoice-container');
+      container.innerHTML = generateInvoiceHTML(order);
+      document.getElementById('invoice-modal').classList.remove('hidden');
+    }
+
+    function showSelfieModal(url) {
+      // Create quick popup modal to view full size selfie
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4 cursor-pointer backdrop-blur-sm';
+      modal.onclick = () => modal.remove();
+      modal.innerHTML = `<img src="${url}" class="max-w-md max-h-screen rounded-2xl border-4 border-white shadow-2xl" />`;
+      document.body.appendChild(modal);
+    }
+
+    // VENDOR PROFILE DETAILS DIALOGUE
+    async function showVendorProfile(uid) {
+      const users = db.getUsers();
+      const v = users.find(u => u.uid === uid);
+      if (!v) return;
+
+      const decryptedAadhaar = await decryptAadhaar(v.aadhaar);
+      // Mask Aadhaar: show only last 4 digits
+      let maskedAadhaar = 'N/A';
+      if (decryptedAadhaar && decryptedAadhaar.length === 12) {
+        maskedAadhaar = `xxxx-xxxx-${decryptedAadhaar.substring(8)}`;
+      } else if (decryptedAadhaar) {
+        maskedAadhaar = decryptedAadhaar;
+      }
+
+      // Fetch all products uploaded by this vendor
+      const allProducts = db.getProducts();
+      const vendorProducts = allProducts.filter(p => p.vendorId === uid);
+
+      // Define translations inline to support Guj and En easily
+      const isGu = (currentLanguage === 'gu');
+      const textProductsHeader = isGu ? 'લિસ્ટેડ પ્રોડક્ટ્સ અને કેટેગરીઝ' : 'Listed Products & Categories';
+      const textProduct = isGu ? 'પ્રોડક્ટ' : 'Product';
+      const textCategory = isGu ? 'કેટેગરી' : 'Category';
+      const textPrice = isGu ? 'કિંમત' : 'Price';
+      const textStatus = isGu ? 'સ્થિતિ' : 'Status';
+      const textNoProducts = isGu ? 'કોઈ પ્રોડક્ટ લિસ્ટ કરેલ નથી.' : 'No products listed yet.';
+      const textApproved = isGu ? 'મંજૂર કરેલ' : 'Approved';
+      const textFrozen = isGu ? 'ફ્રીઝ (બાકી)' : 'Frozen';
+
+      let productsHtml = '';
+      if (vendorProducts.length === 0) {
+        productsHtml = `
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">${textProductsHeader}</h4>
+            <p class="text-xs text-slate-500 italic">${textNoProducts}</p>
+          </div>
+        `;
+      } else {
+        let rows = vendorProducts.map(p => {
+          const statusText = p.approvedByAdmin ? textApproved : textFrozen;
+          const statusColor = p.approvedByAdmin ? 'text-green-600 font-bold' : 'text-amber-500 font-bold';
+          const rawCat = p.category || 'others';
+          const categoryName = translations[currentLanguage][rawCat] || rawCat.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+          return `
+            <tr class="border-b border-slate-50 text-slate-700 hover:bg-slate-50/50">
+              <td class="py-2 pr-2">
+                <div class="flex items-center gap-2">
+                  <img src="${p.imageUrl}" class="w-6 h-6 object-cover rounded shadow-sm" />
+                  <span class="font-medium truncate max-w-[120px]">${p.name}</span>
+                </div>
+              </td>
+              <td class="py-2 text-slate-500">${categoryName}</td>
+              <td class="py-2 text-right font-semibold">₹${p.price}</td>
+              <td class="py-2 text-center text-[10px] ${statusColor}">${statusText}</td>
+              <td class="py-2 text-right">
+                <button onclick="toggleVendorProfileModal(false); openOwnerEditProductModal('${p.id}')" class="text-xs font-semibold text-brand hover:underline">Edit</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        productsHtml = `
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">${textProductsHeader}</h4>
+            <div class="max-h-60 overflow-y-auto pr-1">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                    <th class="py-1 pb-2">${textProduct}</th>
+                    <th class="py-1 pb-2">${textCategory}</th>
+                    <th class="py-1 pb-2 text-right">${textPrice}</th>
+                    <th class="py-1 pb-2 text-center">${textStatus}</th>
+                    <th class="py-1 pb-2 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      const container = document.getElementById('vendor-profile-content');
+      container.innerHTML = `
+        <div class="flex flex-col items-center pb-4 border-b border-slate-100">
+          <img src="${v.selfieUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}" class="w-24 h-24 rounded-full border-4 border-orange-100 object-cover shadow-sm mb-2" />
+          <h4 class="text-lg font-bold text-slate-900">${v.displayName}</h4>
+          <span class="text-xs font-bold uppercase px-3 py-1 rounded-full ${v.vendorStatus === 'approved' ? 'bg-green-50 text-green-600 border border-green-100' : v.vendorStatus === 'pending' ? 'bg-amber-50 text-amber-500 border border-amber-100' : 'bg-red-50 text-red-600 border border-red-100'}">${v.vendorStatus || 'pending'}</span>
+        </div>
+        
+        <div class="space-y-2.5 text-sm pt-2">
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Email:</span> <span class="font-semibold text-slate-800">${v.email}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Phone:</span> <a href="tel:${v.phone}" class="font-semibold text-brand hover:underline">${v.phone}</a></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">WhatsApp:</span> <a href="https://wa.me/${v.whatsapp}" target="_blank" class="font-semibold text-green-600 hover:underline">${v.whatsapp}</a></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">UPI ID:</span> <span class="font-mono font-semibold text-slate-800">${v.upiId || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Aadhaar (Decrypted):</span> <span class="font-mono font-semibold text-slate-800">${decryptedAadhaar || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">GSTIN:</span> <span class="font-mono font-semibold text-slate-800">${v.gstin || 'N/A'}</span></div>
+          <div class="flex justify-between py-1.5 border-b border-slate-50"><span class="text-slate-400">Shop Address:</span> <span class="font-semibold text-slate-800 text-right max-w-xs">${v.physicalAddress || 'Home-based / Online'}</span></div>
+          <div class="flex justify-between py-1.5"><span class="text-slate-400">Liveness Status:</span> <span class="text-green-600 font-bold">PASSED (Face Verified)</span></div>
+        </div>
+
+        ${productsHtml}
+      `;
+      
+      toggleVendorProfileModal(true);
+    }
+
+    function toggleVendorProfileModal(open) {
+      const modal = document.getElementById('vendor-profile-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // NEW MASTER SUITE HELPER FUNCTIONS
+    // ==========================================
+
+    // UPGRADE 1: Open Owner Edit Modal
+    // UPGRADE 1: Open Owner Edit Modal
+    window.openOwnerEditProductModal = function(id) {
+      const p = db.getProducts().find(prod => prod.id === id);
+      if (!p) return;
+      
+      // Security Check: If vendor, verify ownership
+      if (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid) {
+        showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
+        return;
+      }
+
+      // Hide or show badge selection depending on user role
+      if (currentUser.role === 'admin') {
+        document.getElementById('edit-prod-badge-container').classList.remove('hidden');
+        document.getElementById('edit-prod-category-container').className = "col-span-1";
+        document.querySelector('#owner-edit-product-modal h3').innerText = "Edit Product (માલિક દ્વારા સુધારો)";
+      } else {
+        document.getElementById('edit-prod-badge-container').classList.add('hidden');
+        document.getElementById('edit-prod-category-container').className = "col-span-2";
+        document.querySelector('#owner-edit-product-modal h3').innerText = "Edit Product (સુધારો)";
+      }
+
+      document.getElementById('edit-prod-id').value = p.id;
+      document.getElementById('edit-prod-name').value = p.name;
+      document.getElementById('edit-prod-price').value = p.price;
+      document.getElementById('edit-prod-stock').value = p.stock;
+      document.getElementById('edit-prod-category').value = p.category || 'others';
+      document.getElementById('edit-prod-badge').value = p.badge || 'none';
+      document.getElementById('edit-prod-desc').value = p.description;
+      
+      // Load current images
+      window.uploadedEditProductImages = p.imageUrls && p.imageUrls.length > 0 ? [...p.imageUrls] : (p.imageUrl ? [p.imageUrl] : []);
+      renderEditProductImagePreviews();
+
+      // Update specs dynamically
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category', 'edit-attr-', p.attributes);
+      
+      document.getElementById('owner-edit-product-modal').classList.remove('hidden');
+    }
+
+    window.toggleOwnerEditProductModal = function(open) {
+      const modal = document.getElementById('owner-edit-product-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    window.handleEditCategoryChange = function() {
+      updateCategoryFields('edit-dynamic-attributes-container', 'edit-prod-category', 'edit-attr-');
+    }
+
+    window.submitOwnerProductEdit = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-prod-id').value;
+      const category = document.getElementById('edit-prod-category').value;
+      
+      const p = db.getProducts().find(prod => prod.id === id);
+      if (!p) return;
+
+      // Security Check: If vendor, verify ownership and ensure session signature is valid
+      if (!currentUser || !verifyUserSession(currentUser) || (currentUser.role !== 'admin' && p.vendorId !== currentUser.uid)) {
+        console.warn("Security Alert: Unauthorized product edit attempt!");
+        showToast(currentLanguage === 'gu' ? "તમારી પાસે આ પ્રોડક્ટ સુધારવાની પરવાનગી નથી!" : "You do not have permission to edit this product!");
+        handleLogout();
+        return;
+      }
+
+      if (window.uploadedEditProductImages.length === 0) {
+        alert(currentLanguage === 'gu' ? 'કૃપા કરીને ઓછામાં ઓછી ૧ ઇમેજ અપલોડ કરો.' : 'Please upload at least 1 product image.');
+        return;
+      }
+
+      // Set submit button to loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving...';
+      
+      // Read from 'edit-attr-' prefixed fields to avoid conflict with Add form
+      const attributes = collectAttributes('edit-dynamic-attributes-container');
+
+      // Snapshot current images (base64 or existing Firebase URLs)
+      const base64EditImages = [...window.uploadedEditProductImages];
+
+      try {
+        // ── STEP 1: Save IMMEDIATELY with current images ──
+        const updatedFields = {
+          name: document.getElementById('edit-prod-name').value,
+          price: parseFloat(document.getElementById('edit-prod-price').value),
+          stock: parseInt(document.getElementById('edit-prod-stock').value),
+          category: category,
+          imageUrl: base64EditImages[0] || '',
+          imageUrls: base64EditImages,
+          description: document.getElementById('edit-prod-desc').value,
+          attributes: attributes,
+          imagesUploading: false
+        };
+
+        if (currentUser.role === 'admin') {
+          updatedFields.badge = document.getElementById('edit-prod-badge').value;
+          db.updateProduct(id, updatedFields);
+          showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ અપડેટ થઈ ગઈ!' : '✅ Product updated successfully!');
+          toggleOwnerEditProductModal(false);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          renderAdminDashboard();
+        } else {
+          // Vendors: keep original badge, reset approval
+          updatedFields.badge = p.badge || 'none';
+          updatedFields.approvedByAdmin = false;
+          updatedFields.imagesUploading = true;
+          db.updateProduct(id, updatedFields);
+          showToast(currentLanguage === 'gu' ? '✅ પ્રોડક્ટ અપડેટ! ઓનર અપ્રૂવ કરે પછી લાઈવ થશે.' : '✅ Updated! Goes live after Owner approval.');
+          toggleOwnerEditProductModal(false);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          renderVendorDashboard();
+
+          // ── STEP 2: Background Firebase upload for vendor edits ──
+          if (typeof firebase !== 'undefined' && firebase.apps.length) {
+            (async () => {
+              try {
+                // Only upload images that are base64 (not already Firebase URLs)
+                const firebaseUrls = await Promise.all(
+                  base64EditImages.map((img, i) => {
+                    if (img.startsWith('data:')) {
+                      return uploadProductImageToFirebase(id, i, img);
+                    }
+                    return Promise.resolve(img); // already a remote URL, keep it
+                  })
+                );
+                db.updateProduct(id, {
+                  imageUrl: firebaseUrls[0] || base64EditImages[0],
+                  imageUrls: firebaseUrls,
+                  imagesUploading: false
+                });
+                if (currentUser && currentUser.role === 'vendor') renderVendorDashboard();
+              } catch (uploadErr) {
+                console.warn('Background edit image upload failed:', uploadErr);
+                db.updateProduct(id, { imagesUploading: false });
+              }
+            })();
+          }
+        }
+      } catch (err) {
+        console.error("Error editing product:", err);
+        alert("Failed to save product changes.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    }
+
+    window.deleteProductFromAdmin = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteProductFromAdmin attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      if (confirm('Are you sure you want to delete this product?')) {
+        db.deleteProduct(id);
+        showToast('Product deleted successfully!');
+        renderAdminDashboard();
+      }
+    }
+
+    // UPGRADE 4: AI Copywriter triggers
+    window.triggerVendorAICopywriter = function() {
+      const name = document.getElementById('prod-name').value;
+      const category = document.getElementById('prod-category').value;
+      if (!name.trim()) {
+        alert(currentLanguage === 'gu' ? "કૃપા કરીને પહેલા પ્રોડક્ટનું નામ લખો." : "Please enter the product name first.");
+        return;
+      }
+      const desc = generateAIDescription(name, category);
+      animateTyping(document.getElementById('prod-desc'), desc);
+    }
+    
+    window.triggerEditAICopywriter = function() {
+      const name = document.getElementById('edit-prod-name').value;
+      const category = document.getElementById('edit-prod-category').value;
+      if (!name.trim()) {
+        alert(currentLanguage === 'gu' ? "કૃપા કરીને પહેલા પ્રોડક્ટનું નામ લખો." : "Please enter the product name first.");
+        return;
+      }
+      const desc = generateAIDescription(name, category);
+      animateTyping(document.getElementById('edit-prod-desc'), desc);
+    }
+
+    function animateTyping(textarea, text) {
+      textarea.value = '';
+      let i = 0;
+      textarea.focus();
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          textarea.value += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 5);
+    }
+
+    // UPGRADE 7: Save announcement banner settings
+    window.saveAdminBannerSettings = function(e) {
+      e.preventDefault();
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized saveAdminBannerSettings attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      const text = document.getElementById('banner-text').value;
+      const active = document.getElementById('banner-active').checked;
+      
+      db.saveBannerSettings({ text, active });
+      showToast('Announcement settings saved successfully!');
+    }
+
+    // UPGRADE 9: Star rating review approval and deletions
+    window.approveReview = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized approveReview attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      db.updateReview(id, { approvedByAdmin: true });
+      showToast('Review approved and rating recalculated!');
+      renderAdminDashboard();
+    }
+    
+    window.deleteReview = function(id) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteReview attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      if (confirm('Are you sure you want to delete/reject this review?')) {
+        db.deleteReview(id);
+        showToast('Review deleted!');
+        renderAdminDashboard();
+      }
+    }
+
+    // UPGRADE 15: Excel/CSV Master Ledger Bookkeeping Exporter
+    window.exportLedgerToCSV = function() {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized exportLedgerToCSV attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      const orders = db.getOrders();
+      if (orders.length === 0) {
+        showToast('No transaction logs found to export!');
+        return;
+      }
+
+      // Header row
+      const headers = [
+        "Invoice Number", "Order ID", "Date", "Vendor Name", "Customer Name", 
+        "Customer Mobile", "Shipping Address", "Total Amount (INR)", 
+        "Payment Status", "Order Status"
+      ];
+      
+      const rows = orders.map(o => [
+        o.invoiceNumber || '',
+        o.id || '',
+        new Date(o.createdAt).toLocaleDateString(),
+        o.vendorName || '',
+        o.customerName || '',
+        o.customerMobile || '',
+        `"${(o.shippingAddress || '').replace(/"/g, '""')}"`,
+        o.totalAmount || 0,
+        o.paymentStatus || '',
+        o.orderStatus || ''
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Master_Ledger_Export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      
+      link.click();
+      document.body.removeChild(link);
+      showToast('Master Ledger CSV exported successfully!');
+    }
+
+    // UPGRADE 6: Animated SVG Sales Chart builder
+    window.renderSalesChart = function(orders) {
+      const svg = document.getElementById('admin-sales-chart');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      // Get last 7 days sales values
+      const dates = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+      }
+
+      // Aggregate sales amounts
+      const amounts = new Array(7).fill(0);
+      orders.forEach(o => {
+        const orderDate = new Date(o.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const idx = dates.indexOf(orderDate);
+        if (idx !== -1) {
+          amounts[idx] += o.totalAmount;
+        }
+      });
+
+      const maxVal = Math.max(...amounts, 100);
+      
+      const width = 500;
+      const height = 150;
+      const paddingLeft = 40;
+      const paddingRight = 20;
+      const paddingTop = 20;
+      const paddingBottom = 20;
+      const chartWidth = width - paddingLeft - paddingRight;
+      const chartHeight = height - paddingTop - paddingBottom;
+
+      const points = amounts.map((val, idx) => {
+        const x = paddingLeft + (idx / 6) * chartWidth;
+        const y = height - paddingBottom - (val / maxVal) * chartHeight;
+        return { x, y, val };
+      });
+
+      // Draw Gridlines & Labels
+      dates.forEach((date, idx) => {
+        const x = paddingLeft + (idx / 6) * chartWidth;
+        svg.innerHTML += `<text x="${x}" y="${height - 5}" text-anchor="middle" font-size="8" fill="#94a3b8">${date}</text>`;
+        svg.innerHTML += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="2,2" />`;
+      });
+
+      for (let i = 0; i <= 4; i++) {
+        const levelVal = Math.round((i / 4) * maxVal);
+        const y = height - paddingBottom - (i / 4) * chartHeight;
+        svg.innerHTML += `<text x="${paddingLeft - 8}" y="${y + 3}" text-anchor="end" font-size="8" fill="#94a3b8">₹${levelVal}</text>`;
+        svg.innerHTML += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="#e2e8f0" stroke-width="0.5" />`;
+      }
+
+      const pathData = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const fillPathData = `${pathData} L ${points[6].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+
+      svg.innerHTML += `
+        <defs>
+          <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6700" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#ff6700" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+      `;
+
+      svg.innerHTML += `<path d="${fillPathData}" fill="url(#chart-grad)" />`;
+      svg.innerHTML += `<path id="chart-stroke" d="${pathData}" fill="none" stroke="#ff6700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+
+      points.forEach(p => {
+        svg.innerHTML += `
+          <circle cx="${p.x}" cy="${p.y}" r="4" fill="#ffffff" stroke="#ff6700" stroke-width="2" class="cursor-pointer transition hover:scale-125">
+            <title>₹${p.val}</title>
+          </circle>
+        `;
+      });
+      
+      const strokeEl = svg.querySelector('#chart-stroke');
+      if (strokeEl) {
+        const len = strokeEl.getTotalLength();
+        gsap.fromTo(strokeEl, 
+          { strokeDasharray: len, strokeDashoffset: len }, 
+          { strokeDashoffset: 0, duration: 1.5, ease: "power2.out" }
+        );
+      }
+    }
+
+    // ==========================================
+    // PROFILE SETTINGS INTERACTIVE SUITE
+    // ==========================================
+    window.tempUploadedAvatar = '';
+
+    window.openProfileSettingsModal = function() {
+      if (!currentUser) return;
+      
+      document.getElementById('profile-display-name').value = currentUser.displayName || '';
+      document.getElementById('profile-phone').value = currentUser.phone || '';
+      document.getElementById('profile-whatsapp').value = currentUser.whatsapp || '';
+      
+      const upiInput = document.getElementById('profile-upi');
+      if (upiInput) {
+        upiInput.value = currentUser.upiId || '';
+      }
+
+      // Show/Hide vendor specific settings fields dynamically
+      const gstinCont = document.getElementById('profile-gstin-container');
+      const addressCont = document.getElementById('profile-address-container');
+      if (currentUser.role === 'vendor') {
+        if (gstinCont) gstinCont.classList.remove('hidden');
+        if (addressCont) addressCont.classList.remove('hidden');
+        document.getElementById('profile-gstin').value = currentUser.gstin || '';
+        document.getElementById('profile-address').value = currentUser.physicalAddress || '';
+      } else {
+        if (gstinCont) gstinCont.classList.add('hidden');
+        if (addressCont) addressCont.classList.add('hidden');
+      }
+      
+      // Load current avatar into preview
+      window.tempUploadedAvatar = currentUser.avatar || currentUser.selfieUrl || '';
+      const preview = document.getElementById('profile-settings-avatar-preview');
+      if (preview) {
+        preview.src = window.tempUploadedAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100";
+      }
+
+      window.toggleProfileSettingsModal(true);
+    };
+
+    window.toggleProfileSettingsModal = function(open) {
+      const modal = document.getElementById('profile-settings-modal');
+      if (!modal) return;
+      if (open) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    };
+
+    window.handleAvatarFileSelect = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      compressImage(file, 150, 150, 0.5, (compressedDataUrl) => {
+        window.tempUploadedAvatar = compressedDataUrl;
+        const preview = document.getElementById('profile-settings-avatar-preview');
+        if (preview) {
+          preview.src = compressedDataUrl;
+        }
+      });
+    };
+
+    window.removeAvatarImage = function() {
+      window.tempUploadedAvatar = '';
+      const preview = document.getElementById('profile-settings-avatar-preview');
+      if (preview) {
+        preview.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100";
+      }
+    };
+
+    window.saveProfileSettings = async function(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = currentLanguage === 'gu' ? 'સેવ થઈ રહ્યું છે...' : 'Saving Changes...';
+
+      const displayName = document.getElementById('profile-display-name').value.trim();
+      const phone = document.getElementById('profile-phone').value.trim();
+      const whatsapp = document.getElementById('profile-whatsapp').value.trim();
+      const upiInput = document.getElementById('profile-upi');
+      const upiId = upiInput ? upiInput.value.trim() : '';
+
+      let gstin = '';
+      let physicalAddress = '';
+      if (currentUser.role === 'vendor') {
+        gstin = document.getElementById('profile-gstin').value.trim();
+        physicalAddress = document.getElementById('profile-address').value.trim();
+      }
+
+      let finalAvatarUrl = window.tempUploadedAvatar;
+      const isBase64 = finalAvatarUrl && finalAvatarUrl.startsWith('data:');
+
+      // Prepare updated fields
+      const updatedFields = {
+        displayName: displayName,
+        phone: phone,
+        whatsapp: whatsapp,
+        upiId: upiId,
+        avatar: finalAvatarUrl
+      };
+
+      if (currentUser.role === 'vendor') {
+        updatedFields.gstin = gstin;
+        updatedFields.physicalAddress = physicalAddress;
+      }
+
+      try {
+        // Save to Database immediately
+        db.updateUser(currentUser.uid, updatedFields);
+
+        // Update local session immediately
+        currentUser.displayName = displayName;
+        currentUser.phone = phone;
+        currentUser.whatsapp = whatsapp;
+        currentUser.upiId = upiId;
+        currentUser.avatar = finalAvatarUrl;
+        if (currentUser.role === 'vendor') {
+          currentUser.gstin = gstin;
+          currentUser.physicalAddress = physicalAddress;
+        }
+        setCurrentUser(currentUser);
+
+        // Refresh UI immediately
+        document.getElementById('dash-username').innerText = displayName;
+        const dashAvatar = document.getElementById('dash-avatar');
+        if (dashAvatar) {
+          dashAvatar.src = finalAvatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100";
+        }
+
+        // Close modal immediately
+        window.toggleProfileSettingsModal(false);
+
+        // Toast success message immediately
+        showToast(currentLanguage === 'gu' ? '✅ પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થઈ ગઈ!' : '✅ Profile updated successfully!');
+
+        // Run Firebase Storage upload in the background if configured
+        if (isBase64 && typeof firebase !== 'undefined' && firebase.apps.length) {
+          (async () => {
+            try {
+              const storageRef = firebase.storage().ref();
+              const ref = storageRef.child(`avatars/${currentUser.uid}.jpg`);
+              const blob = dataURLtoBlob(finalAvatarUrl);
+              if (blob) {
+                const snapshot = await ref.put(blob);
+                const downloadUrl = await snapshot.ref.getDownloadURL();
+                
+                // Update user with the firebase URL in background database
+                db.updateUser(currentUser.uid, { avatar: downloadUrl });
+                
+                // Also update active session if user is still logged in
+                const checkUser = JSON.parse(localStorage.getItem('current_user'));
+                if (checkUser && checkUser.uid === currentUser.uid) {
+                  checkUser.avatar = downloadUrl;
+                  setCurrentUser(checkUser);
+                  
+                  // Update header avatar too
+                  const activeAvatar = document.getElementById('dash-avatar');
+                  if (activeAvatar) activeAvatar.src = downloadUrl;
+                }
+                console.log("Background avatar upload completed successfully:", downloadUrl);
+              }
+            } catch (bgErr) {
+              console.warn("Background avatar upload to Firebase Storage failed:", bgErr);
+            }
+          })();
+        }
+      } catch (err) {
+        console.error("Error saving profile settings:", err);
+        alert(currentLanguage === 'gu' ? "પ્રોફાઇલ સેવ કરવામાં ભૂલ આવી!" : "Error saving profile settings!");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    };
+
+    // SECURE AUDIT: On-demand Aadhaar Decryption (delegated to Cloud Function / Secure closure)
+    window.viewAadhaar = async function(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized viewAadhaar attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      const users = db.getUsers();
+      const v = users.find(u => u.uid === uid);
+      if (v && v.aadhaar) {
+        // Show loading toast
+        showToast(currentLanguage === 'gu' ? 'આધાર ડિક્રિપ્ટ થઈ રહ્યું છે...' : 'Decrypting Aadhaar...');
+        
+        try {
+          const decrypted = await decryptAadhaar(v.aadhaar);
+          if (decrypted) {
+            alert(currentLanguage === 'gu' 
+              ? `📄 સેલરનું નામ: ${v.displayName}\nઆધાર નંબર: ${decrypted}` 
+              : `📄 Seller Name: ${v.displayName}\nAadhaar Number: ${decrypted}`);
+          } else {
+            alert(currentLanguage === 'gu' ? 'ડિક્રિપ્શન નિષ્ફળ ગયું.' : 'Decryption failed.');
+          }
+        } catch (err) {
+          console.error("Decryption error:", err);
+          alert('Error decrypting Aadhaar.');
+        }
+      } else {
+        alert(currentLanguage === 'gu' ? 'કોઈ ડેટા મળ્યો નથી.' : 'No Aadhaar data found.');
+      }
+    };
+  </script>
+</body>
+</html>
+
