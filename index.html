@@ -335,6 +335,109 @@
     </div>
   </div>
 
+  <!-- PROFILE DRAWER -->
+  <div id="profile-drawer" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-sm transition-opacity duration-300 animate-fade-in">
+    <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-slate-200 p-6 flex flex-col justify-between shadow-2xl transition-transform duration-300 transform translate-x-full" id="profile-drawer-panel">
+      <div class="flex flex-col h-full justify-between">
+        <div>
+          <!-- Header -->
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              <span id="profile-drawer-title" data-i18n="profileTitle" class="tracking-tight">User Profile</span>
+            </h2>
+            <button onclick="toggleProfileDrawer(false)" class="text-slate-400 hover:text-slate-950 transition hover:scale-110">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <!-- Profile Info Card -->
+          <div class="relative rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-brand p-5 text-white shadow-lg overflow-hidden mb-6 border border-slate-800">
+            <!-- Glassmorphic highlights -->
+            <div class="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-white/10 blur-xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-28 h-28 rounded-full bg-brand/30 blur-lg"></div>
+
+            <div class="relative flex items-center gap-4">
+              <!-- Avatar -->
+              <div id="profile-avatar-container">
+                <!-- Dynamic: Selfie Image or Initials Avatar -->
+              </div>
+              <div>
+                <h3 id="profile-user-name" class="text-lg font-bold truncate max-w-[220px]">User Name</h3>
+                <span id="profile-user-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white border border-white/10 mt-1 uppercase">Vendor</span>
+              </div>
+            </div>
+            
+            <div class="relative mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs">
+              <span class="text-white/60">UID: <span id="profile-user-uid" class="font-mono font-bold text-white ml-1">UID...</span></span>
+              <button onclick="copyUserProfileUID()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-xl transition hover:scale-105" title="Copy UID">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-3 8h3m-3 3h3m-9-13h12"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Details List -->
+          <div class="space-y-4 mb-6">
+            <div class="flex flex-col bg-slate-50 rounded-xl p-3 border border-slate-100 transition hover:bg-slate-100/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Email Address</span>
+              <span id="profile-detail-email" class="text-sm font-semibold text-slate-800 mt-0.5 truncate">email@example.com</span>
+            </div>
+            
+            <div class="flex flex-col bg-slate-50 rounded-xl p-3 border border-slate-100 transition hover:bg-slate-100/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Phone / WhatsApp</span>
+              <div class="flex justify-between items-center mt-0.5">
+                <span id="profile-detail-phone" class="text-sm font-semibold text-slate-800">+91 99999-99999</span>
+                <a id="profile-whatsapp-link" href="#" target="_blank" class="flex items-center gap-1 text-[11px] text-green-600 hover:text-green-700 font-bold transition hover:scale-105">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.335 4.978L2 22l5.177-1.356a9.948 9.948 0 0 0 4.832 1.246h.004c5.505 0 9.989-4.478 9.99-9.984a9.946 9.946 0 0 0-2.927-7.064 9.954 9.954 0 0 0-7.064-2.926zm5.836 14.159c-.32.901-1.842 1.765-2.529 1.875-.589.094-1.36.149-3.92-.91-3.275-1.355-5.385-4.693-5.549-4.912-.164-.219-1.332-1.776-1.332-3.387 0-1.611.838-2.404 1.137-2.721.3-.317.659-.396.879-.396.22 0 .439.002.63.01.2.007.469-.076.733.564.271.658.927 2.274 1.007 2.436.081.162.135.351.027.568-.108.217-.162.351-.324.541-.162.19-.341.424-.487.569-.163.159-.333.333-.143.66.19.324.843 1.391 1.811 2.257.967.866 1.782 1.134 2.032 1.258.25.124.396.108.542-.06.146-.168.63-.733.799-.982.169-.25.337-.208.569-.122.233.086 1.478.697 1.731.824.254.127.422.19.485.297.062.108.062.624-.258 1.525z"/></svg>
+                  Chat
+                </a>
+              </div>
+            </div>
+            
+            <div id="profile-detail-aadhaar-container" class="flex flex-col bg-slate-50 rounded-xl p-3 border border-slate-100 transition hover:bg-slate-100/50">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Aadhaar Card Number</span>
+              <div class="flex justify-between items-center mt-0.5">
+                <span id="profile-detail-aadhaar" class="text-sm font-semibold text-slate-800 font-mono">xxxx-xxxx-xxxx</span>
+                <span id="profile-liveness-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-green-50 text-green-600 border border-green-100">Face Verified</span>
+              </div>
+            </div>
+            
+            <div id="profile-detail-upi-container" class="flex flex-col bg-slate-50 rounded-xl p-3 border border-slate-100 transition hover:bg-slate-100/50 hidden">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">UPI ID (For Payments)</span>
+              <span id="profile-detail-upi" class="text-sm font-semibold text-slate-800 font-mono mt-0.5">upi@upi</span>
+            </div>
+          </div>
+
+          <!-- Platform Quick Actions -->
+          <div class="border-t border-slate-100 pt-6">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <a href="admin.html" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
+                <svg class="w-6 h-6 text-slate-500 group-hover:text-brand transition mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path></svg>
+                <span class="text-xs font-bold text-slate-700 group-hover:text-brand transition">Dashboard</span>
+              </a>
+              <button onclick="toggleOrdersDrawer(true); toggleProfileDrawer(false);" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
+                <svg class="w-6 h-6 text-slate-500 group-hover:text-brand transition mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span class="text-xs font-bold text-slate-700 group-hover:text-brand transition">Track Orders</span>
+              </button>
+              <button id="profile-action-shoplink" onclick="copyVendorShopLink()" class="col-span-2 flex items-center justify-center gap-2 p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition group text-left hidden">
+                <svg class="w-4 h-4 text-slate-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.894-2.719m0 0a3 3 0 100-4.046m0 4.046a3 3 0 110 4.046m0 0l-4.894 2.719m0 0a3 3 0 110-4.046m0 0a3 3 0 100 4.046"></path></svg>
+                <span class="text-xs font-bold text-slate-700 group-hover:text-brand transition">Copy Shop Link / લિંક કોપી કરો</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 flex gap-2">
+          <button onclick="handleLogout()" class="w-full py-3 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-600 font-bold rounded-xl transition text-center text-xs flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span data-i18n="logout">Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PRODUCT DETAIL DRAWER -->
   <div id="detail-drawer" class="fixed inset-0 bg-slate-900/40 z-50 hidden backdrop-blur-sm">
     <div class="fixed right-0 top-0 h-full w-full max-w-lg bg-white border-l border-slate-200 p-6 flex flex-col overflow-y-auto shadow-2xl transition-transform duration-300 transform translate-x-full" id="detail-drawer-panel">
@@ -680,19 +783,33 @@
       const bottomProfileText = document.getElementById('bottom-profile-text');
       if (!navUser) return;
       if (currentUser) {
+        const name = currentUser.name || currentUser.storeName || 'User';
+        const initial = name.trim().charAt(0).toUpperCase();
+        
+        let avatarHtml = '';
+        if (currentUser.selfieUrl) {
+          avatarHtml = `<img src="${currentUser.selfieUrl}" class="w-7 h-7 rounded-full object-cover border border-brand/20 shadow-sm" />`;
+        } else {
+          avatarHtml = `<div class="w-7 h-7 bg-brand/10 border border-brand/20 text-brand rounded-full flex items-center justify-center font-bold text-xs shadow-sm">${initial}</div>`;
+        }
+
         navUser.innerHTML = `
-          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
-          <a href="admin.html" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="dashboard">${translations[currentLanguage].dashboard}</a>
-          <button onclick="handleLogout()" class="border border-slate-200 bg-white text-slate-700 px-4 py-1.5 rounded-full hover:bg-slate-50 hover:border-slate-300 transition" data-i18n="logout">${translations[currentLanguage].logout}</button>
+          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-4 text-slate-600 text-xs sm:text-sm" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
+          
+          <button onclick="toggleProfileDrawer(true)" class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full pl-1.5 pr-3 py-1 transition shadow-sm select-none">
+            ${avatarHtml}
+            <span class="font-bold text-slate-700 text-xs max-w-[100px] truncate">${name}</span>
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
         `;
         if (bottomProfileText) {
-          bottomProfileText.textContent = currentUser.role === 'owner' ? 'Owner' : 'Seller';
+          bottomProfileText.textContent = currentUser.role === 'admin' ? (currentLanguage === 'gu' ? 'માલિક' : 'Owner') : (currentLanguage === 'gu' ? 'વિક્રેતા' : 'Seller');
         }
       } else {
         navUser.innerHTML = `
-          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
-          <a href="admin.html?action=login" class="hover:text-brand font-semibold transition mr-3 text-slate-600" data-i18n="login">${translations[currentLanguage].login}</a>
-          <a href="admin.html?action=register" class="btn-primary text-white px-4 py-1.5 rounded-full font-semibold transition" data-i18n="register">${translations[currentLanguage].register}</a>
+          <button onclick="toggleOrdersDrawer(true)" class="hover:text-brand font-semibold transition mr-3 text-slate-600 text-xs sm:text-sm" data-i18n="myOrders">${translations[currentLanguage].myOrders}</button>
+          <a href="admin.html?action=login" class="hover:text-brand font-semibold transition mr-3 text-slate-600 text-xs sm:text-sm" data-i18n="login">${translations[currentLanguage].login}</a>
+          <a href="admin.html?action=register" class="btn-primary text-white px-4 py-1.5 rounded-full font-semibold transition text-xs sm:text-sm" data-i18n="register">${translations[currentLanguage].register}</a>
         `;
         if (bottomProfileText) {
           bottomProfileText.textContent = translations[currentLanguage].login;
@@ -913,6 +1030,138 @@
       } else {
         panel.classList.add('translate-x-full');
         setTimeout(() => drawer.classList.add('hidden'), 300);
+      }
+    }
+
+    function toggleProfileDrawer(open) {
+      const drawer = document.getElementById('profile-drawer');
+      const panel = document.getElementById('profile-drawer-panel');
+      if (open) {
+        drawer.classList.remove('hidden');
+        setTimeout(() => {
+          panel.classList.remove('translate-x-full');
+          populateProfileDetails();
+        }, 10);
+      } else {
+        panel.classList.add('translate-x-full');
+        setTimeout(() => drawer.classList.add('hidden'), 300);
+      }
+    }
+
+    async function populateProfileDetails() {
+      if (!currentUser) return;
+      
+      const name = currentUser.name || currentUser.storeName || 'User';
+      document.getElementById('profile-user-name').innerText = name;
+      document.getElementById('profile-user-uid').innerText = currentUser.uid || 'N/A';
+      
+      const badge = document.getElementById('profile-user-badge');
+      if (currentUser.role === 'admin') {
+        badge.innerText = currentLanguage === 'gu' ? 'એડમિન / માલિક' : 'Platform Owner';
+        badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 mt-1 uppercase";
+      } else {
+        badge.innerText = currentLanguage === 'gu' ? 'વેન્ડર / વિક્રેતા' : 'Approved Vendor';
+        badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-300 border border-green-500/30 mt-1 uppercase";
+      }
+      
+      document.getElementById('profile-detail-email').innerText = currentUser.email || 'N/A';
+      document.getElementById('profile-detail-phone').innerText = currentUser.phone || 'N/A';
+      
+      const waLink = document.getElementById('profile-whatsapp-link');
+      if (currentUser.whatsapp) {
+        waLink.href = `https://wa.me/${currentUser.whatsapp}`;
+        waLink.classList.remove('hidden');
+      } else if (currentUser.phone) {
+        waLink.href = `https://wa.me/${currentUser.phone}`;
+        waLink.classList.remove('hidden');
+      } else {
+        waLink.classList.add('hidden');
+      }
+      
+      const avatarContainer = document.getElementById('profile-avatar-container');
+      if (currentUser.selfieUrl) {
+        avatarContainer.innerHTML = `
+          <img src="${currentUser.selfieUrl}" class="w-16 h-16 rounded-full border-4 border-white/20 shadow-md object-cover" alt="Selfie" />
+        `;
+      } else {
+        const initial = name.trim().charAt(0).toUpperCase();
+        avatarContainer.innerHTML = `
+          <div class="w-16 h-16 bg-gradient-to-br from-brand/80 to-brand text-white rounded-full flex items-center justify-center text-2xl font-bold border-4 border-white/20 shadow-md">
+            ${initial}
+          </div>
+        `;
+      }
+      
+      const aadhaarText = document.getElementById('profile-detail-aadhaar');
+      const livenessBadge = document.getElementById('profile-liveness-badge');
+      
+      if (currentUser.aadhaar) {
+        if (currentUser.role === 'admin') {
+          try {
+            const decrypted = await decryptAadhaar(currentUser.aadhaar);
+            aadhaarText.innerText = decrypted || "xxxx-xxxx-xxxx";
+          } catch (e) {
+            aadhaarText.innerText = "xxxx-xxxx-xxxx";
+          }
+        } else {
+          aadhaarText.innerText = "xxxx-xxxx-xxxx";
+        }
+      } else {
+        aadhaarText.innerText = "Not Provided";
+      }
+      
+      if (livenessBadge) {
+        if (currentUser.livenessVerified) {
+          livenessBadge.innerText = currentLanguage === 'gu' ? 'ફેસ વેરીફાઈડ' : 'Face Verified';
+          livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-green-505 bg-green-500/20 text-green-300 border border-green-500/30";
+        } else {
+          livenessBadge.innerText = currentLanguage === 'gu' ? 'વેરીફીકેશન બાકી' : 'Verification Pending';
+          livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        }
+      }
+      
+      const upiContainer = document.getElementById('profile-detail-upi-container');
+      const upiText = document.getElementById('profile-detail-upi');
+      const shoplinkAction = document.getElementById('profile-action-shoplink');
+      
+      if (currentUser.role === 'vendor') {
+        if (upiContainer && upiText) {
+          upiText.innerText = currentUser.upiId || 'Not Set';
+          upiContainer.classList.remove('hidden');
+        }
+        if (shoplinkAction) {
+          shoplinkAction.classList.remove('hidden');
+        }
+      } else {
+        if (upiContainer) {
+          upiContainer.classList.add('hidden');
+        }
+        if (shoplinkAction) {
+          shoplinkAction.classList.add('hidden');
+        }
+      }
+    }
+
+    function copyUserProfileUID() {
+      if (!currentUser || !currentUser.uid) return;
+      navigator.clipboard.writeText(currentUser.uid).then(() => {
+        showToast(currentLanguage === 'gu' ? "યુઝર આઈડી કોપી થઈ ગઈ છે!" : "User ID copied to clipboard!");
+      });
+    }
+
+    function copyVendorShopLink() {
+      if (!currentUser || currentUser.role !== 'vendor') return;
+      const shopUrl = `${window.location.origin}${window.location.pathname}?shop=${currentUser.uid}`;
+      navigator.clipboard.writeText(shopUrl).then(() => {
+        showToast(currentLanguage === 'gu' ? "તમારી દુકાન લિંક કોપી થઈ ગઈ છે!" : "Your shop link copied to clipboard!");
+      });
+    }
+
+    function handleMobileProfileClick() {
+      if (currentUser) {
+        toggleProfileDrawer(true);
+      } else {
+        window.location.href = "admin.html?action=login";
       }
     }
 
@@ -1320,10 +1569,10 @@
       <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
       <span class="text-[9px] font-bold">Orders</span>
     </button>
-    <a href="admin.html" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
+    <button onclick="handleMobileProfileClick()" class="flex flex-col items-center gap-1 text-slate-555 text-slate-500 hover:text-brand transition focus:outline-none">
       <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
       <span id="bottom-profile-text" class="text-[9px] font-bold">Account</span>
-    </a>
+    </button>
   </div>
 </body>
 </html>
