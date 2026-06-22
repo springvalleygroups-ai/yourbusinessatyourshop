@@ -412,11 +412,11 @@
           <div class="border-t border-slate-100 pt-6">
             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h4>
             <div class="grid grid-cols-2 gap-2">
-              <a href="admin.html" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
+              <a id="profile-action-dashboard" href="admin.html" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
                 <svg class="w-6 h-6 text-slate-500 group-hover:text-brand transition mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path></svg>
                 <span class="text-xs font-bold text-slate-700 group-hover:text-brand transition">Dashboard</span>
               </a>
-              <button onclick="toggleOrdersDrawer(true); toggleProfileDrawer(false);" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
+              <button id="profile-action-trackorders" onclick="toggleOrdersDrawer(true); toggleProfileDrawer(false);" class="flex flex-col items-center justify-center p-3 bg-slate-50 hover:bg-brand/5 border border-slate-100 hover:border-brand/20 rounded-xl transition text-center group">
                 <svg class="w-6 h-6 text-slate-500 group-hover:text-brand transition mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                 <span class="text-xs font-bold text-slate-700 group-hover:text-brand transition">Track Orders</span>
               </button>
@@ -783,7 +783,7 @@
       const bottomProfileText = document.getElementById('bottom-profile-text');
       if (!navUser) return;
       if (currentUser) {
-        const name = currentUser.name || currentUser.storeName || 'User';
+        const name = currentUser.displayName || currentUser.name || currentUser.storeName || 'User';
         const initial = name.trim().charAt(0).toUpperCase();
         
         let avatarHtml = '';
@@ -803,7 +803,13 @@
           </button>
         `;
         if (bottomProfileText) {
-          bottomProfileText.textContent = currentUser.role === 'admin' ? (currentLanguage === 'gu' ? 'માલિક' : 'Owner') : (currentLanguage === 'gu' ? 'વિક્રેતા' : 'Seller');
+          if (currentUser.role === 'admin') {
+            bottomProfileText.textContent = currentLanguage === 'gu' ? 'માલિક' : 'Owner';
+          } else if (currentUser.role === 'vendor') {
+            bottomProfileText.textContent = currentLanguage === 'gu' ? 'વિક્રેતા' : 'Seller';
+          } else {
+            bottomProfileText.textContent = currentLanguage === 'gu' ? 'ગ્રાહક' : 'Customer';
+          }
         }
       } else {
         navUser.innerHTML = `
@@ -1051,7 +1057,7 @@
     async function populateProfileDetails() {
       if (!currentUser) return;
       
-      const name = currentUser.name || currentUser.storeName || 'User';
+      const name = currentUser.displayName || currentUser.name || currentUser.storeName || 'User';
       document.getElementById('profile-user-name').innerText = name;
       document.getElementById('profile-user-uid').innerText = currentUser.uid || 'N/A';
       
@@ -1059,9 +1065,12 @@
       if (currentUser.role === 'admin') {
         badge.innerText = currentLanguage === 'gu' ? 'એડમિન / માલિક' : 'Platform Owner';
         badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 mt-1 uppercase";
-      } else {
+      } else if (currentUser.role === 'vendor') {
         badge.innerText = currentLanguage === 'gu' ? 'વેન્ડર / વિક્રેતા' : 'Approved Vendor';
         badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-300 border border-green-500/30 mt-1 uppercase";
+      } else {
+        badge.innerText = currentLanguage === 'gu' ? 'વેરિફાઈડ ગ્રાહક' : 'Verified Customer';
+        badge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mt-1 uppercase";
       }
       
       document.getElementById('profile-detail-email').innerText = currentUser.email || 'N/A';
@@ -1093,35 +1102,43 @@
       }
       
       const aadhaarText = document.getElementById('profile-detail-aadhaar');
+      const aadhaarContainer = document.getElementById('profile-detail-aadhaar-container');
       const livenessBadge = document.getElementById('profile-liveness-badge');
       
-      if (currentUser.aadhaar) {
-        if (currentUser.role === 'admin') {
-          try {
-            const decrypted = await decryptAadhaar(currentUser.aadhaar);
-            aadhaarText.innerText = decrypted || "xxxx-xxxx-xxxx";
-          } catch (e) {
+      if (currentUser.role === 'admin' || currentUser.role === 'vendor') {
+        if (aadhaarContainer) aadhaarContainer.classList.remove('hidden');
+        if (currentUser.aadhaar) {
+          if (currentUser.role === 'admin') {
+            try {
+              const decrypted = await decryptAadhaar(currentUser.aadhaar);
+              aadhaarText.innerText = decrypted || "xxxx-xxxx-xxxx";
+            } catch (e) {
+              aadhaarText.innerText = "xxxx-xxxx-xxxx";
+            }
+          } else {
             aadhaarText.innerText = "xxxx-xxxx-xxxx";
           }
         } else {
-          aadhaarText.innerText = "xxxx-xxxx-xxxx";
+          aadhaarText.innerText = "Not Provided";
+        }
+        
+        if (livenessBadge) {
+          if (currentUser.livenessVerified) {
+            livenessBadge.innerText = currentLanguage === 'gu' ? 'ફેસ વેરીફાઈડ' : 'Face Verified';
+            livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-green-500/20 text-green-300 border border-green-500/30";
+          } else {
+            livenessBadge.innerText = currentLanguage === 'gu' ? 'વેરીફીકેશન બાકી' : 'Verification Pending';
+            livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+          }
         }
       } else {
-        aadhaarText.innerText = "Not Provided";
-      }
-      
-      if (livenessBadge) {
-        if (currentUser.livenessVerified) {
-          livenessBadge.innerText = currentLanguage === 'gu' ? 'ફેસ વેરીફાઈડ' : 'Face Verified';
-          livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-green-505 bg-green-500/20 text-green-300 border border-green-500/30";
-        } else {
-          livenessBadge.innerText = currentLanguage === 'gu' ? 'વેરીફીકેશન બાકી' : 'Verification Pending';
-          livenessBadge.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30";
-        }
+        if (aadhaarContainer) aadhaarContainer.classList.add('hidden');
       }
       
       const upiContainer = document.getElementById('profile-detail-upi-container');
       const upiText = document.getElementById('profile-detail-upi');
+      const dashboardAction = document.getElementById('profile-action-dashboard');
+      const trackOrdersBtn = document.getElementById('profile-action-trackorders');
       const shoplinkAction = document.getElementById('profile-action-shoplink');
       
       if (currentUser.role === 'vendor') {
@@ -1138,6 +1155,20 @@
         }
         if (shoplinkAction) {
           shoplinkAction.classList.add('hidden');
+        }
+      }
+
+      if (currentUser.role === 'admin' || currentUser.role === 'vendor') {
+        if (dashboardAction) dashboardAction.classList.remove('hidden');
+        if (trackOrdersBtn) {
+          trackOrdersBtn.classList.remove('col-span-2');
+          trackOrdersBtn.classList.add('col-span-1');
+        }
+      } else {
+        if (dashboardAction) dashboardAction.classList.add('hidden');
+        if (trackOrdersBtn) {
+          trackOrdersBtn.classList.remove('col-span-1');
+          trackOrdersBtn.classList.add('col-span-2');
         }
       }
     }
@@ -1651,21 +1682,46 @@
       const custName = document.getElementById('tryon-cust-name');
       if (custName) custName.innerText = currentUser.displayName || 'Customer';
       
-      // Start with Priya by default (Direct wear)
-      selectTryOnSource('Priya');
+      // Reset size filter to All (which automatically selects Priya by default)
+      filterTryOnSizes('All');
     };
 
     window.selectTryOnSource = function(source) {
-      ['Priya', 'Rohan', 'Sarah', 'David', 'Custom'].forEach(src => {
-        const btn = document.getElementById(`btn-model-${src.toLowerCase()}`);
-        if (btn) {
+      // Model mapping details for display label
+      const modelLabels = {
+        Priya: "Priya • 5'6\" • Wearing Size S",
+        Rohan: "Rohan • 6'0\" • Wearing Size M",
+        Sarah: "Sarah • 5'8\" • Wearing Size L",
+        David: "David • 5'11\" • Wearing Size XL",
+        Custom: "Custom • Your 360° Calibrated Fit"
+      };
+
+      // Set active/inactive styling for predefined models and custom webcam cards
+      ['Priya', 'Rohan', 'Sarah', 'David'].forEach(src => {
+        const card = document.getElementById(`card-model-${src.toLowerCase()}`);
+        if (card) {
           if (src === source) {
-            btn.className = "flex flex-col items-center p-1 bg-brand/20 border border-brand rounded-lg transition focus:outline-none relative group";
+            card.className = "flex items-center gap-2 p-2 bg-slate-800 border-2 border-indigo-500 rounded-xl text-left hover:bg-slate-750 transition relative focus:outline-none";
           } else {
-            btn.className = "flex flex-col items-center p-1 bg-slate-800 hover:bg-brand/10 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none relative group";
+            card.className = "flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none";
           }
         }
       });
+
+      const customCard = document.getElementById('btn-card-custom');
+      if (customCard) {
+        if (source === 'Custom') {
+          customCard.className = "w-full flex items-center justify-between p-3 bg-indigo-950/40 border-2 border-indigo-500 rounded-xl text-left transition focus:outline-none";
+        } else {
+          customCard.className = "w-full flex items-center justify-between p-3 bg-indigo-950/40 hover:bg-indigo-900/40 border border-indigo-500/30 rounded-xl text-left transition focus:outline-none";
+        }
+      }
+
+      // Update viewport info floating badge text
+      const infoText = document.getElementById('tryon-model-info-text');
+      if (infoText) {
+        infoText.innerText = modelLabels[source] || `${source} • Fitted View`;
+      }
 
       if (source === 'Custom') {
         if (currentUser.scanFront) {
@@ -1690,16 +1746,74 @@
         document.getElementById('tryon-fit-container').classList.remove('hidden');
 
         const modelData = tryOnPredefinedModels[source];
-        tryOnCapturedFrames.Front = modelData.Front;
-        tryOnCapturedFrames.Left = modelData.Left;
-        tryOnCapturedFrames.Right = modelData.Right;
-        tryOnCapturedFrames.Back = modelData.Back;
+        if (modelData) {
+          tryOnCapturedFrames.Front = modelData.Front;
+          tryOnCapturedFrames.Left = modelData.Left;
+          tryOnCapturedFrames.Right = modelData.Right;
+          tryOnCapturedFrames.Back = modelData.Back;
+        }
 
         document.getElementById('tryon-scanner-panel').classList.add('hidden');
         document.getElementById('tryon-fitting-panel').classList.remove('hidden');
         document.getElementById('btn-start-scan-custom').classList.add('hidden');
         
         showFittingPanel();
+      }
+    };
+
+    window.filterTryOnSizes = function(size) {
+      // Toggle style on filter buttons
+      ['All', 'S', 'M', 'L', 'XL'].forEach(sz => {
+        const btn = document.getElementById(`btn-size-${sz.toLowerCase()}`);
+        if (btn) {
+          if (sz === size) {
+            btn.className = "flex-1 py-1.5 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition focus:outline-none";
+          } else {
+            btn.className = "flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none";
+          }
+        }
+      });
+
+      // Filter and hide/show models based on size mapping
+      const sizeModelMapping = {
+        S: ['Priya'],
+        M: ['Rohan'],
+        L: ['Sarah'],
+        XL: ['David']
+      };
+
+      const allModels = ['Priya', 'Rohan', 'Sarah', 'David'];
+      const visibleModels = size === 'All' ? allModels : (sizeModelMapping[size] || []);
+
+      allModels.forEach(m => {
+        const card = document.getElementById(`card-model-${m.toLowerCase()}`);
+        if (card) {
+          if (visibleModels.includes(m)) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+      });
+
+      // Automatically select the first visible model matching the size filter
+      if (visibleModels.length > 0) {
+        selectTryOnSource(visibleModels[0]);
+      }
+    };
+
+    window.toggleTryOnAdvancedFit = function() {
+      const content = document.getElementById('tryon-advanced-content');
+      const arrow = document.getElementById('tryon-advanced-arrow');
+      if (content && arrow) {
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+          content.classList.remove('hidden');
+          arrow.classList.add('rotate-180');
+        } else {
+          content.classList.add('hidden');
+          arrow.classList.remove('rotate-180');
+        }
       }
     };
 
@@ -2080,76 +2194,127 @@
       <div class="flex items-center justify-between p-5 border-b border-slate-800 z-10 bg-slate-900/90 backdrop-blur-md">
         <div class="flex items-center gap-2">
           <span class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
-          <h3 class="text-md sm:text-lg font-extrabold tracking-tight">AI 360° Virtual Try-On / એઆઈ ટ્રાય ઓન</h3>
+          <h3 class="text-base font-extrabold text-slate-100 tracking-tight">AI Virtual Try-On for <span id="tryon-cust-name">Customer</span></h3>
         </div>
-        <button onclick="closeTryOn()" class="text-slate-400 hover:text-white transition p-1 rounded-full hover:bg-slate-800 focus:outline-none">
+        <button onclick="window.closeTryOn()" class="text-slate-400 hover:text-white transition focus:outline-none p-1.5 hover:bg-slate-800 rounded-lg">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
-      <!-- Main Content Split View -->
-      <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        
-        <!-- Viewport (Camera/Scanning/Fitting) -->
-        <div class="flex-1 bg-slate-950 relative flex items-center justify-center overflow-hidden min-h-[350px]">
-          <!-- Video element for live scanning -->
-          <video id="tryon-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover opacity-70 hidden"></video>
+      <!-- Main Content Area: Split Viewport & Controls -->
+      <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Left Column: Viewport (Try-On Preview or Live Webcam) -->
+        <div class="flex-1 bg-slate-950 relative flex items-center justify-center overflow-hidden min-h-[300px] md:min-h-0">
           
-          <!-- Snapshot Canvas layer -->
-          <canvas id="tryon-canvas" class="absolute inset-0 w-full h-full object-cover hidden"></canvas>
-          
-          <!-- Interactive Fit Container (renders calibrated snapshots + product) -->
-          <div id="tryon-fit-container" class="absolute inset-0 w-full h-full flex items-center justify-center hidden">
-            <!-- Calibrated User Photo Background -->
-            <img id="tryon-user-bg" src="" class="absolute inset-0 w-full h-full object-cover pointer-events-none" />
-            <!-- Calibrated Auto-Fitted Product Overlay -->
-            <img id="tryon-product-overlay" src="" class="absolute transition-transform duration-300 pointer-events-none shadow-md" style="transform-origin: center center;" />
+          <!-- Viewport Info Floating Badge -->
+          <div class="absolute top-4 left-4 z-20 bg-slate-900/90 backdrop-blur-sm border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            <span id="tryon-model-info-text" class="text-[10px] font-bold text-slate-200">Priya • 5'6" • Wearing Size S</span>
           </div>
 
-          <!-- Glowing Scan Scanning Overlay Grid -->
-          <div id="tryon-scanner-overlay" class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-10 hidden">
-            <!-- Glowing Outline Frame (Face/Body/Wrist Outline) -->
-            <div id="tryon-outline-frame" class="w-64 h-64 border-2 border-indigo-500/50 rounded-full border-dashed flex items-center justify-center animate-pulse relative">
-              <div class="absolute inset-4 border border-brand/35 rounded-full"></div>
+          <!-- Video Element (Hidden by default, used for live scan) -->
+          <video id="tryon-video" class="absolute inset-0 w-full h-full object-cover hidden scale-x-[-1]" autoplay playsinline></video>
+
+          <!-- 360° Scan Outline Overlay (Guides the user during snapshot capture) -->
+          <div id="tryon-scanner-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/40 hidden z-10">
+            <div id="tryon-outline-frame" class="w-48 h-80 border-2 border-indigo-500/50 rounded-[40px] border-dashed flex items-center justify-center animate-pulse relative">
+              <!-- Corner indicators -->
+              <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-indigo-400"></div>
+              <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-indigo-400"></div>
+              <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-indigo-400"></div>
+              <div class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-indigo-400"></div>
             </div>
-            <!-- Bouncing Green Scan Line -->
-            <div class="absolute w-full h-1 bg-gradient-to-r from-transparent via-indigo-400 to-transparent top-0 left-0 animate-scan"></div>
-            <!-- Interactive Calibration Text -->
-            <div id="tryon-scanner-text" class="absolute bottom-12 bg-slate-900/90 text-indigo-400 border border-slate-800 rounded-xl px-4 py-2 text-xs font-bold font-mono tracking-wider">CALIBRATING AI COORDINATES...</div>
+            <div id="tryon-scanner-text" class="mt-4 bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+              GUIDE: BODY 360° OUTLINE / શરીર
+            </div>
           </div>
+
+          <!-- Canvas Element for snapshot processing (hidden) -->
+          <canvas id="tryon-canvas" class="hidden"></canvas>
+
+          <!-- Fit Overlay Container (Combines BG scan and product overlay) -->
+          <div id="tryon-fit-container" class="relative w-full h-full flex items-center justify-center">
+            <!-- Background: Selected Model or custom scan frame -->
+            <img id="tryon-user-bg" src="" class="w-full h-full object-cover select-none pointer-events-none transition-all duration-300">
+            
+            <!-- Foreground Overlay: The product image -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <img id="tryon-product-overlay" src="" class="transition-all duration-300 object-contain select-none" style="width: 150px; transform: translate(0px, 0px) rotate(0deg);">
+            </div>
+          </div>
+
         </div>
 
+        <!-- Right Column: Sidebar Controls -->
         <div class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 p-5 flex flex-col justify-between overflow-y-auto max-h-[350px] md:max-h-none">
           
           <div class="space-y-4">
-            <!-- Source Model Selector -->
+            <!-- Source Selector: Sizes filter row (Google style) -->
             <div>
-              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">Select Person / વ્યક્તિ પસંદ કરો</h4>
-              <div class="grid grid-cols-5 gap-1.5" id="tryon-model-selector">
-                <button onclick="selectTryOnSource('Priya')" id="btn-model-priya" class="flex flex-col items-center p-1.5 bg-slate-800 hover:bg-brand/20 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=80" class="w-8 h-8 rounded-full object-cover border border-slate-700">
-                  <span class="text-[8px] text-slate-350 font-bold mt-1">Priya</span>
-                </button>
-                <button onclick="selectTryOnSource('Rohan')" id="btn-model-rohan" class="flex flex-col items-center p-1.5 bg-slate-800 hover:bg-brand/20 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=80" class="w-8 h-8 rounded-full object-cover border border-slate-700">
-                  <span class="text-[8px] text-slate-355 font-bold mt-1">Rohan</span>
-                </button>
-                <button onclick="selectTryOnSource('Sarah')" id="btn-model-sarah" class="flex flex-col items-center p-1.5 bg-slate-800 hover:bg-brand/20 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=80" class="w-8 h-8 rounded-full object-cover border border-slate-700">
-                  <span class="text-[8px] text-slate-355 font-bold mt-1">Sarah</span>
-                </button>
-                <button onclick="selectTryOnSource('David')" id="btn-model-david" class="flex flex-col items-center p-1.5 bg-slate-800 hover:bg-brand/20 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=80" class="w-8 h-8 rounded-full object-cover border border-slate-700">
-                  <span class="text-[8px] text-slate-355 font-bold mt-1">David</span>
-                </button>
-                <button onclick="selectTryOnSource('Custom')" id="btn-model-custom" class="flex flex-col items-center p-1.5 bg-slate-800 hover:bg-brand/20 border border-slate-700 hover:border-brand rounded-lg transition focus:outline-none">
-                  <div class="w-8 h-8 rounded-full bg-indigo-900/50 flex items-center justify-center border border-indigo-500/40 text-indigo-400">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+              <div class="flex justify-between items-center mb-1">
+                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left">Sizes / સાઈઝ ફિલ્ટર</h4>
+              </div>
+              <div class="flex gap-1" id="tryon-size-filters">
+                <button onclick="filterTryOnSizes('All')" id="btn-size-all" class="flex-1 py-1.5 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition focus:outline-none">All</button>
+                <button onclick="filterTryOnSizes('S')" id="btn-size-s" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">S</button>
+                <button onclick="filterTryOnSizes('M')" id="btn-size-m" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">M</button>
+                <button onclick="filterTryOnSizes('L')" id="btn-size-l" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">L</button>
+                <button onclick="filterTryOnSizes('XL')" id="btn-size-xl" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">XL</button>
+              </div>
+            </div>
+
+            <!-- Models Grid (Google Shopping Style layout with avatar details) -->
+            <div>
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">Select Model / મોડલ પસંદ કરો</h4>
+              <div class="grid grid-cols-2 gap-2" id="tryon-models-grid">
+                <!-- Priya Card -->
+                <button onclick="selectTryOnSource('Priya')" id="card-model-priya" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                  <div class="leading-tight">
+                    <div class="text-[11px] font-bold text-slate-200">Priya</div>
+                    <div class="text-[9px] text-slate-450">5'6" • Size S</div>
                   </div>
-                  <span class="text-[8px] text-indigo-400 font-bold mt-1">Scan Me</span>
+                </button>
+                <!-- Rohan Card -->
+                <button onclick="selectTryOnSource('Rohan')" id="card-model-rohan" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                  <div class="leading-tight">
+                    <div class="text-[11px] font-bold text-slate-200">Rohan</div>
+                    <div class="text-[9px] text-slate-450">6'0" • Size M</div>
+                  </div>
+                </button>
+                <!-- Sarah Card -->
+                <button onclick="selectTryOnSource('Sarah')" id="card-model-sarah" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                  <div class="leading-tight">
+                    <div class="text-[11px] font-bold text-slate-200">Sarah</div>
+                    <div class="text-[9px] text-slate-450">5'8" • Size L</div>
+                  </div>
+                </button>
+                <!-- David Card -->
+                <button onclick="selectTryOnSource('David')" id="card-model-david" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                  <div class="leading-tight">
+                    <div class="text-[11px] font-bold text-slate-200">David</div>
+                    <div class="text-[9px] text-slate-450">5'11" • Size XL</div>
+                  </div>
                 </button>
               </div>
             </div>
+
+            <!-- Try on Yourself (Webcam Scan Shortcut) -->
+            <button onclick="selectTryOnSource('Custom')" id="btn-card-custom" class="w-full flex items-center justify-between p-3 bg-indigo-950/40 hover:bg-indigo-900/40 border border-indigo-500/30 rounded-xl text-left transition focus:outline-none">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30">
+                  <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold text-indigo-400">Try on yourself / તમારા પર જુઓ</div>
+                  <div class="text-[9px] text-indigo-300/70">Scan your photo for custom fit</div>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
 
             <!-- Scanner Step Panel (Webcam scan process, hidden by default) -->
             <div id="tryon-scanner-panel" class="space-y-4 hidden border-t border-slate-800 pt-3">
@@ -2158,19 +2323,19 @@
               
               <div class="grid grid-cols-2 gap-2">
                 <button id="btn-snap-front" onclick="captureAngle('Front')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none">
-                  <span class="text-[9px] text-slate-500 font-mono">STEP 1</span>
+                  <span class="text-[9px] text-slate-550 font-mono">STEP 1</span>
                   Front View / સામે
                 </button>
                 <button id="btn-snap-left" onclick="captureAngle('Left')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-500 font-mono">STEP 2</span>
+                  <span class="text-[9px] text-slate-550 font-mono">STEP 2</span>
                   Left View / ડાબે
                 </button>
                 <button id="btn-snap-right" onclick="captureAngle('Right')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-500 font-mono">STEP 3</span>
+                  <span class="text-[9px] text-slate-550 font-mono">STEP 3</span>
                   Right View / જમણે
                 </button>
                 <button id="btn-snap-back" onclick="captureAngle('Back')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-500 font-mono">STEP 4</span>
+                  <span class="text-[9px] text-slate-550 font-mono">STEP 4</span>
                   Back View / પાછળ
                 </button>
               </div>
@@ -2209,26 +2374,29 @@
                 </div>
               </div>
 
-              <!-- Fine-Tune Fitting Calibrators -->
-              <div>
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">Fine-Tune Fitting / ફિટિંગ કરો</h4>
-                <div class="space-y-3 bg-slate-950 p-3 rounded-2xl border border-slate-850">
+              <!-- Collapsible Fine-Tune Accordion (Google Style) -->
+              <div class="border border-slate-800 rounded-2xl overflow-hidden mt-3">
+                <button type="button" onclick="toggleTryOnAdvancedFit()" class="w-full p-2.5 bg-slate-850 hover:bg-slate-800 text-slate-350 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center transition focus:outline-none">
+                  <span>⚙️ Adjust Fitting / ફિટિંગ કરો</span>
+                  <svg id="tryon-advanced-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="tryon-advanced-content" class="space-y-3 bg-slate-950 p-3 border-t border-slate-850 hidden">
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
                       <span>Product Scale / કદ</span>
                       <span id="label-scale">100%</span>
                     </div>
                     <input type="range" id="fit-scale" min="30" max="250" value="100" class="w-full accent-brand bg-slate-800 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
                   </div>
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
                       <span>Product Rotation / એંગલ</span>
                       <span id="label-rotate">0°</span>
                     </div>
                     <input type="range" id="fit-rotate" min="-180" max="180" value="0" class="w-full accent-brand bg-slate-800 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
                   </div>
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
                       <span>Vertical Align / ઉપર-નીચે</span>
                       <span id="label-y">0px</span>
                     </div>
@@ -2242,7 +2410,7 @@
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   Save Photo / ફોટો ડાઉનલોડ કરો
                 </button>
-                <button onclick="startTryOnCustomScan()" id="btn-start-scan-custom" class="w-full py-2 bg-slate-850 hover:bg-slate-800 text-slate-350 font-semibold text-[10px] rounded-full transition border border-slate-750 focus:outline-none hidden">
+                <button onclick="startTryOnCustomScan()" id="btn-start-scan-custom" class="w-full py-2 bg-slate-850 hover:bg-slate-800 text-slate-355 font-semibold text-[10px] rounded-full transition border border-slate-750 focus:outline-none hidden">
                   📷 Re-scan 360° / નવું સ્કેન કરો
                 </button>
               </div>
