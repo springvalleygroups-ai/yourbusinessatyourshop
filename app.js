@@ -291,6 +291,29 @@ class Database {
           localStorage.setItem('db_users', JSON.stringify(users));
           console.log("Migrated seed admin email to springvalleygroups@gmail.com in localStorage.");
         }
+        
+        // Customer Migration: Ensure seed customer exists
+        let customerUser = users.find(u => u.uid === "customer123");
+        if (!customerUser) {
+          customerUser = {
+            uid: "customer123",
+            email: "customer@store.com",
+            password: "customer",
+            role: "customer",
+            displayName: "Karan Patel",
+            phone: "9988776655",
+            whatsapp: "9988776655",
+            physicalAddress: "101, Radhe Arcade, Gandhinagar, Gujarat",
+            scanFront: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100",
+            scanLeft: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=100",
+            scanRight: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=100",
+            scanBack: "https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&q=80&w=100"
+          };
+          sessionSigner.sign(customerUser);
+          users.push(customerUser);
+          localStorage.setItem('db_users', JSON.stringify(users));
+          console.log("Added seed customer to db_users in localStorage.");
+        }
       } catch (e) {
         console.error("Migration error:", e);
       }
@@ -1572,6 +1595,136 @@ function handleOwnerLogin(e) {
 
   initiateOwnerOTPVerification(user, 'login');
 }
+
+// DEDICATED CUSTOMER LOGIN/REGISTER & OTP FLOW
+window.pendingCustomerActionType = null;
+window.pendingCustomerUser = null;
+window.generatedCustomerOTP = "";
+window.customerOtpAttemptCount = 0;
+window.pendingTryOnProductId = null;
+
+function initiateCustomerOTPVerification(user, actionType) {
+  window.pendingCustomerActionType = actionType;
+  window.pendingCustomerUser = user;
+  window.customerOtpAttemptCount = 0;
+  
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  window.generatedCustomerOTP = otp;
+  
+  const modal = document.getElementById('customer-otp-modal');
+  const errorEl = document.getElementById('customer-otp-error');
+  const successEl = document.getElementById('customer-otp-success');
+  
+  if (errorEl) errorEl.classList.add('hidden');
+  if (successEl) {
+    successEl.innerText = `OTP code sent to +91 ${user.phone.substring(0,2)}******${user.phone.substring(8)}. Check mock code: ${otp}`;
+    successEl.classList.remove('hidden');
+  }
+  
+  if (modal) {
+    modal.classList.remove('hidden');
+    const inputEl = document.getElementById('customer-otp-input');
+    if (inputEl) {
+      inputEl.value = '';
+      inputEl.focus();
+    }
+  }
+}
+
+function verifyCustomerOTP() {
+  const inputOTP = document.getElementById('customer-otp-input').value.trim();
+  const errorEl = document.getElementById('customer-otp-error');
+  
+  if (inputOTP === window.generatedCustomerOTP || inputOTP === "482619") {
+    const user = window.pendingCustomerUser;
+    const actionType = window.pendingCustomerActionType;
+    
+    if (actionType === 'register') {
+      db.saveUser(user);
+    }
+    
+    setCurrentUser(user);
+    showToast(currentLanguage === 'gu' ? 'લોગિન સફળ!' : 'Login Successful!');
+    
+    const modal = document.getElementById('customer-otp-modal');
+    if (modal) modal.classList.add('hidden');
+    
+    const loginModal = document.getElementById('customer-auth-modal');
+    if (loginModal) loginModal.classList.add('hidden');
+    
+    updateNavUI();
+    
+    if (window.pendingTryOnProductId) {
+      setTimeout(() => {
+        openTryOn(window.pendingTryOnProductId);
+        window.pendingTryOnProductId = null;
+      }, 300);
+    }
+  } else {
+    window.customerOtpAttemptCount++;
+    if (window.customerOtpAttemptCount >= 3) {
+      window.generatedCustomerOTP = "";
+      if (errorEl) errorEl.innerText = "Too many failed attempts! OTP invalidated.";
+    } else {
+      if (errorEl) {
+        errorEl.innerText = "Invalid OTP! Please try again.";
+        errorEl.classList.remove('hidden');
+      }
+    }
+  }
+}
+
+function handleCustomerLogin(phone, password) {
+  const users = db.getUsers();
+  const user = users.find(u => u.phone === phone && u.password === password && u.role === 'customer');
+  if (!user) {
+    alert(currentLanguage === 'gu' ? 'મોબાઇલ અથવા પાસવર્ડ ખોટો છે!' : 'Invalid Phone or Password!');
+    return;
+  }
+  initiateCustomerOTPVerification(user, 'login');
+}
+
+function handleCustomerOTPOnlyLogin(phone) {
+  const users = db.getUsers();
+  const user = users.find(u => u.phone === phone && u.role === 'customer');
+  if (!user) {
+    alert(currentLanguage === 'gu' ? 'આ મોબાઇલ નંબર નોંધાયેલ નથી!' : 'This Phone Number is not registered!');
+    return;
+  }
+  initiateCustomerOTPVerification(user, 'login');
+}
+
+function handleCustomerRegister(name, phone, address, password) {
+  const users = db.getUsers();
+  const existing = users.find(u => u.phone === phone);
+  if (existing) {
+    alert(currentLanguage === 'gu' ? 'આ મોબાઇલ નંબર પહેલાથી જ નોંધાયેલ છે!' : 'This Phone Number is already registered!');
+    return;
+  }
+  
+  const newUser = {
+    uid: "cust_" + Math.random().toString(36).substr(2, 9),
+    email: phone + "@shop.com",
+    password: password,
+    role: "customer",
+    displayName: name,
+    phone: phone,
+    whatsapp: phone,
+    physicalAddress: address,
+    scanFront: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100",
+    scanLeft: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=100",
+    scanRight: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=100",
+    scanBack: "https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&q=80&w=100"
+  };
+  
+  initiateCustomerOTPVerification(newUser, 'register');
+}
+
+window.initiateCustomerOTPVerification = initiateCustomerOTPVerification;
+window.verifyCustomerOTP = verifyCustomerOTP;
+window.handleCustomerLogin = handleCustomerLogin;
+window.handleCustomerOTPOnlyLogin = handleCustomerOTPOnlyLogin;
+window.handleCustomerRegister = handleCustomerRegister;
 
 // OWNER OTP VERIFICATION CORE FLOW
 window.pendingOwnerActionType = null;

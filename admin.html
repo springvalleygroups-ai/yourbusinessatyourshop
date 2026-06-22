@@ -525,6 +525,31 @@
           </div>
         </div>
 
+        <!-- REGISTERED CUSTOMERS LIST -->
+        <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-800">Registered Customers / નોંધાયેલા ગ્રાહકો</h3>
+            <span class="bg-indigo-50 text-indigo-650 text-xs px-3 py-1 rounded-full font-semibold border border-indigo-100 uppercase tracking-wider">
+              AI Try-On Profiles
+            </span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead>
+                <tr class="border-b border-slate-150 text-slate-400 font-semibold">
+                  <th class="py-3">Customer / ગ્રાહક</th>
+                  <th class="py-3">Contact / સંપર્ક</th>
+                  <th class="py-3">Address / સરનામું</th>
+                  <th class="py-3">Actions / ક્રિયાઓ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-customers-list">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- UPGRADE 1: ACTIVE APPROVED PRODUCTS LIST -->
         <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
           <h3 class="text-lg font-bold mb-4 text-slate-800">Active Approved Products / ચાલુ પ્રોડક્ટ્સ</h3>
@@ -610,6 +635,26 @@
             <!-- Populated by JS -->
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER 360° SCAN VIEWER MODAL -->
+  <div id="customer-scan-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-150 w-full max-w-4xl p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto text-slate-800 text-left">
+      <button onclick="toggleCustomerScanModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-950 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-xl font-extrabold text-slate-900" id="scan-modal-title">Customer 360° Scan Viewer / ૩૬૦° સ્કેન ગેલેરી</h3>
+          <p class="text-xs text-slate-400" id="scan-modal-subtitle">AI Virtual Try-On 4-angle snapshot calibration gallery</p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="customer-scan-content">
+        <!-- Render 4 angles with beautiful titles and indicators -->
       </div>
     </div>
   </div>
@@ -1629,6 +1674,53 @@
         });
       }
 
+      // Render Registered Customers table
+      const allCustomersList = document.getElementById('admin-customers-list');
+      if (allCustomersList) {
+        allCustomersList.innerHTML = '';
+        const allRegisteredCustomers = allUsers.filter(u => u.role === 'customer');
+        
+        if (allRegisteredCustomers.length === 0) {
+          allCustomersList.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">No registered customers yet. / કોઈ ગ્રાહક નોંધાયેલ નથી.</td></tr>`;
+        } else {
+          allRegisteredCustomers.forEach(c => {
+            const displayName = c.displayName || 'Unnamed Customer';
+            const phone = c.phone || 'N/A';
+            const whatsapp = c.whatsapp || phone;
+            const address = c.physicalAddress || 'No Address Provided';
+            const email = c.email || 'N/A';
+            
+            allCustomersList.innerHTML += `
+              <tr class="border-b border-slate-100 text-slate-600 hover:bg-slate-50/50 transition">
+                <td class="py-3 text-left">
+                  <div class="font-bold text-slate-800">${displayName}</div>
+                  <div class="text-[10px] text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full inline-block mt-0.5">ID: ${c.uid}</div>
+                  <div class="text-[11px] text-slate-400 mt-1">Email: ${email}</div>
+                </td>
+                <td class="py-3 text-left">
+                  <div>Ph: ${phone}</div>
+                  <div class="text-xs text-green-600 font-semibold mt-1">
+                    <a href="https://wa.me/${whatsapp}" target="_blank" class="hover:underline flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5 inline text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.22-3.645c1.589.943 3.197 1.441 4.795 1.442 5.422 0 9.835-4.409 9.838-9.835.002-2.628-1.02-5.101-2.88-6.963C16.07 3.136 13.593 2.11 10.97 2.11 5.548 2.11 1.137 6.52 1.135 11.948c-.001 1.637.427 3.235 1.24 4.65l-.97 3.545 3.652-.958zm12.383-7.596c-.327-.164-1.938-.956-2.237-1.066-.3-.11-.518-.164-.736.164-.218.327-.844 1.066-1.035 1.284-.19.218-.38.245-.708.081-.327-.164-1.383-.51-2.635-1.627-.975-.87-1.633-1.946-1.824-2.274-.19-.327-.02-.504.143-.667.147-.147.327-.381.49-.572.164-.19.218-.327.327-.546.11-.218.055-.409-.027-.572-.082-.164-.736-1.774-1.008-2.428-.266-.64-.537-.553-.736-.563-.19-.01-.409-.011-.627-.011-.218 0-.572.082-.871.409-.3.327-1.144 1.118-1.144 2.727 0 1.609 1.171 3.163 1.335 3.382.164.218 2.304 3.518 5.582 4.937.78.337 1.389.539 1.863.69.784.249 1.497.214 2.06.13.629-.094 1.938-.792 2.21-1.556.273-.764.273-1.418.191-1.556-.081-.137-.3-.218-.627-.382z"/></svg>
+                      ${whatsapp}
+                    </a>
+                  </div>
+                </td>
+                <td class="py-3 text-left max-w-xs truncate" title="${address}">
+                  ${address}
+                </td>
+                <td class="py-3 text-left flex gap-2">
+                  <button onclick="showCustomerScan('${c.uid}')" class="bg-indigo-600 hover:bg-indigo-750 text-white text-xs px-3.5 py-1.5 rounded-full transition shadow-sm shadow-indigo-500/10 flex items-center gap-1 font-semibold">
+                    <span>360° Scan</span>
+                  </button>
+                  <button onclick="deleteCustomer('${c.uid}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-full transition shadow-sm shadow-red-500/10">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+      }
+
       // UPGRADE 1: Render Approved Products Table
       const approvedProductsList = document.getElementById('admin-approved-products-list');
       if (approvedProductsList) {
@@ -1731,6 +1823,74 @@
         showToast(currentLanguage === 'gu' ? 'વેન્ડર અને તેમની બધી પ્રોડક્ટ્સ ડીલીટ થઈ ગઈ!' : 'Vendor and their products deleted successfully!');
         renderAdminDashboard();
       }
+    }
+
+    function deleteCustomer(uid) {
+      if (!currentUser || currentUser.role !== 'admin' || !verifyUserSession(currentUser)) {
+        console.warn("Security Alert: Unauthorized deleteCustomer attempt!");
+        showToast(currentLanguage === 'gu' ? "ચેતવણી: આ ક્રિયા ફક્ત એડમિન માટે જ છે!" : "Warning: This action is only allowed for Admin!");
+        handleLogout();
+        return;
+      }
+      if (confirm(currentLanguage === 'gu' ? 'શું તમે આ ગ્રાહકનું ખાતું અને તેમનો ડેટા કાઢી નાખવા માંગો છો?' : 'Are you sure you want to delete this customer and all their try-on data?')) {
+        db.deleteUser(uid);
+        showToast(currentLanguage === 'gu' ? 'ગ્રાહક સફળતાપૂર્વક ડીલીટ થઈ ગયા!' : 'Customer deleted successfully!');
+        renderAdminDashboard();
+      }
+    }
+
+    function toggleCustomerScanModal(show) {
+      const modal = document.getElementById('customer-scan-modal');
+      if (modal) {
+        if (show) modal.classList.remove('hidden');
+        else modal.classList.add('hidden');
+      }
+    }
+
+    function showCustomerScan(uid) {
+      const allUsers = db.getUsers();
+      const customer = allUsers.find(u => u.uid === uid);
+      if (!customer) {
+        alert("Customer not found.");
+        return;
+      }
+      
+      const titleEl = document.getElementById('scan-modal-title');
+      const subtitleEl = document.getElementById('scan-modal-subtitle');
+      if (titleEl) titleEl.innerText = `${customer.displayName} - 360° AI Scan Viewer`;
+      if (subtitleEl) subtitleEl.innerText = `Phone: ${customer.phone} | Address: ${customer.physicalAddress}`;
+      
+      const container = document.getElementById('customer-scan-content');
+      if (container) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Front View / સામેથી</span>
+            <div class="w-full aspect-[3/4] rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+              <img src="${customer.scanFront || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'}" class="w-full h-full object-cover">
+            </div>
+          </div>
+          <div class="flex flex-col items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Left View / ડાબી બાજુથી</span>
+            <div class="w-full aspect-[3/4] rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+              <img src="${customer.scanLeft || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=100'}" class="w-full h-full object-cover">
+            </div>
+          </div>
+          <div class="flex flex-col items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Right View / જમણી બાજુથી</span>
+            <div class="w-full aspect-[3/4] rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+              <img src="${customer.scanRight || 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=100'}" class="w-full h-full object-cover">
+            </div>
+          </div>
+          <div class="flex flex-col items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Back View / પાછળથી</span>
+            <div class="w-full aspect-[3/4] rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
+              <img src="${customer.scanBack || 'https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&q=80&w=100'}" class="w-full h-full object-cover">
+            </div>
+          </div>
+        `;
+      }
+      
+      toggleCustomerScanModal(true);
     }
 
     function approveProduct(id) {
