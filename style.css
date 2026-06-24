@@ -349,3 +349,52 @@ body {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Google Shopping Try-On Clone Styling Override */
+.google-tryon-badge {
+  font-family: 'Roboto', -apple-system, sans-serif;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e0e0e0;
+  color: #3c4043;
+}
+.google-size-chip {
+  transition: all 0.2s ease;
+}
+.google-size-chip-active {
+  background-color: #202124 !important;
+  color: #ffffff !important;
+  border-color: #202124 !important;
+}
+.google-size-chip-inactive {
+  background-color: #ffffff !important;
+  color: #3c4043 !important;
+  border-color: #dadce0 !important;
+}
+.google-model-card-active {
+  border-color: #1a73e8 !important;
+  background-color: #f8f9fa !important;
+  box-shadow: 0 1px 3px 0 rgba(60,64,67,0.15), 0 1px 2px 0 rgba(60,64,67,0.3) !important;
+}
+.google-model-card-inactive {
+  border-color: #dadce0 !important;
+  background-color: #ffffff !important;
+}
+.google-custom-card-active {
+  border-color: #1a73e8 !important;
+  background-color: #e8f0fe !important;
+}
+.google-custom-card-inactive {
+  border-color: #e0e0e0 !important;
+  background-color: #f8f9fa !important;
+}
+.google-btn-angle-active {
+  background-color: #202124 !important;
+  color: #ffffff !important;
+  border-color: #202124 !important;
+}
+.google-btn-angle-inactive {
+  background-color: #ffffff !important;
+  color: #3c4043 !important;
+  border-color: #dadce0 !important;
+}
+

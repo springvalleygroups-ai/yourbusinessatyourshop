@@ -1681,6 +1681,14 @@
 
       const custName = document.getElementById('tryon-cust-name');
       if (custName) custName.innerText = currentUser.displayName || 'Customer';
+
+      // Bind product details to sidebar brand header
+      const pBrand = document.getElementById('tryon-product-brand');
+      const pTitle = document.getElementById('tryon-product-title');
+      const pPrice = document.getElementById('tryon-product-price');
+      if (pBrand) pBrand.innerText = tryOnProduct.brand || 'Premium';
+      if (pTitle) pTitle.innerText = tryOnProduct.name || '';
+      if (pPrice) pPrice.innerText = `₹${tryOnProduct.price}`;
       
       // If customer has a 360° scan in their profile, select it immediately!
       if (currentUser && currentUser.scanFront) {
@@ -1688,7 +1696,7 @@
         ['All', 'S', 'M', 'L', 'XL'].forEach(sz => {
           const btn = document.getElementById(`btn-size-${sz.toLowerCase()}`);
           if (btn) {
-            btn.className = "flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none";
+            btn.className = "google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border";
           }
         });
         // Select Custom source
@@ -1714,9 +1722,9 @@
         const card = document.getElementById(`card-model-${src.toLowerCase()}`);
         if (card) {
           if (src === source) {
-            card.className = "flex items-center gap-2 p-2 bg-slate-800 border-2 border-indigo-500 rounded-xl text-left hover:bg-slate-750 transition relative focus:outline-none";
+            card.className = "google-model-card-active flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none shadow-sm";
           } else {
-            card.className = "flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none";
+            card.className = "google-model-card-inactive flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none";
           }
         }
       });
@@ -1724,9 +1732,9 @@
       const customCard = document.getElementById('btn-card-custom');
       if (customCard) {
         if (source === 'Custom') {
-          customCard.className = "w-full flex items-center justify-between p-3 bg-indigo-950/40 border-2 border-indigo-500 rounded-xl text-left transition focus:outline-none";
+          customCard.className = "google-custom-card-active w-full flex items-center justify-between p-3 border rounded-xl text-left transition focus:outline-none";
         } else {
-          customCard.className = "w-full flex items-center justify-between p-3 bg-indigo-950/40 hover:bg-indigo-900/40 border border-indigo-500/30 rounded-xl text-left transition focus:outline-none";
+          customCard.className = "google-custom-card-inactive w-full flex items-center justify-between p-3 border rounded-xl text-left transition focus:outline-none";
         }
       }
 
@@ -1780,9 +1788,9 @@
         const btn = document.getElementById(`btn-size-${sz.toLowerCase()}`);
         if (btn) {
           if (sz === size) {
-            btn.className = "flex-1 py-1.5 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition focus:outline-none";
+            btn.className = "google-size-chip google-size-chip-active flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border";
           } else {
-            btn.className = "flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none";
+            btn.className = "google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border";
           }
         }
       });
@@ -1846,16 +1854,16 @@
       const outlineFrame = document.getElementById('tryon-outline-frame');
       const cat = tryOnProduct.category;
       if (cat === 'clothing') {
-        outlineFrame.className = "w-48 h-80 border-2 border-indigo-500/50 rounded-[40px] border-dashed flex items-center justify-center animate-pulse relative";
+        outlineFrame.className = "w-48 h-80 border-2 border-blue-500/50 rounded-[40px] border-dashed flex items-center justify-center animate-pulse relative";
         document.getElementById('tryon-scanner-text').innerText = "GUIDE: BODY 360° OUTLINE / શરીર";
       } else if (cat === 'footwear') {
-        outlineFrame.className = "w-64 h-32 border-2 border-indigo-500/50 rounded-xl border-dashed flex items-center justify-center animate-pulse relative";
+        outlineFrame.className = "w-64 h-32 border-2 border-blue-500/50 rounded-xl border-dashed flex items-center justify-center animate-pulse relative";
         document.getElementById('tryon-scanner-text').innerText = "GUIDE: FEET OUTLINE / પગ";
       } else if (cat === 'electronics' || cat === 'others') {
-        outlineFrame.className = "w-52 h-52 border-2 border-indigo-500/50 rounded-full border-dashed flex items-center justify-center animate-pulse relative";
+        outlineFrame.className = "w-52 h-52 border-2 border-blue-500/50 rounded-full border-dashed flex items-center justify-center animate-pulse relative";
         document.getElementById('tryon-scanner-text').innerText = "GUIDE: HEAD & EARS OUTLINE / કાન અને ચહેરો";
       } else {
-        outlineFrame.className = "w-48 h-48 border-2 border-indigo-500/50 rounded-full border-dashed flex items-center justify-center animate-pulse relative";
+        outlineFrame.className = "w-48 h-48 border-2 border-blue-500/50 rounded-full border-dashed flex items-center justify-center animate-pulse relative";
         document.getElementById('tryon-scanner-text').innerText = "GUIDE: WRIST & HAND OUTLINE / હાથ અને કાંડું";
       }
 
@@ -1880,7 +1888,7 @@
         if (tryOnCapturedFrames[angle]) {
           preview.innerHTML = `<img src="${tryOnCapturedFrames[angle]}" class="w-full h-full object-cover" />`;
           const btn = document.getElementById(`btn-snap-${angle.toLowerCase()}`);
-          if (btn) btn.className = "bg-green-700 text-white border border-green-600 p-2.5 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition";
+          if (btn) btn.className = "bg-green-600 text-white border border-green-500 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none";
         }
       });
       
@@ -1975,112 +1983,89 @@
           corners.forEach(c => { bgR += c.r; bgG += c.g; bgB += c.b; });
           bgR = Math.round(bgR / 4);
           bgG = Math.round(bgG / 4);
-          bgB = Math.round(bgB / 4);
-          
-          // White threshold / tolerance
-          const tolerance = 40;
-          
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i+1];
-            const b = data[i+2];
-            
-            // Calculate distance to corner background
-            const dist = Math.sqrt(
-              Math.pow(r - bgR, 2) + 
-              Math.pow(g - bgG, 2) + 
-              Math.pow(b - bgB, 2)
-            );
-            
-            if (dist < tolerance || (r > 238 && g > 238 && b > 238)) {
-              data[i+3] = 0; // set alpha to 0 (make transparent)
-            }
-          }
-          
-          ctx.putImageData(imgData, 0, 0);
-          overlay.src = canvas.toDataURL('image/png');
-        } catch (e) {
-          console.error("Background removal canvas extraction failed:", e);
-          // Fallback remains as is
-        }
-      };
-      tempImg.onerror = function() {
-        console.error("Failed to load image for background removal processing:", url);
-      };
-      tempImg.src = url;
-    }
-
-    function showFittingPanel() {
-      stopTryOnWebcam();
-
-      document.getElementById('tryon-scanner-panel').classList.add('hidden');
-      document.getElementById('tryon-fitting-panel').classList.remove('hidden');
-      document.getElementById('tryon-scanner-overlay').classList.add('hidden');
-      
-      document.getElementById('tryon-fit-container').classList.remove('hidden');
-      
-      tryOnAngle = 'Front';
-      document.getElementById('tryon-user-bg').src = tryOnCapturedFrames.Front;
-      
-      const images = tryOnProduct.imageUrls || (tryOnProduct.imageUrl ? [tryOnProduct.imageUrl] : []);
-      const url = images[0] || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff';
-      loadTransparentProductImage(url);
-
-      resetAutoFitting();
-    }
-
-    function resetAutoFitting() {
-      const cat = tryOnProduct.category;
-      let scale = 100;
-      let rotate = 0;
-      let y = 0;
-
-      if (cat === 'clothing') {
-        scale = 110;
-        y = 20;
-      } else if (cat === 'footwear') {
-        scale = 65;
-        y = 110;
-      } else if (cat === 'electronics') {
-        scale = 55;
-        y = -40;
-      } else {
-        scale = 45;
-        y = 40;
-      }
-
-      document.getElementById('fit-scale').value = scale;
-      document.getElementById('fit-rotate').value = rotate;
-      document.getElementById('fit-y').value = y;
-      
-      adjustOverlay();
-    }
-
-    window.adjustOverlay = function() {
-      const scale = document.getElementById('fit-scale').value;
-      const rotate = document.getElementById('fit-rotate').value;
-      const y = document.getElementById('fit-y').value;
-
-      document.getElementById('label-scale').innerText = `${scale}%`;
-      document.getElementById('label-rotate').innerText = `${rotate}°`;
-      document.getElementById('label-y').innerText = `${y}px`;
-
-      const overlay = document.getElementById('tryon-product-overlay');
-      if (overlay) {
-        overlay.style.width = `${scale * 1.5}px`;
-        overlay.style.transform = `translate(0px, ${y}px) rotate(${rotate}deg)`;
-      }
-    };
-
-    window.setTryOnAngle = function(angle) {
+          bgB =     window.setTryOnAngle = function(angle) {
       tryOnAngle = angle;
       
       ['Front', 'Left', 'Right', 'Back'].forEach(ang => {
         const btn = document.getElementById(`btn-angle-${ang.toLowerCase()}`);
         if (ang === angle) {
-          btn.className = "flex-1 py-2 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition";
+          btn.className = "google-btn-angle-active flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
         } else {
-          btn.className = "flex-1 py-2 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition";
+          btn.className = "google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
+        }
+      });
+
+      document.getElementById('tryon-user-bg').src = tryOnCapturedFrames[angle];
+
+      const images = tryOnProduct.imageUrls || [];
+      if (images.length > 1) {
+        let url = images[0];
+        if (angle === 'Front') url = images[0];
+        else if (angle === 'Left' && images[1]) url = images[1];
+        else if (angle === 'Right' && images[2]) url = images[2] || images[1];
+        else if (angle === 'Back' && images[3]) url = images[3] || images[0];
+        
+        loadTransparentProductImage(url);
+      }
+    };
+
+    window.captureTryOnSnapshot = function() {
+      const bgImg = document.getElementById('tryon-user-bg');
+      const overlayImg = document.getElementById('tryon-product-overlay');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+
+      const bg = new Image();
+      bg.crossOrigin = "anonymous";
+      bg.onload = function() {
+        ctx.drawImage(bg, 0, 0, 640, 480);
+        
+        const overlay = new Image();
+        overlay.crossOrigin = "anonymous";
+        overlay.onload = function() {
+          const scale = document.getElementById('fit-scale').value;
+          const rotate = document.getElementById('fit-rotate').value;
+          const y = parseInt(document.getElementById('fit-y').value);
+
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2 + y);
+          ctx.rotate((rotate * Math.PI) / 180);
+          
+          const w = scale * 1.5;
+          const h = (overlay.height / overlay.width) * w;
+          ctx.drawImage(overlay, -w / 2, -h / 2, w, h);
+          ctx.restore();
+
+          const link = document.createElement('a');
+          link.download = `tryon_${currentUser.displayName}_${tryOnProduct.name}.jpg`;
+          link.href = canvas.toDataURL('image/jpeg');
+          link.click();
+          showToast(currentLanguage === 'gu' ? "ફોટો ગૅલેરીમાં સેવ થઈ ગયો છે!" : "Try-on snapshot saved successfully!");
+        };
+        overlay.src = overlayImg.src;
+      };
+      bg.src = bgImg.src;
+    };
+
+    window.reinitiateScan = function() {
+      tryOnCapturedFrames = { Front: "", Left: "", Right: "", Back: "" };
+      
+      ['front', 'left', 'right', 'back'].forEach(angle => {
+        document.getElementById(`preview-${angle}`).innerHTML = `<span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">${angle}</span>`;
+        const btn = document.getElementById(`btn-snap-${angle}`);
+        if (btn) {
+          if (angle === 'front') {
+            btn.className = "bg-slate-50 hover:bg-slate-100 text-slate-850 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none";
+            btn.removeAttribute('disabled');
+          } else {
+            btn.className = "bg-slate-50 hover:bg-slate-100 text-slate-850 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none";
+            btn.setAttribute('disabled', 'disabled');
+          }
+        }
+      });ate-700 text-[10px] font-bold rounded-lg transition";
         }
       });
 
@@ -2227,58 +2212,16 @@
         <form onsubmit="event.preventDefault(); window.handleCustomerRegister(document.getElementById('cust-reg-name').value, document.getElementById('cust-reg-phone').value, document.getElementById('cust-reg-address').value, document.getElementById('cust-reg-pass').value)">
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-0.5">Your Name / નામ</label>
-              <input type="text" id="cust-reg-name" placeholder="Enter Full Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-brand focus:bg-white transition" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-0.5">Mobile Number / મોબાઇલ</label>
-              <input type="tel" id="cust-reg-phone" placeholder="Enter Mobile Number" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-brand focus:bg-white transition" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-0.5">Shipping Address / સરનામું</label>
-              <textarea id="cust-reg-address" placeholder="Enter Delivery Address" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-brand focus:bg-white transition" required></textarea>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-0.5">Password / પાસવર્ડ</label>
-              <input type="password" id="cust-reg-pass" placeholder="Create Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-brand focus:bg-white transition" required>
-            </div>
-            <button type="submit" class="w-full btn-primary text-white py-3.5 rounded-full font-semibold transition mt-4">Verify Phone & Register</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- CUSTOMER OTP MODAL -->
-  <div id="customer-otp-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative border border-slate-100 text-center animate-fade-in text-slate-800">
-      <h3 class="text-xl font-extrabold text-slate-900 mb-2">Verify Mobile Number</h3>
-      <p id="customer-otp-success" class="text-xs text-green-600 mb-4 bg-green-50 p-2.5 rounded-xl border border-green-100 hidden"></p>
-      <p id="customer-otp-error" class="text-xs text-red-500 mb-4 bg-red-50 p-2.5 rounded-xl border border-red-100 hidden"></p>
-      
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-2">Enter 6-Digit OTP / વેરિફિકેશન કોડ</label>
-          <input type="text" id="customer-otp-input" maxlength="6" class="w-40 text-center text-2xl font-black bg-slate-100 border border-slate-200 rounded-xl py-3 focus:outline-none focus:border-brand focus:bg-white tracking-widest text-slate-800" required>
-        </div>
-        <div class="flex gap-3">
-          <button onclick="document.getElementById('customer-otp-modal').classList.add('hidden')" class="w-1/2 bg-slate-100 text-slate-700 py-3 rounded-full font-bold text-xs transition focus:outline-none">Cancel</button>
-          <button onclick="window.verifyCustomerOTP()" class="w-1/2 btn-primary text-white py-3 rounded-full font-bold text-xs transition focus:outline-none">Verify & Proceed</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI 360° VIRTUAL TRY-ON MODAL -->
-  <div id="try-on-modal" class="fixed inset-0 bg-slate-950/80 z-50 hidden backdrop-blur-md flex items-center justify-center p-0 sm:p-4 text-white">
-    <div class="bg-slate-900 w-full h-full sm:h-[90vh] sm:max-w-4xl sm:rounded-3xl border border-slate-800 shadow-2xl relative flex flex-col justify-between overflow-hidden">
+              <label class="block text-xs font-sem  <!-- AI 360° VIRTUAL TRY-ON MODAL -->
+  <div id="try-on-modal" class="fixed inset-0 bg-white/95 z-50 hidden backdrop-blur-md flex items-center justify-center p-0 sm:p-4 text-slate-800">
+    <div class="bg-white w-full h-full sm:h-[90vh] sm:max-w-4xl sm:rounded-3xl border border-slate-200 shadow-2xl relative flex flex-col justify-between overflow-hidden">
       <!-- Header -->
-      <div class="flex items-center justify-between p-5 border-b border-slate-800 z-10 bg-slate-900/90 backdrop-blur-md">
+      <div class="flex items-center justify-between p-5 border-b border-slate-100 z-10 bg-white/90 backdrop-blur-md">
         <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
-          <h3 class="text-base font-extrabold text-slate-100 tracking-tight">AI Virtual Try-On for <span id="tryon-cust-name">Customer</span></h3>
+          <span class="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></span>
+          <h3 class="text-base font-extrabold text-slate-800 tracking-tight">AI Virtual Try-On for <span id="tryon-cust-name">Customer</span></h3>
         </div>
-        <button onclick="window.closeTryOn()" class="text-slate-400 hover:text-white transition focus:outline-none p-1.5 hover:bg-slate-800 rounded-lg">
+        <button onclick="window.closeTryOn()" class="text-slate-500 hover:text-slate-800 transition focus:outline-none p-1.5 hover:bg-slate-100 rounded-lg">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
@@ -2286,27 +2229,27 @@
       <!-- Main Content Area: Split Viewport & Controls -->
       <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
         <!-- Left Column: Viewport (Try-On Preview or Live Webcam) -->
-        <div class="flex-1 bg-slate-950 relative flex items-center justify-center overflow-hidden min-h-[300px] md:min-h-0">
+        <div class="flex-1 bg-slate-50 relative flex items-center justify-center overflow-hidden min-h-[300px] md:min-h-0">
           
-          <!-- Viewport Info Floating Badge -->
-          <div class="absolute top-4 left-4 z-20 bg-slate-900/90 backdrop-blur-sm border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+          <!-- Viewport Info Floating Badge (Google style) -->
+          <div class="absolute top-4 left-4 z-20 google-tryon-badge px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm text-[10px] font-bold">
             <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-            <span id="tryon-model-info-text" class="text-[10px] font-bold text-slate-200">Priya • 5'6" • Wearing Size S</span>
+            <span id="tryon-model-info-text">Priya • 5'6" • Wearing Size S</span>
           </div>
 
           <!-- Video Element (Hidden by default, used for live scan) -->
           <video id="tryon-video" class="absolute inset-0 w-full h-full object-cover hidden scale-x-[-1]" autoplay playsinline></video>
 
           <!-- 360° Scan Outline Overlay (Guides the user during snapshot capture) -->
-          <div id="tryon-scanner-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/40 hidden z-10">
-            <div id="tryon-outline-frame" class="w-48 h-80 border-2 border-indigo-500/50 rounded-[40px] border-dashed flex items-center justify-center animate-pulse relative">
+          <div id="tryon-scanner-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/40 hidden z-10">
+            <div id="tryon-outline-frame" class="w-48 h-80 border-2 border-blue-500/50 rounded-[40px] border-dashed flex items-center justify-center animate-pulse relative">
               <!-- Corner indicators -->
-              <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-indigo-400"></div>
-              <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-indigo-400"></div>
-              <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-indigo-400"></div>
-              <div class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-indigo-400"></div>
+              <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-blue-400"></div>
+              <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-blue-400"></div>
+              <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-blue-400"></div>
+              <div class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-blue-400"></div>
             </div>
-            <div id="tryon-scanner-text" class="mt-4 bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+            <div id="tryon-scanner-text" class="mt-4 bg-blue-50/90 border border-blue-200 text-blue-600 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
               GUIDE: BODY 360° OUTLINE / શરીર
             </div>
           </div>
@@ -2328,179 +2271,186 @@
         </div>
 
         <!-- Right Column: Sidebar Controls -->
-        <div class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 p-5 flex flex-col justify-between overflow-y-auto max-h-[350px] md:max-h-none">
+        <div class="w-full md:w-80 bg-white border-t md:border-t-0 md:border-l border-slate-100 p-5 flex flex-col justify-between overflow-y-auto max-h-[350px] md:max-h-none">
           
           <div class="space-y-4">
+            <!-- Product Details Header (Google style) -->
+            <div class="border-b border-slate-100 pb-3 mb-3">
+              <div id="tryon-product-brand" class="text-xs font-semibold text-slate-500 uppercase tracking-wider text-left">Brand</div>
+              <div id="tryon-product-title" class="text-sm font-bold text-slate-800 leading-tight text-left mt-0.5">Product Name</div>
+              <div id="tryon-product-price" class="text-sm font-semibold text-slate-900 mt-0.5 text-left">$0.00</div>
+            </div>
+
             <!-- Source Selector: Sizes filter row (Google style) -->
             <div>
-              <div class="flex justify-between items-center mb-1">
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left">Sizes / સાઈઝ ફિલ્ટર</h4>
+              <div class="flex justify-between items-center mb-1.5">
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-left">Sizes / સાઈઝ ફિલ્ટર</h4>
               </div>
-              <div class="flex gap-1" id="tryon-size-filters">
-                <button onclick="filterTryOnSizes('All')" id="btn-size-all" class="flex-1 py-1.5 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition focus:outline-none">All</button>
-                <button onclick="filterTryOnSizes('S')" id="btn-size-s" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">S</button>
-                <button onclick="filterTryOnSizes('M')" id="btn-size-m" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">M</button>
-                <button onclick="filterTryOnSizes('L')" id="btn-size-l" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">L</button>
-                <button onclick="filterTryOnSizes('XL')" id="btn-size-xl" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">XL</button>
+              <div class="flex gap-1.5" id="tryon-size-filters">
+                <button onclick="filterTryOnSizes('All')" id="btn-size-all" class="google-size-chip google-size-chip-active flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border">All</button>
+                <button onclick="filterTryOnSizes('S')" id="btn-size-s" class="google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border">S</button>
+                <button onclick="filterTryOnSizes('M')" id="btn-size-m" class="google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border">M</button>
+                <button onclick="filterTryOnSizes('L')" id="btn-size-l" class="google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border">L</button>
+                <button onclick="filterTryOnSizes('XL')" id="btn-size-xl" class="google-size-chip google-size-chip-inactive flex-1 py-1.5 text-[11px] font-bold rounded-full transition focus:outline-none border">XL</button>
               </div>
             </div>
 
             <!-- Models Grid (Google Shopping Style layout with avatar details) -->
             <div>
-              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">Select Model / મોડલ પસંદ કરો</h4>
+              <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-left">Select Model / મોડલ પસંદ કરો</h4>
               <div class="grid grid-cols-2 gap-2" id="tryon-models-grid">
                 <!-- Priya Card -->
-                <button onclick="selectTryOnSource('Priya')" id="card-model-priya" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                <button onclick="selectTryOnSource('Priya')" id="card-model-priya" class="google-model-card-active flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-200">
                   <div class="leading-tight">
-                    <div class="text-[11px] font-bold text-slate-200">Priya</div>
-                    <div class="text-[9px] text-slate-450">5'6" • Size S</div>
+                    <div class="text-[11px] font-bold text-slate-800">Priya</div>
+                    <div class="text-[9px] text-slate-500">5'6" • Size S</div>
                   </div>
                 </button>
                 <!-- Rohan Card -->
-                <button onclick="selectTryOnSource('Rohan')" id="card-model-rohan" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                <button onclick="selectTryOnSource('Rohan')" id="card-model-rohan" class="google-model-card-inactive flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-200">
                   <div class="leading-tight">
-                    <div class="text-[11px] font-bold text-slate-200">Rohan</div>
-                    <div class="text-[9px] text-slate-450">6'0" • Size M</div>
+                    <div class="text-[11px] font-bold text-slate-800">Rohan</div>
+                    <div class="text-[9px] text-slate-500">6'0" • Size M</div>
                   </div>
                 </button>
                 <!-- Sarah Card -->
-                <button onclick="selectTryOnSource('Sarah')" id="card-model-sarah" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                <button onclick="selectTryOnSource('Sarah')" id="card-model-sarah" class="google-model-card-inactive flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-200">
                   <div class="leading-tight">
-                    <div class="text-[11px] font-bold text-slate-200">Sarah</div>
-                    <div class="text-[9px] text-slate-450">5'8" • Size L</div>
+                    <div class="text-[11px] font-bold text-slate-800">Sarah</div>
+                    <div class="text-[9px] text-slate-500">5'8" • Size L</div>
                   </div>
                 </button>
                 <!-- David Card -->
-                <button onclick="selectTryOnSource('David')" id="card-model-david" class="flex items-center gap-2 p-2 bg-slate-800 border border-slate-700 rounded-xl text-left hover:bg-slate-750 hover:border-slate-500 transition relative focus:outline-none">
-                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                <button onclick="selectTryOnSource('David')" id="card-model-david" class="google-model-card-inactive flex items-center gap-2 p-2 border rounded-xl text-left transition relative focus:outline-none">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120" class="w-9 h-9 rounded-full object-cover border border-slate-200">
                   <div class="leading-tight">
-                    <div class="text-[11px] font-bold text-slate-200">David</div>
-                    <div class="text-[9px] text-slate-450">5'11" • Size XL</div>
+                    <div class="text-[11px] font-bold text-slate-800">David</div>
+                    <div class="text-[9px] text-slate-500">5'11" • Size XL</div>
                   </div>
                 </button>
               </div>
             </div>
 
             <!-- Try on Yourself (Webcam Scan Shortcut) -->
-            <button onclick="selectTryOnSource('Custom')" id="btn-card-custom" class="w-full flex items-center justify-between p-3 bg-indigo-950/40 hover:bg-indigo-900/40 border border-indigo-500/30 rounded-xl text-left transition focus:outline-none">
+            <button onclick="selectTryOnSource('Custom')" id="btn-card-custom" class="google-custom-card-inactive w-full flex items-center justify-between p-3 border rounded-xl text-left transition focus:outline-none animate-pulse">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30">
+                <div class="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
                   <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                 </div>
                 <div>
-                  <div class="text-[11px] font-bold text-indigo-400">Try on yourself / તમારા પર જુઓ</div>
-                  <div class="text-[9px] text-indigo-300/70">Scan your photo for custom fit</div>
+                  <div class="text-[11px] font-bold text-slate-800">Try on yourself / તમારા પર જુઓ</div>
+                  <div class="text-[9px] text-slate-500">Scan your photo for custom fit</div>
                 </div>
               </div>
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
 
             <!-- Scanner Step Panel (Webcam scan process, hidden by default) -->
-            <div id="tryon-scanner-panel" class="space-y-4 hidden border-t border-slate-800 pt-3">
-              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider text-left">360° AI Camera Scanner</h4>
-              <p class="text-[11px] text-slate-400 text-left">એઆઈ એક્યુરેસી માટે કૃપા કરીને નીચેના ૪ એંગલથી કેમેરા સામે ફોટો પાડો:</p>
+            <div id="tryon-scanner-panel" class="space-y-4 hidden border-t border-slate-100 pt-3">
+              <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider text-left">360° AI Camera Scanner</h4>
+              <p class="text-[11px] text-slate-500 text-left">એઆઈ એક્યુરેસી માટે કૃપા કરીને નીચેના ૪ એંગલથી કેમેરા સામે ફોટો પાડો:</p>
               
               <div class="grid grid-cols-2 gap-2">
-                <button id="btn-snap-front" onclick="captureAngle('Front')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none">
-                  <span class="text-[9px] text-slate-550 font-mono">STEP 1</span>
+                <button id="btn-snap-front" onclick="captureAngle('Front')" class="bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none">
+                  <span class="text-[9px] text-slate-400 font-mono">STEP 1</span>
                   Front View / સામે
                 </button>
-                <button id="btn-snap-left" onclick="captureAngle('Left')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-550 font-mono">STEP 2</span>
+                <button id="btn-snap-left" onclick="captureAngle('Left')" class="bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
+                  <span class="text-[9px] text-slate-400 font-mono">STEP 2</span>
                   Left View / ડાબે
                 </button>
-                <button id="btn-snap-right" onclick="captureAngle('Right')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-550 font-mono">STEP 3</span>
+                <button id="btn-snap-right" onclick="captureAngle('Right')" class="bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
+                  <span class="text-[9px] text-slate-400 font-mono">STEP 3</span>
                   Right View / જમણે
                 </button>
-                <button id="btn-snap-back" onclick="captureAngle('Back')" class="bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
-                  <span class="text-[9px] text-slate-550 font-mono">STEP 4</span>
+                <button id="btn-snap-back" onclick="captureAngle('Back')" class="bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none" disabled>
+                  <span class="text-[9px] text-slate-400 font-mono">STEP 4</span>
                   Back View / પાછળ
                 </button>
               </div>
               
               <!-- Live Preview of Captured Frames -->
               <div class="flex justify-between gap-1 mt-2">
-                <div class="flex-1 bg-slate-950 h-10 rounded border border-slate-850 overflow-hidden relative" id="preview-front">
-                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-650 font-bold uppercase">Front</span>
+                <div class="flex-1 bg-slate-50 h-10 rounded border border-slate-200 overflow-hidden relative" id="preview-front">
+                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">Front</span>
                 </div>
-                <div class="flex-1 bg-slate-950 h-10 rounded border border-slate-850 overflow-hidden relative" id="preview-left">
-                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-650 font-bold uppercase">Left</span>
+                <div class="flex-1 bg-slate-50 h-10 rounded border border-slate-200 overflow-hidden relative" id="preview-left">
+                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">Left</span>
                 </div>
-                <div class="flex-1 bg-slate-950 h-10 rounded border border-slate-850 overflow-hidden relative" id="preview-right">
-                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-650 font-bold uppercase">Right</span>
+                <div class="flex-1 bg-slate-50 h-10 rounded border border-slate-200 overflow-hidden relative" id="preview-right">
+                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">Right</span>
                 </div>
-                <div class="flex-1 bg-slate-950 h-10 rounded border border-slate-850 overflow-hidden relative" id="preview-back">
-                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-650 font-bold uppercase">Back</span>
+                <div class="flex-1 bg-slate-50 h-10 rounded border border-slate-200 overflow-hidden relative" id="preview-back">
+                  <span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">Back</span>
                 </div>
               </div>
 
-              <button id="btn-calibrate-scan" onclick="calibrateAIScan()" class="w-full py-2.5 bg-brand text-white font-bold text-xs rounded-full transition disabled:opacity-40 mt-3 focus:outline-none" disabled>
+              <button id="btn-calibrate-scan" onclick="calibrateAIScan()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-full transition disabled:opacity-40 mt-3 focus:outline-none" disabled>
                 🤖 Calibrate & Align AI / કેલિબ્રેટ કરો
               </button>
             </div>
 
             <!-- Fitting Controls Panel -->
-            <div id="tryon-fitting-panel" class="space-y-4 text-left border-t border-slate-800 pt-3">
+            <div id="tryon-fitting-panel" class="space-y-4 text-left border-t border-slate-100 pt-3">
               <!-- 360° Angle Rotation Slider / View Selector -->
               <div>
-                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">360° Body Rotation / શરીર ફેરવો</h4>
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-left">360° Body Rotation / શરીર ફેરવો</h4>
                 <div class="flex justify-between gap-1">
-                  <button onclick="setTryOnAngle('Front')" id="btn-angle-front" class="flex-1 py-1.5 bg-brand text-white border border-brand text-[10px] font-bold rounded-lg transition focus:outline-none">Front</button>
-                  <button onclick="setTryOnAngle('Left')" id="btn-angle-left" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">Left</button>
-                  <button onclick="setTryOnAngle('Right')" id="btn-angle-right" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">Right</button>
-                  <button onclick="setTryOnAngle('Back')" id="btn-angle-back" class="flex-1 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold rounded-lg transition focus:outline-none">Back</button>
+                  <button onclick="setTryOnAngle('Front')" id="btn-angle-front" class="google-btn-angle-active flex-1 py-1.5 text-[10px] font-bold rounded-lg transition focus:outline-none border">Front</button>
+                  <button onclick="setTryOnAngle('Left')" id="btn-angle-left" class="google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition focus:outline-none border">Left</button>
+                  <button onclick="setTryOnAngle('Right')" id="btn-angle-right" class="google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition focus:outline-none border">Right</button>
+                  <button onclick="setTryOnAngle('Back')" id="btn-angle-back" class="google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition focus:outline-none border">Back</button>
                 </div>
               </div>
 
               <!-- Collapsible Fine-Tune Accordion (Google Style) -->
-              <div class="border border-slate-800 rounded-2xl overflow-hidden mt-3">
-                <button type="button" onclick="toggleTryOnAdvancedFit()" class="w-full p-2.5 bg-slate-850 hover:bg-slate-800 text-slate-350 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center transition focus:outline-none">
+              <div class="border border-slate-200 rounded-2xl overflow-hidden mt-3">
+                <button type="button" onclick="toggleTryOnAdvancedFit()" class="w-full p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider flex justify-between items-center transition focus:outline-none">
                   <span>⚙️ Adjust Fitting / ફિટિંગ કરો</span>
-                  <svg id="tryon-advanced-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  <svg id="tryon-advanced-arrow" class="w-4 h-4 text-slate-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div id="tryon-advanced-content" class="space-y-3 bg-slate-950 p-3 border-t border-slate-850 hidden">
+                <div id="tryon-advanced-content" class="space-y-3 bg-white p-3 border-t border-slate-100 hidden">
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
                       <span>Product Scale / કદ</span>
                       <span id="label-scale">100%</span>
                     </div>
-                    <input type="range" id="fit-scale" min="30" max="250" value="100" class="w-full accent-brand bg-slate-800 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
+                    <input type="range" id="fit-scale" min="30" max="250" value="100" class="w-full accent-blue-600 bg-slate-200 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
                   </div>
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
                       <span>Product Rotation / એંગલ</span>
                       <span id="label-rotate">0°</span>
                     </div>
-                    <input type="range" id="fit-rotate" min="-180" max="180" value="0" class="w-full accent-brand bg-slate-800 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
+                    <input type="range" id="fit-rotate" min="-180" max="180" value="0" class="w-full accent-blue-600 bg-slate-200 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
                   </div>
                   <div>
-                    <div class="flex justify-between text-[10px] text-slate-450 mb-0.5">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
                       <span>Vertical Align / ઉપર-નીચે</span>
                       <span id="label-y">0px</span>
                     </div>
-                    <input type="range" id="fit-y" min="-150" max="150" value="0" class="w-full accent-brand bg-slate-800 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
+                    <input type="range" id="fit-y" min="-150" max="150" value="0" class="w-full accent-blue-600 bg-slate-200 rounded-lg appearance-none h-1" oninput="adjustOverlay()">
                   </div>
                 </div>
               </div>
 
               <div class="flex flex-col gap-1.5 pt-2">
-                <button onclick="captureTryOnSnapshot()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-full transition flex items-center justify-center gap-1 shadow-md shadow-indigo-600/10 focus:outline-none">
+                <button onclick="captureTryOnSnapshot()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-full transition flex items-center justify-center gap-1 shadow-md shadow-blue-600/10 focus:outline-none">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                   Save Photo / ફોટો ડાઉનલોડ કરો
                 </button>
-                <button onclick="startTryOnCustomScan()" id="btn-start-scan-custom" class="w-full py-2 bg-slate-850 hover:bg-slate-800 text-slate-355 font-semibold text-[10px] rounded-full transition border border-slate-750 focus:outline-none hidden">
+                <button onclick="startTryOnCustomScan()" id="btn-start-scan-custom" class="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-semibold text-[10px] rounded-full transition border border-slate-200 focus:outline-none hidden">
                   📷 Re-scan 360° / નવું સ્કેન કરો
                 </button>
               </div>
             </div>
           </div>
           
-          <div class="border-t border-slate-800 pt-3 text-center">
-            <span class="text-[9px] text-slate-500 font-mono">AI Virtual Fitting Engine v3.0</span>
+          <div class="border-t border-slate-100 pt-3 text-center">
+            <span class="text-[9px] text-slate-400 font-mono">AI Virtual Fitting Engine v3.0</span>
           </div>
         </div>
 
@@ -2508,7 +2458,7 @@
     </div>
   </div>
 
-  <!-- MOBILE BOTTOM NAVIGATION -->
+<!-- MOBILE BOTTOM NAVIGATION -->
   <div class="fixed bottom-4 left-4 right-4 z-50 md:hidden bg-white/85 backdrop-blur-lg border border-white/40 shadow-xl rounded-2xl px-6 py-3 flex items-center justify-between">
     <a href="index.html" class="flex flex-col items-center gap-1 text-slate-550 hover:text-brand transition">
       <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
