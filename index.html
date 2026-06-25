@@ -1885,7 +1885,7 @@
     function updateScannerPreviews() {
       ['Front', 'Left', 'Right', 'Back'].forEach(angle => {
         const preview = document.getElementById(`preview-${angle.toLowerCase()}`);
-        if (tryOnCapturedFrames[angle]) {
+        if (preview && tryOnCapturedFrames[angle]) {
           preview.innerHTML = `<img src="${tryOnCapturedFrames[angle]}" class="w-full h-full object-cover" />`;
           const btn = document.getElementById(`btn-snap-${angle.toLowerCase()}`);
           if (btn) btn.className = "bg-green-600 text-white border border-green-500 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none";
@@ -1983,21 +1983,288 @@
           corners.forEach(c => { bgR += c.r; bgG += c.g; bgB += c.b; });
           bgR = Math.round(bgR / 4);
           bgG = Math.round(bgG / 4);
-          bgB =     window.setTryOnAngle = function(angle) {
+          bgB = Math.round(bgB / 4);
+          
+          // Then replace background pixels with transparent
+          const tolerance = 40;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i+1];
+            const b = data[i+2];
+            
+            if (Math.abs(r - bgR) < tolerance && Math.abs(g - bgG) < tolerance && Math.abs(b - bgB) < tolerance) {
+              data[i+3] = 0;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+          overlay.src = canvas.toDataURL();
+        } catch(e) {
+          console.error("Transparent bg removal error:", e);
+          overlay.src = url;
+        }
+      };
+      tempImg.onerror = function() {
+        overlay.src = url;
+      };
+      tempImg.src = url;
+    }
+
+    const tryOnCategoryAnchors = {
+      Priya: {
+        clothing: { scale: 105, rotate: 0, y: 15 },
+        footwear: { scale: 75, rotate: 0, y: 180 },
+        electronics: { scale: 65, rotate: 0, y: -130 },
+        others: { scale: 50, rotate: 0, y: 55 }
+      },
+      Rohan: {
+        clothing: { scale: 125, rotate: 0, y: -20 },
+        footwear: { scale: 85, rotate: 0, y: 190 },
+        electronics: { scale: 75, rotate: 0, y: -140 },
+        others: { scale: 55, rotate: 0, y: 65 }
+      },
+      Sarah: {
+        clothing: { scale: 110, rotate: 0, y: 5 },
+        footwear: { scale: 80, rotate: 0, y: 185 },
+        electronics: { scale: 70, rotate: 0, y: -135 },
+        others: { scale: 52, rotate: 0, y: 58 }
+      },
+      David: {
+        clothing: { scale: 130, rotate: 0, y: -30 },
+        footwear: { scale: 90, rotate: 0, y: 195 },
+        electronics: { scale: 80, rotate: 0, y: -145 },
+        others: { scale: 60, rotate: 0, y: 70 }
+      },
+      Custom: {
+        clothing: { scale: 110, rotate: 0, y: 0 },
+        footwear: { scale: 80, rotate: 0, y: 100 },
+        electronics: { scale: 70, rotate: 0, y: -100 },
+        others: { scale: 50, rotate: 0, y: 40 }
+      }
+    };
+
+    function applyDefaultAnchors(source) {
+      const cat = (tryOnProduct && tryOnProduct.category) ? tryOnProduct.category : 'clothing';
+      const modelKey = tryOnCategoryAnchors[source] ? source : 'Custom';
+      const anchor = tryOnCategoryAnchors[modelKey][cat] || { scale: 100, rotate: 0, y: 0 };
+
+      document.getElementById('fit-scale').value = anchor.scale;
+      document.getElementById('fit-rotate').value = anchor.rotate;
+      document.getElementById('fit-y').value = anchor.y;
+
+      document.getElementById('label-scale').innerText = `${anchor.scale}%`;
+      document.getElementById('label-rotate').innerText = `${anchor.rotate}°`;
+      document.getElementById('label-y').innerText = `${anchor.y}px`;
+    }
+
+    window.renderRealisticTryOn = function() {
+      const canvas = document.getElementById('tryon-canvas');
+      const bgImg = document.getElementById('tryon-user-bg');
+      const overlayImg = document.getElementById('tryon-product-overlay');
+      
+      if (!canvas || !bgImg || !overlayImg) return;
+      const ctx = canvas.getContext('2d');
+      
+      if (!bgImg.complete || bgImg.naturalWidth === 0 || !overlayImg.complete || overlayImg.naturalWidth === 0) {
+        return; // wait for images to load via onload handlers in HTML
+      }
+
+      const cw = bgImg.naturalWidth;
+      const ch = bgImg.naturalHeight;
+      canvas.width = cw;
+      canvas.height = ch;
+
+      try {
+        // 1. Draw model background
+        ctx.drawImage(bgImg, 0, 0, cw, ch);
+
+        // 2. Create offscreen canvas for the clothing/product overlay
+        const overlayCanvas = document.createElement('canvas');
+        overlayCanvas.width = cw;
+        overlayCanvas.height = ch;
+        const oCtx = overlayCanvas.getContext('2d');
+
+        // Extract fitting parameters
+        const scaleVal = parseFloat(document.getElementById('fit-scale').value) / 100;
+        const rotateVal = parseFloat(document.getElementById('fit-rotate').value);
+        const yOffset = parseInt(document.getElementById('fit-y').value);
+
+        // Position calculations
+        const centerX = cw / 2;
+        const cat = tryOnProduct ? tryOnProduct.category : 'clothing';
+        let baseY = ch / 2;
+        if (cat === 'footwear') baseY = ch * 0.85;
+        else if (cat === 'electronics') baseY = ch * 0.28;
+        else if (cat === 'others') baseY = ch * 0.65;
+
+        const centerY = baseY + yOffset;
+
+        oCtx.save();
+        oCtx.translate(centerX, centerY);
+        oCtx.rotate((rotateVal * Math.PI) / 180);
+
+        // Apply 3D perspective skew if product has only 1 image but the model angle is not Front
+        const sideAngles = ['Left', 'Right', 'Back'];
+        const images = tryOnProduct ? (tryOnProduct.imageUrls || []) : [];
+        if (sideAngles.includes(tryOnAngle) && images.length <= 1) {
+          let skewFactor = 0.08;
+          let scaleXFactor = 0.8;
+          if (tryOnAngle === 'Left') {
+            skewFactor = -0.08;
+          } else if (tryOnAngle === 'Back') {
+            scaleXFactor = 1.0;
+            skewFactor = 0;
+          }
+          oCtx.transform(scaleXFactor, skewFactor, 0, 1.0, 0, 0);
+        }
+
+        // Draw the product image centered
+        let baseSize = cw * 0.5;
+        if (cat === 'footwear') baseSize = cw * 0.35;
+        else if (cat === 'electronics') baseSize = cw * 0.28;
+        else if (cat === 'others') baseSize = cw * 0.22;
+
+        const w = baseSize * scaleVal;
+        const h = (overlayImg.naturalHeight / overlayImg.naturalWidth) * w;
+
+        oCtx.drawImage(overlayImg, -w / 2, -h / 2, w, h);
+        oCtx.restore();
+
+        // 3. Extract shadows/contours from the background model to blend onto the clothes
+        const shadingCanvas = document.createElement('canvas');
+        shadingCanvas.width = cw;
+        shadingCanvas.height = ch;
+        const sCtx = shadingCanvas.getContext('2d');
+
+        sCtx.drawImage(bgImg, 0, 0, cw, ch);
+
+        const sData = sCtx.getImageData(0, 0, cw, ch);
+        const pixels = sData.data;
+
+        let totalBrightness = 0;
+        let pCount = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const a = pixels[i+3];
+          if (a > 0) {
+            const r = pixels[i];
+            const g = pixels[i+1];
+            const b = pixels[i+2];
+            totalBrightness += (r * 0.299 + g * 0.587 + b * 0.114);
+            pCount++;
+          }
+        }
+        const avgB = pCount > 0 ? (totalBrightness / pCount) : 128;
+
+        const contrastFactor = 1.8;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const r = pixels[i];
+          const g = pixels[i+1];
+          const b = pixels[i+2];
+          
+          const val = (r * 0.299 + g * 0.587 + b * 0.114);
+          let newVal = avgB + (val - avgB) * contrastFactor;
+          newVal = Math.max(0, Math.min(255, newVal));
+          
+          pixels[i] = newVal;
+          pixels[i+1] = newVal;
+          pixels[i+2] = newVal;
+        }
+        sCtx.putImageData(sData, 0, 0);
+
+        // 4. Blend shading onto product overlay shape
+        oCtx.save();
+        oCtx.globalCompositeOperation = 'source-atop';
+        oCtx.globalCompositeOperation = 'multiply';
+        oCtx.globalAlpha = 0.55;
+        oCtx.drawImage(shadingCanvas, 0, 0);
+        oCtx.restore();
+
+        // 5. Draw overlay onto main canvas
+        ctx.drawImage(overlayCanvas, 0, 0);
+
+        canvas.classList.remove('hidden');
+        bgImg.classList.add('hidden');
+        overlayImg.classList.add('hidden');
+      } catch (err) {
+        console.error("Canvas compositing error (CORS):", err);
+        canvas.classList.add('hidden');
+        bgImg.classList.remove('hidden');
+        overlayImg.classList.remove('hidden');
+
+        const scaleVal = parseFloat(document.getElementById('fit-scale').value);
+        const rotateVal = parseFloat(document.getElementById('fit-rotate').value);
+        const yOffset = parseInt(document.getElementById('fit-y').value);
+
+        overlayImg.style.width = `${150 * (scaleVal / 100)}px`;
+        overlayImg.style.transform = `translate(0px, ${yOffset}px) rotate(${rotateVal}deg)`;
+      }
+    };
+
+    function showFittingPanel() {
+      stopTryOnWebcam();
+      
+      const scannerOverlay = document.getElementById('tryon-scanner-overlay');
+      const tryonVideo = document.getElementById('tryon-video');
+      const fitContainer = document.getElementById('tryon-fit-container');
+      const tryonCanvas = document.getElementById('tryon-canvas');
+      
+      if (scannerOverlay) scannerOverlay.classList.add('hidden');
+      if (tryonVideo) tryonVideo.classList.add('hidden');
+      if (fitContainer) fitContainer.classList.remove('hidden');
+      if (tryonCanvas) tryonCanvas.classList.remove('hidden');
+
+      const bgImg = document.getElementById('tryon-user-bg');
+      if (bgImg) {
+        bgImg.src = tryOnCapturedFrames[tryOnAngle] || tryOnPredefinedModels.Priya.Front;
+      }
+
+      const activeModelCard = document.querySelector('.google-model-card-active, .google-custom-card-active');
+      let sourceName = 'Priya';
+      if (activeModelCard) {
+        const id = activeModelCard.id;
+        if (id.includes('priya')) sourceName = 'Priya';
+        else if (id.includes('rohan')) sourceName = 'Rohan';
+        else if (id.includes('sarah')) sourceName = 'Sarah';
+        else if (id.includes('david')) sourceName = 'David';
+        else if (id.includes('custom')) sourceName = 'Custom';
+      }
+      applyDefaultAnchors(sourceName);
+
+      const images = tryOnProduct ? (tryOnProduct.imageUrls || []) : [];
+      let url = images[0] || (tryOnProduct ? tryOnProduct.imageUrl : '');
+      if (images.length > 1) {
+        if (tryOnAngle === 'Front') url = images[0];
+        else if (tryOnAngle === 'Left' && images[1]) url = images[1];
+        else if (tryOnAngle === 'Right' && images[2]) url = images[2] || images[1];
+        else if (tryOnAngle === 'Back' && images[3]) url = images[3] || images[0];
+      }
+      
+      if (url) {
+        loadTransparentProductImage(url);
+      } else {
+        renderRealisticTryOn();
+      }
+    }
+
+    window.setTryOnAngle = function(angle) {
       tryOnAngle = angle;
       
       ['Front', 'Left', 'Right', 'Back'].forEach(ang => {
         const btn = document.getElementById(`btn-angle-${ang.toLowerCase()}`);
-        if (ang === angle) {
-          btn.className = "google-btn-angle-active flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
-        } else {
-          btn.className = "google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
+        if (btn) {
+          if (ang === angle) {
+            btn.className = "google-btn-angle-active flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
+          } else {
+            btn.className = "google-btn-angle-inactive flex-1 py-1.5 text-[10px] font-bold rounded-lg transition border";
+          }
         }
       });
 
-      document.getElementById('tryon-user-bg').src = tryOnCapturedFrames[angle];
+      const bgImg = document.getElementById('tryon-user-bg');
+      if (bgImg) {
+        bgImg.src = tryOnCapturedFrames[angle];
+      }
 
-      const images = tryOnProduct.imageUrls || [];
+      const images = tryOnProduct ? (tryOnProduct.imageUrls || []) : [];
       if (images.length > 1) {
         let url = images[0];
         if (angle === 'Front') url = images[0];
@@ -2006,85 +2273,79 @@
         else if (angle === 'Back' && images[3]) url = images[3] || images[0];
         
         loadTransparentProductImage(url);
+      } else {
+        renderRealisticTryOn();
       }
     };
 
     window.captureTryOnSnapshot = function() {
-      const bgImg = document.getElementById('tryon-user-bg');
-      const overlayImg = document.getElementById('tryon-product-overlay');
+      const canvas = document.getElementById('tryon-canvas');
+      if (!canvas) return;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 480;
-      const ctx = canvas.getContext('2d');
-
-      const bg = new Image();
-      bg.crossOrigin = "anonymous";
-      bg.onload = function() {
-        ctx.drawImage(bg, 0, 0, 640, 480);
-        
-        const overlay = new Image();
-        overlay.crossOrigin = "anonymous";
-        overlay.onload = function() {
-          const scale = document.getElementById('fit-scale').value;
-          const rotate = document.getElementById('fit-rotate').value;
-          const y = parseInt(document.getElementById('fit-y').value);
-
-          ctx.save();
-          ctx.translate(canvas.width / 2, canvas.height / 2 + y);
-          ctx.rotate((rotate * Math.PI) / 180);
-          
-          const w = scale * 1.5;
-          const h = (overlay.height / overlay.width) * w;
-          ctx.drawImage(overlay, -w / 2, -h / 2, w, h);
-          ctx.restore();
-
-          const link = document.createElement('a');
-          link.download = `tryon_${currentUser.displayName}_${tryOnProduct.name}.jpg`;
-          link.href = canvas.toDataURL('image/jpeg');
-          link.click();
-          showToast(currentLanguage === 'gu' ? "ફોટો ગૅલેરીમાં સેવ થઈ ગયો છે!" : "Try-on snapshot saved successfully!");
-        };
-        overlay.src = overlayImg.src;
-      };
-      bg.src = bgImg.src;
+      try {
+        const link = document.createElement('a');
+        link.download = `tryon_${currentUser.displayName || 'Customer'}_${tryOnProduct ? tryOnProduct.name : 'product'}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.click();
+        showToast(currentLanguage === 'gu' ? "ફોટો ડાઉનલોડ થઈ ગયો છે!" : "Try-on snapshot saved successfully!");
+      } catch (e) {
+        console.error("Failed to capture try-on snapshot:", e);
+        showToast("Error saving photo / ડાઉનલોડ કરવામાં ખામી");
+      }
     };
 
     window.reinitiateScan = function() {
       tryOnCapturedFrames = { Front: "", Left: "", Right: "", Back: "" };
       
       ['front', 'left', 'right', 'back'].forEach(angle => {
-        document.getElementById(`preview-${angle}`).innerHTML = `<span class="absolute inset-0 flex items-center justify-center text-[7px] text-slate-400 font-bold uppercase">${angle}</span>`;
+        document.getElementById(`preview-${angle}`).innerHTML = `<span class="absolute inset-0 flex items-center justify-center text-[8px] text-slate-655 font-bold uppercase">${angle}</span>`;
         const btn = document.getElementById(`btn-snap-${angle}`);
         if (btn) {
           if (angle === 'front') {
-            btn.className = "bg-slate-50 hover:bg-slate-100 text-slate-850 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition focus:outline-none";
+            btn.className = "bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2.5 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition";
             btn.removeAttribute('disabled');
           } else {
-            btn.className = "bg-slate-50 hover:bg-slate-100 text-slate-850 border border-slate-200 p-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition disabled:opacity-40 focus:outline-none";
+            btn.className = "bg-slate-800 hover:bg-brand text-white border border-slate-700 p-2.5 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition disabled:opacity-40";
             btn.setAttribute('disabled', 'disabled');
           }
         }
-      });ate-700 text-[10px] font-bold rounded-lg transition";
-        }
       });
-
-      document.getElementById('tryon-user-bg').src = tryOnCapturedFrames[angle];
-
-      const images = tryOnProduct.imageUrls || [];
-      if (images.length > 1) {
-        let url = images[0];
-        if (angle === 'Front') url = images[0];
-        else if (angle === 'Left' && images[1]) url = images[1];
-        else if (angle === 'Right' && images[2]) url = images[2] || images[1];
-        else if (angle === 'Back' && images[3]) url = images[3] || images[0];
-        
-        loadTransparentProductImage(url);
-      }
+      document.getElementById('btn-calibrate-scan').setAttribute('disabled', 'disabled');
+      
+      showScannerPanel();
     };
 
-    window.captureTryOnSnapshot = function() {
-      const bgImg = document.getElementById('tryon-user-bg');
+    window.adjustOverlay = function() {
+      const scale = document.getElementById('fit-scale').value;
+      const rotate = document.getElementById('fit-rotate').value;
+      const y = document.getElementById('fit-y').value;
+
+      const scaleLabel = document.getElementById('label-scale');
+      const rotateLabel = document.getElementById('label-rotate');
+      const yLabel = document.getElementById('label-y');
+
+      if (scaleLabel) scaleLabel.innerText = `${scale}%`;
+      if (rotateLabel) rotateLabel.innerText = `${rotate}°`;
+      if (yLabel) yLabel.innerText = `${y}px`;
+
+      renderRealisticTryOn();
+    };
+
+    function stopTryOnWebcam() {
+      if (tryOnStream) {
+        tryOnStream.getTracks().forEach(track => track.stop());
+        tryOnStream = null;
+      }
+      const video = document.getElementById('tryon-video');
+      if (video) video.srcObject = null;
+    }
+
+    window.closeTryOn = function() {
+      stopTryOnWebcam();
+      document.getElementById('try-on-modal').classList.add('hidden');
+      tryOnProduct = null;
+    };
+    };      const bgImg = document.getElementById('tryon-user-bg');
       const overlayImg = document.getElementById('tryon-product-overlay');
 
       const canvas = document.createElement('canvas');
@@ -2254,18 +2515,14 @@
             </div>
           </div>
 
-          <!-- Canvas Element for snapshot processing (hidden) -->
-          <canvas id="tryon-canvas" class="hidden"></canvas>
-
           <!-- Fit Overlay Container (Combines BG scan and product overlay) -->
           <div id="tryon-fit-container" class="relative w-full h-full flex items-center justify-center">
-            <!-- Background: Selected Model or custom scan frame -->
-            <img id="tryon-user-bg" src="" class="w-full h-full object-cover select-none pointer-events-none transition-all duration-300">
-            
-            <!-- Foreground Overlay: The product image -->
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img id="tryon-product-overlay" src="" class="transition-all duration-300 object-contain select-none" style="width: 150px; transform: translate(0px, 0px) rotate(0deg);">
-            </div>
+            <!-- Canvas Element for real-time high-fidelity try-on blending -->
+            <canvas id="tryon-canvas" class="w-full h-full object-cover select-none pointer-events-none transition-all duration-300" style="background-color: #f1f3f4;"></canvas>
+
+            <!-- Background and Foreground sources (kept hidden, updated dynamically, triggering canvas redraw on load) -->
+            <img id="tryon-user-bg" src="" class="hidden" crossorigin="anonymous" onload="if(typeof renderRealisticTryOn === 'function') renderRealisticTryOn()">
+            <img id="tryon-product-overlay" src="" class="hidden" crossorigin="anonymous" onload="if(typeof renderRealisticTryOn === 'function') renderRealisticTryOn()">
           </div>
 
         </div>
